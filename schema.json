@@ -1,0 +1,407 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "$id": "https://shorts-player-kit/schema/v3.3.0",
+ "title": "Shorts Script Schema v3.3.0 (AI-friendly, iOS-first)",
+ "description": "停止級エラーのみをスキーマで遮断。Page3=Scripture／Page4=Prologue を任意フラグで強制可能。sectionTags に一本化。",
+
+ "type": "object",
+ "properties": {
+  "//": { "type": "string" },
+  "__contract__": { "type": "string" },
+
+  "videoMeta": {
+   "type": "object",
+   "properties": {
+    "dossierId": { "type": "string", "pattern": "^[A-Za-z0-9._-]+$" },
+    "creationTimestamp": { "type": "string", "format": "date-time" },
+    "theme": { "type": "string" },
+    "triviaTitle": { "type": "string" },
+    "thumbnailText": { "type": "string", "maxLength": 25 },
+    "bannerText": { "type": "string", "maxLength": 20 },
+
+    "meta": {
+     "type": "object",
+     "properties": {
+      "tts": {
+       "type": "object",
+       "properties": {
+        "filter": {
+         "type": "object",
+         "properties": { "jaOnly": { "type": "boolean", "default": true } },
+         "additionalProperties": false
+        }
+       },
+       "additionalProperties": true
+      }
+     },
+     "additionalProperties": true
+    },
+
+    "tts": {
+     "type": "object",
+     "description": "後方互換（推奨は videoMeta.meta.tts）。",
+     "properties": {
+      "lang": { "type": "string" },
+      "voicePreferences": { "type": "array", "items": { "type": "string" } },
+      "rate": { "type": "number", "minimum": 0.5, "maximum": 2.0 },
+      "filter": {
+       "type": "object",
+       "properties": { "jaOnly": { "type": "boolean", "default": true } },
+       "additionalProperties": false
+      }
+     },
+     "additionalProperties": true
+    },
+
+    "ui": {
+     "type": "object",
+     "properties": {
+      "a11y": {
+       "type": "object",
+       "properties": { "prefersReducedMotion": { "type": "boolean", "default": false } },
+       "additionalProperties": false
+      }
+     },
+     "additionalProperties": true
+    },
+
+    "advancePolicy": {
+     "type": "object",
+     "description": "グローバル既定。mode=auto/manual、postDelayMs は読了後の余韻。",
+     "properties": {
+      "mode": { "type": "string", "enum": ["auto", "manual"], "default": "auto" },
+      "postDelayMs": { "type": "integer", "minimum": 0, "default": 250 }
+     },
+     "additionalProperties": false
+    },
+
+    "contract": {
+     "type": "object",
+     "properties": {
+      "structure": {
+       "type": "object",
+       "properties": {
+        "requireOpeningEffect": { "type": "boolean", "default": true },
+        "requireTransitionT": { "type": "boolean", "default": true },
+        "requireClosingEffect": { "type": "boolean", "default": true },
+        "minA": { "type": "integer", "minimum": 0, "default": 1 },
+        "minB": { "type": "integer", "minimum": 0, "default": 1 },
+        "scripturePrologueIntro": { "type": "boolean", "default": false }
+       },
+       "additionalProperties": false
+      },
+      "versionThemeMap": {
+       "type": "object",
+       "properties": {
+        "A": { "type": "string", "enum": ["light", "dark"], "default": "light" },
+        "B": { "type": "string", "enum": ["light", "dark"], "default": "dark" },
+        "T": { "type": "string", "enum": ["light", "dark"], "default": "dark" }
+       },
+       "additionalProperties": false
+      },
+      "bMandate": {
+       "type": "object",
+       "properties": {
+        "role": { "type": "string", "enum": ["HolyOfHolies"] },
+        "polemicAxis": { "type": "string", "enum": ["Hellenism_vs_Hebraism"] },
+        "requireCovenantRelational": { "type": "boolean" }
+       },
+       "additionalProperties": true
+      }
+     },
+     "additionalProperties": true
+    }
+   },
+   "required": ["dossierId", "theme", "thumbnailText"],
+   "additionalProperties": true
+  },
+
+  "scenes": {
+   "type": "array",
+   "minItems": 1,
+   "description": "先頭は必ず Play専用の placeholder。以降は content/effect。任意で Page3=Scripture, Page4=Prologue を強制可能。",
+   "items": [
+    {
+     "allOf": [
+      { "$ref": "#/$defs/placeholderScene" },
+      { "properties": { "page": { "const": "1" } }, "required": ["page"] }
+     ]
+    }
+   ],
+   "additionalItems": { "oneOf": [ { "$ref": "#/$defs/contentScene" }, { "$ref": "#/$defs/effectScene" } ] }
+  }
+ },
+
+ "required": ["videoMeta", "scenes"],
+ "additionalProperties": false,
+
+ "allOf": [
+  {
+   "description": "opening が少なくとも1枚存在",
+   "properties": {
+    "scenes": {
+     "type": "array",
+     "contains": {
+      "type": "object",
+      "properties": { "type": { "const": "effect" }, "effectRole": { "const": "opening" } },
+      "required": ["type", "effectRole"]
+     }
+    }
+   }
+  },
+  {
+   "description": "transition が少なくとも1枚存在",
+   "properties": {
+    "scenes": {
+     "type": "array",
+     "contains": {
+      "type": "object",
+      "properties": { "type": { "const": "effect" }, "effectRole": { "const": "transition" } },
+      "required": ["type", "effectRole"]
+     }
+    }
+   }
+  },
+  {
+   "description": "closing が少なくとも1枚存在",
+   "properties": {
+    "scenes": {
+     "type": "array",
+     "contains": {
+      "type": "object",
+      "properties": { "type": { "const": "effect" }, "effectRole": { "const": "closing" } },
+      "required": ["type", "effectRole"]
+     }
+    }
+   }
+  },
+  {
+   "description": "scripturePrologueIntro=true の時、items[2]=Page3 Scripture, items[3]=Page4 Prologue を強制（配列/単一どちらでも可）",
+   "if": {
+    "properties": {
+     "videoMeta": {
+      "properties": {
+       "contract": {
+        "properties": {
+         "structure": {
+          "properties": { "scripturePrologueIntro": { "const": true } },
+          "required": ["scripturePrologueIntro"]
+         }
+        },
+        "required": ["structure"]
+       }
+      },
+      "required": ["contract"]
+     }
+    },
+    "required": ["videoMeta"]
+   },
+   "then": {
+    "properties": {
+     "scenes": {
+      "items": [
+       {},
+       {},
+       {
+        "allOf": [
+         { "$ref": "#/$defs/contentScene" },
+         {
+          "properties": {
+           "page": { "const": "3" },
+           "version": { "const": "A" },
+           "sectionTags": { "type": "array", "contains": { "const": "#Scripture" } }
+          },
+          "required": ["page","version","sectionTags"]
+         }
+        ]
+       },
+       {
+        "allOf": [
+         { "$ref": "#/$defs/contentScene" },
+         {
+          "properties": {
+           "page": { "const": "4" },
+           "version": { "const": "A" },
+           "sectionTags": { "type": "array", "contains": { "const": "#Prologue" } }
+          },
+          "required": ["page","version","sectionTags"]
+         }
+        ]
+       }
+      ]
+     }
+    }
+   }
+  }
+ ],
+
+ "$defs": {
+  "pageId": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+  "hexColor": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+
+  /* 単語ルールは緩やかに：#英数始まり、[-_]許容、最大24文字 */
+  "sectionTagTokenAny": {
+   "type": "string",
+   "pattern": "^#[A-Za-z0-9][A-Za-z0-9_-]{0,23}$"
+  },
+
+  /* A版の許容タグを限定 */
+  "sectionTagTokenA": {
+   "type": "string",
+   "pattern": "^#(Trivia([1-7])|Scripture|Prologue)$"
+  },
+
+  /* 複数タグ（推奨3個・上限5個） */
+  "sectionTags": {
+   "type": "array",
+   "items": { "$ref": "#/$defs/sectionTagTokenAny" },
+   "uniqueItems": true,
+   "minItems": 1,
+   "maxItems": 5,
+   "description": "推奨3個。順序は表示順。"
+  },
+
+  "placeholderScene": {
+   "type": "object",
+   "description": "Page-1のPlay専用（画面文言なし）。",
+   "properties": {
+    "page": { "$ref": "#/$defs/pageId" },
+    "type": { "type": "string", "const": "placeholder" },
+    "title": { "type": "string" }
+   },
+   "required": ["page", "type"],
+   "additionalProperties": false
+  },
+
+  "contentScene": {
+   "type": "object",
+   "description": "本文を持つ通常シーン（A/B/T）。type:'content' を明示。",
+   "properties": {
+    "page": { "$ref": "#/$defs/pageId" },
+    "type": { "type": "string", "const": "content" },
+    "version": { "type": "string", "enum": ["A", "B", "T"] },
+    "sectionTags": {
+     "type": "array",
+     "items": { "type": "string" },
+     "minItems": 1,
+     "maxItems": 7,
+     "uniqueItems": true,
+     "description": "UI 表示は 1 行に収まる範囲で自動パック。推奨は 3 個。"
+    },
+
+    "title_key": { "type": "string", "pattern": "^\\u3010.+\\u3011$", "minLength": 2, "maxLength": 20 },
+    "title": { "type": "string", "minLength": 1, "maxLength": 28 },
+    "symbol": { "type": "string", "minLength": 1, "maxLength": 16 },
+    "base": { "$ref": "#/$defs/hexColor" },
+    "narr": { "type": "string", "maxLength": 280 },
+
+    "effect": { "type": "string", "enum": ["light-in", "fade-in", "slide-up", "zoom-in"] },
+    "durationHintMs": { "type": "integer", "minimum": 0 },
+
+    "titleKeyReadAloud": { "type": "boolean", "default": false },
+
+    "sanctum": { "type": "string", "enum": ["outer", "holy", "holy_of_holies"] },
+    "polemicAxis": { "type": "string", "enum": ["Hellenism_vs_Hebraism"] },
+    "doctrineTags": {
+     "type": "array",
+     "items": { "type": "string", "enum": ["HolyOfHolies", "DepartureFromHellenism", "CovenantCentered", "IdolatryDenunciation", "SpiritLedTransformation"] },
+     "uniqueItems": true
+    },
+
+    "advancePolicy": {
+     "type": "object",
+     "description": "シーン個別の上書き。未指定時は videoMeta.advancePolicy を継承。",
+     "properties": {
+      "mode": { "type": "string", "enum": ["auto", "manual"] },
+      "postDelayMs": { "type": "integer", "minimum": 0 }
+     },
+     "additionalProperties": false
+    }
+   },
+   "required": ["page","type","version","title_key","title","symbol","base","narr","sectionTags"],
+   "additionalProperties": false,
+
+   "allOf": [
+    {
+     "description": "A は導入パターン対応：sectionTags のうち少なくとも 1 つが #Trivia1..#Trivia7 | #Scripture | #Prologue",
+     "if": { "properties": { "version": { "const": "A" } }, "required": ["version"] },
+     "then": {
+      "properties": {
+       "sectionTags": {
+        "type": "array",
+        "contains": { "type": "string", "pattern": "^#(Trivia([1-7])|Scripture|Prologue)$" }
+       }
+      },
+      "required": ["sectionTags"]
+     }
+    },
+    {
+     "description": "Bは holy_of_holies + 反ヘレニズム + 教理タグ>=2 を必須",
+     "if": { "properties": { "version": { "const": "B" } }, "required": ["version"] },
+     "then": {
+      "required": ["sanctum", "polemicAxis", "doctrineTags"],
+      "properties": {
+       "sanctum": { "const": "holy_of_holies" },
+       "polemicAxis": { "const": "Hellenism_vs_Hebraism" },
+       "doctrineTags": { "minItems": 2 }
+      }
+     }
+    },
+    {
+     "description": "聖なるリズム（最低1改行）",
+     "properties": { "narr": { "pattern": ".*\\n.*" } }
+    },
+    {
+     "description": "長文>=80では段落推奨（\\n\\n を要求：緩い拘束）",
+     "if": { "properties": { "narr": { "minLength": 80 } }, "required": ["narr"] },
+     "then": { "properties": { "narr": { "pattern": ".*\\n\\n.*" } } }
+    }
+   ]
+  },
+
+  "effectScene": {
+   "type": "object",
+   "description": "純エフェクト。本文キーは禁止。時間キーは t|duration|durationMs|effectDuration のいずれでも可。",
+   "properties": {
+    "page": { "$ref": "#/$defs/pageId" },
+    "type": { "type": "string", "const": "effect" },
+    "effect": { "type": "string", "enum": ["light-in", "fade-in", "fade-to-black", "flame-out", "veil-sweep", "slow-bloom"] },
+    "effectRole": { "type": "string", "enum": ["opening", "transition", "closing"] },
+    "uiVersion": { "type": "string", "enum": ["A", "B", "T"] },
+    "base": { "$ref": "#/$defs/hexColor" },
+
+    "t": { "type": "integer", "minimum": 0 },
+    "duration": { "type": "integer", "minimum": 0 },
+    "durationMs": { "type": "integer", "minimum": 0 },
+    "effectDuration": { "type": "integer", "minimum": 0 },
+
+    "advancePolicy": {
+     "type": "object",
+     "description": "エフェクト終了後の挙動。未指定時は videoMeta.advancePolicy を継承。",
+     "properties": {
+      "mode": { "type": "string", "enum": ["auto", "manual"] },
+      "postDelayMs": { "type": "integer", "minimum": 0 }
+     },
+     "additionalProperties": false
+    }
+   },
+   "required": ["page", "type", "effect", "base"],
+   "additionalProperties": false,
+
+   "allOf": [
+    {
+     "description": "本文キーは禁止",
+     "not": {
+      "anyOf": [
+       { "required": ["title_key"] },
+       { "required": ["title"] },
+       { "required": ["symbol"] },
+       { "required": ["narr"] },
+       { "required": ["sectionTags"] }
+      ]
+     }
+    }
+   ]
+  }
+ }
+}

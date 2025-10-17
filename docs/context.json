@@ -1,0 +1,42 @@
+{
+  "format": "spk-context/1.0",
+  "project": "shorts-player-kit",
+  "repo": {
+    "host": "github",
+    "pages_url": "https://yusukefujiijp.github.io/shorts-player-kit/",
+    "default_branch": "main"
+  },
+  "runtime": {
+    "entry": "index.html",
+    "script_order": [
+      "./js/tts-voice-utils.js",
+      "./js/scene-effects.js",
+      "./js/player.core.js",
+      "./js/debug_config.js",
+      "./js/debug_panel.js",
+      "./js/global-zoom-guard.js"
+    ],
+    "schema": "./schema.json",
+    "script": "./scenes.json",
+    "assets": {
+      "og_image": "./assets/og-image.png",
+      "favicon": "./assets/favicon.svg"
+    }
+  },
+  "policies": {
+    "tts_rate": { "mode": "perRoleAbs", "min": 0.5, "max": 2.0, "step": 0.1, "default": 1.4 },
+    "page_rules": { "page1": "play-only", "open_transition_close": true },
+    "domain_canonical": "yusukefujiijp",
+    "commit_convention": "AI-Commit Master Prompt V3.0"
+  },
+  "handoff": {
+    "read_first": ["./README.md", "./docs/README.md"],
+    "proof_checklist": [
+      "Pages公開URLで index.html / assets/og-image.png / assets/favicon.svg が開く",
+      "Actions: latest run is Success (deploy step green)",
+      "canonical / og:url / og:image / twitter:image が自ドメインで一致"
+    ]
+  },
+  "compat": { "ai_handshake": "./docs/ai_handshake.json" },
+  "notes": "新スレはまずこのファイルを読み込み、必要に応じて docs/ へ辿る。"
+}

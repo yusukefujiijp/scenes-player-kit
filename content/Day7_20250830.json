@@ -1,0 +1,42 @@
+{
+  "$schema": "./schema.json",
+  "//": "Shabbat (第七日) script — schema v2.7 compliant. Page-1 is placeholder Play-only. Pure-effect for opening/transition/closing.",
+  "__contract__": "schema v2.7+; veil-contract; pure-effect-pages; sacred rhythm in narr",
+  "videoMeta": {
+    "dossierId": "genesis-day7-shabbat-001",
+    "creationTimestamp": "2025-08-30T12:00:00+09:00",
+    "theme": "天地創造の第七日",
+    "triviaTitle": "第七日—安息と聖別：創造の頂点",
+    "thumbnailText": "【第七日】安息と聖別",
+    "bannerText": "安息の息（いき）",
+    "meta": { "tts": { "filter": { "jaOnly": true } } }
+  },
+  "scenes": [
+    { "page": "1", "type": "placeholder", "title": "Play" },
+    { "page": "2", "type": "effect", "effectRole": "opening", "uiVersion": "B", "base": "#0f172a", "effect": "fade-in", "durationMs": 1800 },
+    { "page": "3", "type": "content", "version": "A", "sectionTag": "#Trivia1 安息の動詞『シャーヴァト』",
+      "title_key": "【語源】", "title": "שבת — 休む・やめる", "symbol": "ℹ️", "base": "#164e63",
+      "narr": "「休む」は停止ではない。\n創造の秩序を『受け取る』日として、働きを止め、受容に切り替える。\nこの切替が、世界を聖別するリズムを刻む。" },
+    { "page": "4", "type": "content", "version": "A", "sectionTag": "#Trivia2 七という構造",
+      "title_key": "【構造】", "title": "六＋一の『冠』", "symbol": "⑦", "base": "#155e75",
+      "narr": "六日は拡張、\n第七日は冠。\n量から質への跳躍は、\n『安息』という名の王冠で完成する。" },
+    { "page": "5", "type": "effect", "effectRole": "transition", "uiVersion": "T", "base": "#0b3b4a", "effect": "veil-sweep", "durationMs": 1400 },
+    { "page": "6", "type": "content", "version": "B",
+      "title_key": "【聖別】", "title": "聖なる境界の確立", "symbol": "🕯️", "base": "#083344",
+      "narr": "『区別』は分断にあらず。\n創造主に帰すための取り分を定めること。\n第七日は、\n世界の中心に〈聖〉を据える。",
+      "sanctum": "holy_of_holies", "polemicAxis": "Hellenism_vs_Hebraism",
+      "doctrineTags": ["HolyOfHolies", "CovenantCentered"] },
+    { "page": "7", "type": "content", "version": "B",
+      "title_key": "【祝福】", "title": "働きでなく、在ることの善", "symbol": "✋", "base": "#0e7490",
+      "narr": "祝福は『効率』の報酬に非ず。\n存在そのものへの頌栄。\nここで人は、\n創造主の安息に『入る』ことを学ぶ。",
+      "sanctum": "holy_of_holies", "polemicAxis": "Hellenism_vs_Hebraism",
+      "doctrineTags": ["DepartureFromHellenism", "CovenantCentered"] },
+    { "page": "8", "type": "effect", "effectRole": "transition", "uiVersion": "T", "base": "#052a38", "effect": "slow-bloom", "durationMs": 1600 },
+    { "page": "9", "type": "content", "version": "B",
+      "title_key": "【安息】", "title": "『良し』が鎮座する日", "symbol": "✅", "base": "#0c4a6e",
+      "narr": "夕があり、朝がある。\n『良し』は働きの果てではなく、\n受け取る者の心に宿る。",
+      "sanctum": "holy_of_holies", "polemicAxis": "Hellenism_vs_Hebraism",
+      "doctrineTags": ["HolyOfHolies"] },
+    { "page": "10", "type": "effect", "effectRole": "closing", "uiVersion": "B", "base": "#031b26", "effect": "fade-out", "durationMs": 1800 }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "ai_prompts.handshake",
+  "version": "2.0.0",
+  "principles": [
+    "Respond in strict 3Step order (File -> Operation -> Anchors).",
+    "Provide copy-paste-ready blocks including one line before/after (complete-form).",
+    "Abort if anchors are not a single match. Re-specify anchors.",
+    "Never alter load order or runtime contracts unless explicitly requested.",
+    "End each response with NS-Core+Joy (1 loop)."
+  ],
+  "anchor_policy": {
+    "complete_form": ["prev_line", "anchor_line", "next_line"],
+    "block_id_tag": "SK-BLOCK:"
+  },
+  "ops_priority": ["replace-block", "insert-after", "replace-file"],
+  "safety": {
+    "no-wildcards": true,
+    "single-match-required": true,
+    "md-fenced-diff": true
+  }
+}

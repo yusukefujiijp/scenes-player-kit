@@ -1,0 +1,99 @@
+{
+  "videoMeta": {
+    "dossierId": "messianic-prayer-creation-week-v1",
+    "creationTimestamp": "2025-10-17T12:00:00Z",
+    "theme": "夜の祈り：天地創造の七日間",
+    "thumbnailText": "創造の安息へ",
+    "bannerText": "Genesis 1:1 - 2:3",
+    "meta": {
+      "subTheme": "The Seven Days of Creation"
+    },
+    "contract": {
+      "structure": {
+        "requireOpeningEffect": true,
+        "requireTransitionT": true,
+        "requireClosingEffect": true
+      },
+      "versionThemeMap": { "A": "dark", "T": "dark" }
+    },
+    "advancePolicy": { "quietMs": 300, "postDelayMs": 250 }
+  },
+  "tts": { "filter": { "jaOnly": true } },
+  "scenes": [
+    { "page": "1", "type": "placeholder", "title": "Tap to Start" },
+    { "page": "2", "type": "effect", "effectRole": "opening", "effect": "light-in", "base": "#000000", "effectDuration": 1400 },
+
+    { "page": "3", "type": "content", "version": "A",
+      "sectionTags": ["#TohuVaVohu", "#Genesis", "#Beginning"],
+      "title_key": "【導入】", "title": "一日の混沌 (トーフー・ヴァ・ヴォーフー)", "symbol": "🌀🤔💭", "base": "#0b0b13",
+      "narr": "あなたの一日が終わる。その心は、形なく、虚しく、闇が淵の上にあった、初めの状態に似てはいないか。"
+    },
+    
+    { "page": "4", "type": "effect", "effectRole": "transition", "effect": "fade-in", "base": "#0a0a10", "effectDuration": 900 },
+
+    { "page": "5", "type": "content", "version": "A",
+      "sectionTags": ["#Day1", "#Light", "#WordOfGod"],
+      "title_key": "【第一日】", "title": "光あれ", "symbol": "🗣️💡✨", "base": "#100f1c",
+      "narr": "しかし、神の霊が水面を覆っていた。\n今宵、あなたの心の混沌に、主の言葉を響かせよ。「光あれ」と。主の秩序が、あなたの闇を聖別する。"
+    },
+    { "page": "6", "type": "content", "version": "A",
+      "sectionTags": ["#Day2", "#Separation", "#Order"],
+      "title_key": "【第二日】", "title": "天と地の分離", "symbol": "🌌💧🌍", "base": "#121120",
+      "narr": "主は天上の水と地上の水を分けられた。\nあなたの祈りは、今日の心配事と明日の不安を分ける大空だ。心の天に、平安の領域を確保せよ。"
+    },
+
+    { "page": "7", "type": "effect", "effectRole": "transition", "effect": "slide-up", "base": "#0a0a10", "effectDuration": 900 },
+
+    { "page": "8", "type": "content", "version": "A",
+      "sectionTags": ["#Day3", "#Foundation", "#Fruitfulness"],
+      "title_key": "【第三日】", "title": "乾いた地と実り", "symbol": "🌱😌🙏", "base": "#151325",
+      "narr": "水の中から、立つべき地が現れた。\n感情の嵐が過ぎ去った後、主の御言葉という揺るぎない地に立て。主はそこから、必ず良い実を結ばせてくださる。"
+    },
+    { "page": "9", "type": "content", "version": "A",
+      "sectionTags": ["#Day4", "#Signs", "#Seasons"],
+      "title_key": "【第四日】", "title": "しるしと季節", "symbol": "☀️🌙⭐", "base": "#181529",
+      "narr": "主は天に光るものを置かれた。時を支配するために。\nあなたの人生の時間もまた、主の御手の中にある。夜は、主が定められた休息の「季節」なのだ。"
+    },
+    
+    { "page": "10", "type": "effect", "effectRole": "transition", "effect": "zoom-in", "base": "#0a0a10", "effectDuration": 900 },
+
+    { "page": "11", "type": "content", "version": "A",
+      "sectionTags": ["#Day5", "#Life", "#Blessing"],
+      "title_key": "【第五日】", "title": "魂の躍動", "symbol": "🐟🐦✨", "base": "#1b182e",
+      "narr": "主が祝福されると、水と空は命で満ちた。\n今日、心が枯渇したと感じても、主の祝福の言葉が、あなたの内に新たな霊の躍動を生み出す。"
+    },
+    { "page": "12", "type": "content", "version": "T",
+      "sectionTags": ["#Day6", "#ImagoDei", "#Identity"],
+      "title_key": "【第六日】-1", "title": "神のかたち (ツェレム・エロヒーム)", "symbol": "👤👑😌", "base": "#1e1a33",
+      "narr": "そして主は、ご自身のかたちに人を創造された。\n一日の終わりに思い出せ。あなたは疲れた消費者ではない。あなたは、天地の創造主のかたちに造られた、尊い存在だ。"
+    },
+    { "page": "13", "type": "content", "version": "T",
+      "sectionTags": ["#Yeshua", "#NewAdam", "#Restoration"],
+      "title_key": "【第六日】-2", "title": "最後のアダム、イェシュア", "symbol": "✝️😌☝️", "base": "#211d38",
+      "narr": "失われた神のかたちは、最後のアダムである主イェシュアによって回復された。\n彼に結ばれることで、私たちは本来あるべき姿へと、日々造り変えられる。"
+    },
+
+    { "page": "14", "type": "effect", "effectRole": "transition", "effect": "fade-in", "base": "#0a0a10", "effectDuration": 900 },
+
+    { "page": "15", "type": "content", "version": "A",
+      "sectionTags": ["#Day7", "#Shabbat", "#Completion"],
+      "title_key": "【第七日】-1", "title": "御業の完成と安息", "symbol": "🕯️安🕯️", "base": "#24203d",
+      "narr": "そして第七日、神は全ての御業を終え、休まれた。\nこの日を祝福し、聖別された。あなたの戦いもまた、主の安息（シャバット）に入るためにある。"
+    },
+    { "page": "16", "type": "content", "version": "T",
+      "sectionTags": ["#Rest", "#Cease", "#Trust"],
+      "title_key": "【第七日】-2", "title": "安息は信頼の行為", "symbol": "🛌😮🙌", "base": "#272242",
+      "narr": "夜の祈りは、小さなシャバットだ。\n自分の働きを止め、「主が全てを成し遂げてくださった」と信頼する行為。創造の完成を、今宵あなたの心で祝いなさい。"
+    },
+
+    { "page": "17", "type": "effect", "effectRole": "transition", "effect": "fade-in", "base": "#0a0a10", "effectDuration": 900 },
+
+    { "page": "18", "type": "content", "version": "A",
+      "sectionTags": ["#Blessing", "#Shalom", "#LailahTov"],
+      "title_key": "【祝福】", "title": "創造主のシャロームと共に", "symbol": "✨😇🙏", "base": "#2a2547",
+      "narr": "天地を創造された主のシャロームが、あなたを覆い、守るように。\n主イェシュア・ハ・マシアの御名によって。\nライラ・トヴ（おやすみなさい）。"
+    },
+
+    { "page": "19", "type": "effect", "effectRole": "closing", "effect": "flame-out", "base": "#050508", "effectDuration": 1200 }
+  ]
+}

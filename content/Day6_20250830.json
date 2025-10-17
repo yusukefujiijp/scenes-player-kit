@@ -1,0 +1,222 @@
+{
+  "$schema": "./schema.json",
+  "//": "role: Script (A=Trivia then B=Sanctum). Page 1 is play-button only. Opening/Transition/Closing are pure effect pages (no text/symbol/title). Prologue & Epilogue content pages are mandatory.",
+  "__contract__": "schema v2.7+; A=light veil, B/T=dark veil via CSS; sacred rhythm in narr",
+
+  "videoMeta": {
+    "dossierId": "genesis-day6-land-animals-humans-001",
+    "creationTimestamp": "2025-08-29T12:00:00+09:00",
+    "theme": "天地創造の第六日目",
+    "triviaTitle": "第六日—地の生きものと人：科学の豆知識と“像と委託”",
+    "thumbnailText": "【第六日】地の生きものと人",
+    "bannerText": "地に いのちが歩み出す",
+    "tts": {
+      "lang": "ja-JP",
+      "voicePreferences": ["Kyoko", "Otoya"],
+      "rate": 1.12,
+      "readTitleKey": false,
+      "fixes": {
+        "良し": "よし",
+        "聖書": "せいしょ",
+        "ヘブライ": "へぶらい",
+        "創世記": "そうせいき",
+        "至聖所": "しせいじょ",
+        "契約": "けいやく",
+        "安息日": "あんそくび"
+      },
+      "filter": { "jaOnly": true }
+    },
+    "ui": { "a11y": { "prefersReducedMotion": false } },
+    "contract": {
+      "ideologyAxis": "Hellenism_vs_Hebraism",
+      "sacredRhythm": "standard",
+      "structure": {
+        "requireOpeningEffect": true,
+        "requireTransitionT": true,
+        "requireClosingEffect": true,
+        "minA": 3,
+        "minB": 3,
+        "targetA": 5,
+        "requirePrologueEpilogue": true
+      },
+      "versionThemeMap": { "A": "light", "B": "dark", "T": "dark" },
+      "bMandate": {
+        "role": "HolyOfHolies",
+        "polemicAxis": "Hellenism_vs_Hebraism",
+        "requireCompleteDeparture": true,
+        "requireCovenantRelational": true,
+        "requireSpiritLedAgency": true
+      },
+      "tags": {
+        "allowedA": ["#Trivia1", "#Trivia2", "#Trivia3", "#Trivia4", "#Trivia5"],
+        "allowedB": []
+      }
+    }
+  },
+
+  "scenes": [
+    {
+      "page": "1",
+      "type": "placeholder",
+      "title": "(Page1 reserved for Play Button Only)"
+    },
+
+    {
+      "page": "2",
+      "type": "effect",
+      "effect": "light-in",
+      "effectRole": "opening",
+      "base": "#fef3c7",
+      "uiVersion": "T"
+    },
+
+    {
+      "page": "3",
+      "version": "A",
+      "title_key": "【プロローグ】",
+      "title": "大地がうごき、人は顔をあげる",
+      "symbol": "🦬👤",
+      "base": "#fde68a",
+      "effect": "slide-up",
+      "narr": "土の上に、\n歩くものが満ちてくる。\n\n息を与えられた者は、\n顔をあげ、名を受ける準備をする。"
+    },
+
+    {
+      "page": "4",
+      "version": "A",
+      "sectionTag": "#Trivia1",
+      "title_key": "【歩行の物理】",
+      "title": "“振り子”と“バネ”で進む体",
+      "symbol": "🚶‍♀️🦘",
+      "base": "#bbf7d0",
+      "effect": "slide-up",
+      "narr": "ゆっくり歩くとき、\n脚は振り子のようにエネルギーを節約し、\n走るとき、\n体はバネのように弾んで推進力に変える。"
+    },
+    {
+      "page": "5",
+      "version": "A",
+      "sectionTag": "#Trivia2",
+      "title_key": "【反芻の台所】",
+      "title": "草を“もう一度”食べる技",
+      "symbol": "🐄🫙",
+      "base": "#e9d5ff",
+      "effect": "light-in",
+      "narr": "複数の胃と微生物で、\n固い繊維をパンに変える。\n\n時間をかける食卓が、\n草原を支える。"
+    },
+    {
+      "page": "6",
+      "version": "A",
+      "sectionTag": "#Trivia3",
+      "title_key": "【体温の守り】",
+      "title": "“恒温”は動くための投資",
+      "symbol": "🌡️🔥",
+      "base": "#bfdbfe",
+      "effect": "zoom-in",
+      "narr": "熱をつくり、\n熱を逃がす仕組みを重ねる。\n\n代謝の炎は、\n俊敏と持久を買い戻す。"
+    },
+    {
+      "page": "7",
+      "version": "A",
+      "sectionTag": "#Trivia4",
+      "title_key": "【精密把握】",
+      "title": "親指が“道具”を持つ",
+      "symbol": "🖐️🛠️",
+      "base": "#fecaca",
+      "effect": "slide-up",
+      "narr": "対向する親指が、\nつまむ・ひねる・押すを可能にする。\n\n小さな差が、\n文化の大きな扉を開いた。"
+    },
+    {
+      "page": "8",
+      "version": "A",
+      "sectionTag": "#Trivia5",
+      "title_key": "【声の器】",
+      "title": "声道は“母音のキャンバス”",
+      "symbol": "🗣️🔤",
+      "base": "#fbcfe8",
+      "effect": "light-in",
+      "narr": "舌と唇、\n喉頭と口腔の形を素早く変えることで、\n音は色づき、\nことばは世界を描き出す。"
+    },
+
+    {
+      "page": "9",
+      "type": "effect",
+      "effect": "fade-to-black",
+      "effectRole": "transition",
+      "base": "#111827",
+      "uiVersion": "T"
+    },
+
+    {
+      "page": "10",
+      "version": "B",
+      "title_key": "【像】",
+      "title": "かたちに造られ、委ねられる",
+      "symbol": "🫱🤲",
+      "base": "#0f766e",
+      "effect": "light-in",
+      "narr": "人は、\n創造主の“像”として呼ばれた。\n\n地の生きものを顧みる責任と、\n共に生きる知恵が託される。",
+      "sanctum": "holy_of_holies",
+      "polemicAxis": "Hellenism_vs_Hebraism",
+      "doctrineTags": ["HolyOfHolies", "CovenantCentered"]
+    },
+    {
+      "page": "11",
+      "version": "B",
+      "title_key": "【祝福と使命】",
+      "title": "生めよ、満ちよ、治めよ",
+      "symbol": "🗣️👥🌍",
+      "base": "#134e4a",
+      "effect": "zoom-in",
+      "narr": "祝福は命令ではなく、\nいのちを開く招き。\n\n増えること、\n地を管理することが、\n関係の約束として与えられる。",
+      "sanctum": "holy_of_holies",
+      "polemicAxis": "Hellenism_vs_Hebraism",
+      "doctrineTags": ["CovenantCentered", "SpiritLedTransformation"]
+    },
+    {
+      "page": "12",
+      "version": "B",
+      "title_key": "【食卓の配分】",
+      "title": "種をもつ実りは“共通の糧”",
+      "symbol": "🌾🍎",
+      "base": "#0ea5a4",
+      "effect": "light-in",
+      "narr": "地にある種をもつ実りは、\n人と獣の食卓に回される。\n\n与えられたものを配り合うとき、\n暴力ではなく秩序が立つ。",
+      "sanctum": "holy_of_holies",
+      "polemicAxis": "Hellenism_vs_Hebraism",
+      "doctrineTags": ["DepartureFromHellenism", "CovenantCentered"]
+    },
+    {
+      "page": "13",
+      "version": "B",
+      "title_key": "【良し】",
+      "title": "「極めて良し」の判は押された",
+      "symbol": "✅🌍",
+      "base": "#0e7490",
+      "effect": "slide-up",
+      "narr": "夕があり、朝がある。\n第六日の端に、\n深い「よし」が響き、\n物語は安息へ向かう。",
+      "sanctum": "holy_of_holies",
+      "polemicAxis": "Hellenism_vs_Hebraism",
+      "doctrineTags": ["HolyOfHolies", "CovenantCentered"]
+    },
+
+    {
+      "page": "14",
+      "version": "B",
+      "title_key": "【エピローグ】",
+      "title": "顔と名と、呼び交わし",
+      "symbol": "🫶🕊️",
+      "base": "#1f2937",
+      "effect": "light-in",
+      "narr": "呼ぶ者と呼ばれる者が、\n互いに応える。\n\n第六日の祝福は、\n次の静けさを迎える。"
+    },
+
+    {
+      "page": "15",
+      "type": "effect",
+      "effect": "flame-out",
+      "effectRole": "closing",
+      "base": "#0b132b",
+      "uiVersion": "T"
+    }
+  ]
+}

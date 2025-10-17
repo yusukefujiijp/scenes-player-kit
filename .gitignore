@@ -1,0 +1,24 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+
+# Node & build artifacts (future-proof)
+node_modules/
+dist/
+build/
+coverage/
+
+# Project-specific (must not publish)
+backup/**
+*.zip
+*.tar
+*.tar.gz
+*.log
+
+# Secrets / local env
+.env
+.env.*

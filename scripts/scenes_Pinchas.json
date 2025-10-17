@@ -1,0 +1,78 @@
+{
+  "videoMeta": {
+    "dossierId": "messianic-prayer-pinchas-v1",
+    "creationTimestamp": "2025-10-16T11:35:00Z",
+    "theme": "夜の祈り：パラシャ・ピンカス",
+    "thumbnailText": "平和の契約：ピンカス",
+    "bannerText": "Parashat Pinchas (Numbers 25:10-30:1)",
+    "meta": {
+      "subTheme": "WeeklyTorahPortion(Parasha): Pinchas"
+    },
+    "contract": {
+      "structure": {
+        "requireOpeningEffect": true,
+        "requireTransitionT": true,
+        "requireClosingEffect": true
+      },
+      "versionThemeMap": { "A": "dark", "T": "dark" }
+    },
+    "advancePolicy": { "quietMs": 300, "postDelayMs": 250 }
+  },
+  "tts": { "filter": { "jaOnly": true } },
+  "scenes": [
+    { "page": "1", "type": "placeholder", "title": "Tap to Start" },
+    { "page": "2", "type": "effect", "effectRole": "opening", "effect": "light-in", "base": "#000000", "effectDuration": 1400 },
+
+    { "page": "3", "type": "content", "version": "A",
+      "sectionTags": ["#Pinchas", "#NightPrayer", "#Covenant"],
+      "title_key": "【導入-1】", "title": "一日の熱狂を鎮める", "symbol": "⚔️🤔💭", "base": "#0b0b13",
+      "narr": "今日も一日、様々な戦いがあっただろうか。\nその熱を、世の喧騒の中に置いたままにするな。主が約束された、聖なる契約へと持ち寄ろう。"
+    },
+    { "page": "4", "type": "content", "version": "T",
+      "sectionTags": ["#BritShalom", "#Peace", "#Promise"],
+      "title_key": "【導入-2】", "title": "今週の約束：平和の契約", "symbol": "📜🕊️✨", "base": "#0c0c15",
+      "narr": "今週のトーラーは、ピンカスに与えられた「平和の契約 (בְּרִיתִי שָׁלוֹם)」を語る。\nそれは、神の義への情熱が、究極的には神からのシャロームへと至ることを示す。"
+    },
+
+    { "page": "5", "type": "effect", "effectRole": "transition", "effect": "fade-in", "base": "#0a0a10", "effectDuration": 900 },
+
+    { "page": "6", "type": "content", "version": "A",
+      "sectionTags": ["#Zeal", "#Holiness", "#Rest"],
+      "title_key": "【中心-1】", "title": "あなたの情熱を主に捧げる", "symbol": "🔥😇🙏", "base": "#0e0d18",
+      "narr": "あなたの内なる情熱、怒り、不安。それら全てを、主の前に差し出せ。\nピンカスの熱心が聖別されたように、あなたの心の動きもまた、主の平和の内に聖別される。"
+    },
+    { "page": "7", "type": "content", "version": "A",
+      "sectionTags": ["#Census", "#KnownByGod", "#Value"],
+      "title_key": "【中心-2】", "title": "あなたは数えられている", "symbol": "🔢😌☝️", "base": "#100f1c",
+      "narr": "主はイスラエルの民を数えられた。\nあなたもまた、名もなき群衆の一人ではない。主に知られ、数えられている、価値ある一人なのだ。"
+    },
+
+    { "page": "8", "type": "effect", "effectRole": "transition", "effect": "slide-up", "base": "#0a0a10", "effectDuration": 900 },
+
+    { "page": "9", "type": "content", "version": "T",
+      "sectionTags": ["#Inheritance", "#Justice", "#Hope"],
+      "title_key": "【聖別-1】", "title": "嗣業を求める祈り", "symbol": "👩‍👩‍👧‍👦🧐✍️", "base": "#151325",
+      "narr": "ツェロフハドの娘たちのように、主が約束された嗣業を大胆に求めよ。\n今宵の祈りは、あなたの魂が安らぐべき聖なる嗣業、すなわち主のシャロームを相続するためのものである。"
+    },
+    { "page": "10", "type": "content", "version": "T",
+      "sectionTags": ["#SarShalom", "#Yeshua", "#Fulfillment"],
+      "title_key": "【聖別-2】", "title": "究極の平和、イェシュア", "symbol": "✝️😌👑", "base": "#181529",
+      "narr": "そして、この「平和の契約」の究極の成就こそ、私たちの平和の君（サル・シャローム）、主イェシュアである。\n彼の内にのみ、真の安息がある。"
+    },
+
+    { "page": "11", "type": "effect", "effectRole": "transition", "effect": "zoom-in", "base": "#0a0a10", "effectDuration": 900 },
+
+    { "page": "12", "type": "content", "version": "A",
+      "sectionTags": ["#Practice", "#LettingGo", "#Rest"],
+      "title_key": "【実践-1】", "title": "今、平和の契約に入れ", "symbol": "🛌😮🙌", "base": "#1b182e",
+      "narr": "今日の census (日々の勘定) は、もう終わりだ。\n全ての心配事を手放し、主がピンカスに約束された、永遠のシャロームの内に、あなたの魂を休ませなさい。"
+    },
+    { "page": "13", "type": "content", "version": "A",
+      "sectionTags": ["#Blessing", "#LailahTov", "#GoodNight"],
+      "title_key": "【祝福-1】", "title": "主のシャロームと共に", "symbol": "✨😇🙏", "base": "#211d38",
+      "narr": "主イェシュア・ハ・マシアの御名にある、破られることのない平和の契約が、あなたを守るように。\nライラ・トヴ（おやすみなさい）。"
+    },
+
+    { "page": "14", "type": "effect", "effectRole": "closing", "effect": "flame-out", "base": "#050508", "effectDuration": 1200 }
+  ]
+}

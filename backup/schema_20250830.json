@@ -1,0 +1,406 @@
+{
+  "//": "role: Validation spec (v3). 『再生が止まる類のエラー』だけをスキーマで確実にガードし、作法や分量は別リンタへ。effectは本文キー禁止／contentは本文キー必須／placeholderはPlay専用。",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Shorts Script Schema v3.0.0 (AI-friendly)",
+  "description": "A/B構造・効果ページ分離・TTSロール整合（tag/titleKey/title/narr）。effectはテキスト類（title_key/title/symbol/narr）を禁止。placeholderはPage-1のPlay専用。",
+
+  "type": "object",
+  "properties": {
+    "//": { "type": "string", "description": "自由記述の短い備考（AI用ヒント）。" },
+    "__contract__": { "type": "string", "description": "このJSONの前提（例: 'schema v3; veil-contract; pure-effect-pages'）。" },
+
+    "videoMeta": {
+      "type": "object",
+      "description": "動画全体メタ + UI/TTS。※ここに“制作規範”は置かず、別リンタで検査する方針。",
+      "properties": {
+        "dossierId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "description": "一意ID。例: genesis-day4-lights-001"
+        },
+        "creationTimestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601。例: 2025-08-26T12:00:00+09:00"
+        },
+        "theme": { "type": "string", "description": "例: 天地創造の第四日目" },
+        "triviaTitle": { "type": "string", "description": "A側の総題（任意）。" },
+        "thumbnailText": {
+          "type": "string",
+          "maxLength": 25,
+          "description": "サムネ文言（25文字以内推奨）。"
+        },
+        "bannerText": {
+          "type": "string",
+          "maxLength": 20,
+          "description": "画面上部バナー（20文字以内推奨）。"
+        },
+
+        "tts": {
+          "type": "object",
+          "description": "読み上げ初期値（UI非表示）。実装ロールは tag/titleKey/title/narr の4系。",
+          "properties": {
+            "lang": { "type": "string", "default": "ja-JP" },
+            "voicePreferences": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": ["Kyoko", "Otoya"],
+              "description": "全体の希望声（先頭優先）。"
+            },
+            "rate": { "type": "number", "minimum": 0.5, "maximum": 2.0, "default": 1.2 },
+            "readTitleKey": {
+              "type": "boolean",
+              "default": false,
+              "description": "全体の初期フラグ（実装側の __ttsFlags.readTitleKey と統合運用）。"
+            },
+            "fixes": {
+              "type": "object",
+              "additionalProperties": { "type": "string" },
+              "description": "読み替え辞書（原語→読み）。例: {\"聖書\":\"せいしょ\"}"
+            },
+
+            "roleVoiceHints": {
+              "type": "object",
+              "description": "役割別の希望ボイス配列（先頭優先／id・名前のどちらでも）。",
+              "properties": {
+                "tag":      { "type": "array", "items": { "type": "string" }, "default": ["Kyoko"] },
+                "titleKey": { "type": "array", "items": { "type": "string" }, "default": ["Kyoko"] },
+                "title":    { "type": "array", "items": { "type": "string" }, "default": ["Kyoko"] },
+                "narr":     { "type": "array", "items": { "type": "string" }, "default": ["Kyoko"] }
+              },
+              "additionalProperties": false
+            },
+
+            "roleEnableFlags": {
+              "type": "object",
+              "description": "役割別読み上げON/OFFの初期値（デバッグパネルで変更可）。",
+              "properties": {
+                "tag":      { "type": "boolean", "default": true },
+                "titleKey": { "type": "boolean", "default": true },
+                "title":    { "type": "boolean", "default": true },
+                "narr":     { "type": "boolean", "default": true }
+              },
+              "additionalProperties": false
+            },
+
+            "voiceAlias": {
+              "type": "object",
+              "description": "論理名→実声名/id の簡易マップ。例: {\"web-ja\":\"Google 日本語\"}",
+              "patternProperties": {
+                "^[A-Za-z0-9._-]{1,32}$": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+
+        "ui": {
+          "type": "object",
+          "description": "UIヒント（CSSにマッピング可・任意）。",
+          "properties": {
+            "sizes": {
+              "type": "object",
+              "properties": {
+                "titleKey": { "type": "object", "properties": {
+                  "minRem": { "type": "number", "default": 1.25 },
+                  "fluidVW": { "type": "number", "default": 3.8 },
+                  "maxRem": { "type": "number", "default": 1.8 }
+                }, "additionalProperties": false },
+                "title": { "type": "object", "properties": {
+                  "minRem": { "type": "number", "default": 1.6 },
+                  "fluidVW": { "type": "number", "default": 5.0 },
+                  "maxRem": { "type": "number", "default": 2.4 }
+                }, "additionalProperties": false },
+                "narr": { "type": "object", "properties": {
+                  "minRem": { "type": "number", "default": 1.05 },
+                  "fluidVW": { "type": "number", "default": 2.2 },
+                  "maxRem": { "type": "number", "default": 1.15 }
+                }, "additionalProperties": false },
+                "symbol": { "type": "object", "properties": {
+                  "minRem": { "type": "number", "default": 4.0 },
+                  "fluidVW": { "type": "number", "default": 20.0 },
+                  "maxRem": { "type": "number", "default": 8.0 }
+                }, "additionalProperties": false }
+              },
+              "additionalProperties": false
+            },
+            "spacing": {
+              "type": "object",
+              "properties": {
+                "titleKeyGapBottomRem": { "type": "number", "default": 0.5 },
+                "titleGapBottomRem": { "type": "number", "default": 1.0 },
+                "symbolOuterGapYRem": { "type": "number", "default": 1.0 },
+                "symbolInnerGapYRem": { "type": "number", "default": 0.30 }
+              },
+              "additionalProperties": false
+            },
+            "band": {
+              "type": "object",
+              "properties": {
+                "borderWidthPx": { "type": "integer", "minimum": 0, "maximum": 4, "default": 1 },
+                "alphaTop": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.04 },
+                "alphaBottom": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.08 }
+              },
+              "additionalProperties": false
+            },
+            "a11y": {
+              "type": "object",
+              "properties": {
+                "prefersReducedMotion": { "type": "boolean", "default": false }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+
+        "contract": {
+          "type": "object",
+          "description": "思想・構造の宣言（**検査は別リンタ**で行う）。",
+          "properties": {
+            "ideologyAxis": {
+              "type": "string",
+              "enum": ["Hellenism_vs_Hebraism", "None"],
+              "default": "Hellenism_vs_Hebraism"
+            },
+            "sacredRhythm": {
+              "type": "string",
+              "enum": ["off", "light", "standard", "strict"],
+              "default": "standard",
+              "description": "本文の間(タメ)の強度指標。"
+            },
+            "structure": {
+              "type": "object",
+              "properties": {
+                "requireOpeningEffect": { "type": "boolean", "default": true },
+                "requireTransitionT":   { "type": "boolean", "default": true },
+                "requireClosingEffect": { "type": "boolean", "default": true },
+                "requirePrologueEpilogue": { "type": "boolean", "default": true },
+                "minA": { "type": "integer", "minimum": 1, "default": 3 },
+                "minB": { "type": "integer", "minimum": 1, "default": 3 },
+                "targetA": { "type": "integer", "minimum": 1, "default": 5 }
+              },
+              "additionalProperties": false
+            },
+            "versionThemeMap": {
+              "type": "object",
+              "description": "A=light, B/T=dark（CSSベールのヒント）。",
+              "properties": {
+                "A": { "type": "string", "enum": ["light","dark"], "default": "light" },
+                "B": { "type": "string", "enum": ["light","dark"], "default": "dark" },
+                "T": { "type": "string", "enum": ["light","dark"], "default": "dark" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["dossierId", "theme", "thumbnailText"],
+      "additionalProperties": false
+    },
+
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "$comment": "itemsは placeholder | effect | content のいずれか。Page-1はplaceholder推奨（スキーマは強制しない）。",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/placeholderScene" },
+          { "$ref": "#/$defs/effectScene" },
+          { "$ref": "#/$defs/contentScene" }
+        ]
+      }
+    }
+  },
+
+  "required": ["videoMeta", "scenes"],
+  "additionalProperties": false,
+
+  "$defs": {
+    "pageId": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$",
+      "description": "通し番号（文字列化整数）。1から。"
+    },
+    "hexColor": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$",
+      "description": "基調色（#RRGGBB）。背景の直塗り根拠。"
+    },
+
+    "placeholderScene": {
+      "type": "object",
+      "description": "Page-1のPlay専用。本文や背景制御は行わない。",
+      "properties": {
+        "page": { "$ref": "#/$defs/pageId" },
+        "type": {
+          "type": "string",
+          "const": "placeholder",
+          "description": "固定文字列 'placeholder'"
+        },
+        "title": { "type": "string", "description": "任意のメモ（画面には出さない想定）。" }
+      },
+      "required": ["page", "type"],
+      "additionalProperties": false
+    },
+
+    "contentScene": {
+      "type": "object",
+      "description": "本文を持つ通常シーン（A/B/T）。",
+      "properties": {
+        "page":       { "$ref": "#/$defs/pageId" },
+        "version":    { "type": "string", "enum": ["A", "B", "T"], "description": "A=雑学/導入、B=核心/神学、T=転換。" },
+        "sectionTag": { "type": "string", "description": "Aで #Trivia1..#Trivia7 を推奨（パターンは下の条件式で適用）。" },
+
+        "title_key": {
+          "type": "string",
+          "pattern": "^\\u3010.+\\u3011$",
+          "minLength": 2,
+          "maxLength": 20,
+          "description": "全角【】の短見出し。"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 28,
+          "description": "メイン見出し。"
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16,
+          "description": "絵文字列（推奨1〜6）。改行せず一行。"
+        },
+        "base": { "$ref": "#/$defs/hexColor" },
+        "narr": {
+          "type": "string",
+          "maxLength": 280,
+          "description": "本文。\\n で改行。"
+        },
+
+        "effect": {
+          "type": "string",
+          "enum": ["light-in", "fade-in", "slide-up", "zoom-in"],
+          "description": "シーン入場の軽い演出（非ブロッキング）。"
+        },
+        "durationHintMs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "演出目安尺（ミリ秒・任意）。"
+        },
+
+        "titleKeyReadAloud": {
+          "type": "boolean",
+          "default": false,
+          "description": "このシーンのみ title_key をTTS対象に。"
+        },
+
+        "sanctum": {
+          "type": "string",
+          "enum": ["outer", "holy", "holy_of_holies"],
+          "description": "Bでは holy_of_holies を推奨（強制はリンタ側）。"
+        },
+        "polemicAxis": {
+          "type": "string",
+          "enum": ["Hellenism_vs_Hebraism"],
+          "description": "Bでは Hellenism_vs_Hebraism を推奨。"
+        },
+        "doctrineTags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "HolyOfHolies",
+              "DepartureFromHellenism",
+              "CovenantCentered",
+              "IdolatryDenunciation",
+              "SpiritLedTransformation"
+            ]
+          },
+          "uniqueItems": true,
+          "minItems": 1,
+          "description": "思想タグ（Bで2個以上推奨→リンタでWARN/ERROR）。"
+        }
+      },
+      "required": ["page", "version", "title_key", "title", "symbol", "base", "narr"],
+      "additionalProperties": false,
+
+      "allOf": [
+        {
+          "$comment": "Aのときは #Trivia1..#Trivia7 を要求。",
+          "if": { "properties": { "version": { "const": "A" } }, "required": ["version"] },
+          "then": {
+            "required": ["sectionTag"],
+            "properties": {
+              "sectionTag": { "type": "string", "pattern": "^#Trivia([1-7])$" }
+            }
+          }
+        },
+        {
+          "$comment": "長文(>=80文字)は \\n\\n を推奨（ここでは緩く検査）。",
+          "if": { "properties": { "narr": { "minLength": 80 } }, "required": ["narr"] },
+          "then": { "properties": { "narr": { "pattern": ".*\\n\\n.*" } } }
+        },
+        {
+          "$comment": "最低1改行を推奨（strict化はリンタ側へ）。",
+          "properties": { "narr": { "pattern": ".*\\n.*" } }
+        }
+      ]
+    },
+
+    "effectScene": {
+      "type": "object",
+      "description": "純エフェクト・ページ（本文キー禁止／ブロッキング）。",
+      "properties": {
+        "page":   { "$ref": "#/$defs/pageId" },
+        "type":   { "type": "string", "const": "effect" },
+        "effect": {
+          "type": "string",
+          "enum": ["light-in", "flame-out", "fade-to-black"],
+          "description": "純エフェクト名。"
+        },
+        "effectRole": {
+          "type": "string",
+          "enum": ["opening", "transition", "closing"],
+          "description": "象徴的役割（冒頭/転換/終幕）。"
+        },
+        "uiVersion": {
+          "type": "string",
+          "enum": ["A","B","T"],
+          "description": "画面テーマのヒント（任意）。"
+        },
+        "base": { "$ref": "#/$defs/hexColor" },
+
+        "t": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "エフェクトの希望長さ（ms）。player.core.js は t→CSS実測の長い方を採用。"
+        },
+        "effectDuration": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "t の別名（後方互換用）。"
+        }
+      },
+      "required": ["page", "type", "effect", "base"],
+      "additionalProperties": false,
+
+      "allOf": [
+        {
+          "$comment": "本文キーは禁止（存在したらスキーマ違反）。",
+          "not": {
+            "anyOf": [
+              { "required": ["title_key"] },
+              { "required": ["title"] },
+              { "required": ["symbol"] },
+              { "required": ["narr"] },
+              { "required": ["sectionTag"] }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

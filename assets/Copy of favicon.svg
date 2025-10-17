@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- shorts-player-kit favicon (safe-inset + optical centering) -->
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="512" height="512" viewBox="0 0 512 512"
+     role="img" aria-label="shorts-player-kit favicon"
+     style="shape-rendering:geometricPrecision">
+  <defs>
+    <!-- ネイビー→チャコールの落ち着いたBG（左下→右上） -->
+    <linearGradient id="bg" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#0c1a2b"/>
+      <stop offset="1" stop-color="#2b2b2b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 安全インセット：24px（境界クリップ防止）。角丸は等比で104 -->
+  <rect x="24" y="24" width="464" height="464" rx="104" fill="url(#bg)"/>
+
+  <!-- “S” を光学中央に：middle＋下方向オフセット（dy） -->
+  <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle"
+        font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, 'Noto Sans JP', sans-serif"
+        font-weight="800" font-size="200" fill="#FFFFFF"
+        dy=".09em">SPK</text>
+</svg>
