@@ -1,5 +1,5 @@
 # scenes-player-kit (iOS-first)
-作成日時: 2025/10/19 13:00
+作成日時: 2025/10/19 13:30
 
 短編／場面（scenes）再生の**最小デモ**。iOS（Textastic × Working Copy × a-Shell）だけで  
 **小粒に編集 → すぐ Push → すぐ検証**。  
