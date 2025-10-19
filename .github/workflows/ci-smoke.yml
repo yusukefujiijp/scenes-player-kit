@@ -1,19 +1,73 @@
-name: CI (smoke)
+# .github/workflows/ci-smoke.yml
+name: CI Smoke (generate-and-compare)
+
 on:
+  push:
+    branches: [ "dev", "main" ]
+    paths:
+      - 'docs/tts-kv.txt'
+      - 'assets/tts-rules.json'
+      - 'tools/**'
   pull_request:
-    branches: [ main ]
+    branches: [ "dev", "main" ]
+    paths:
+      - 'docs/tts-kv.txt'
+      - 'assets/tts-rules.json'
+      - 'tools/**'
+
+permissions:
+  contents: read
+
 jobs:
   smoke:
+    name: Smoke checks (generate & compare)
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - name: Basic smoke check
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps (if any)
         run: |
-          # 最小：index.html が存在するか
-          if [ ! -f index.html ]; then
-            echo "index.html missing"
+          if [ -f package.json ]; then npm ci; else echo "no package.json, skip npm install"; fi
+
+      - name: Generate JSON from TXT (tmp)
+        run: |
+          mkdir -p tmp
+          node tools/generate-tts-json.mjs tmp/tts-rules.json
+          echo "Generated tmp/tts-rules.json"
+
+      - name: Ensure committed assets/tts-rules.json exists
+        run: |
+          if [ ! -f assets/tts-rules.json ]; then
+            echo "::error ::Missing file: assets/tts-rules.json. Please run tools/generate-tts-json.mjs locally and commit the result."
             exit 1
           fi
-          echo "smoke ok"
+          echo "assets/tts-rules.json exists"
+
+      - name: Compare committed JSON with generated JSON
+        run: |
+          set -e
+          diff -u assets/tts-rules.json tmp/tts-rules.json || (
+            echo "::error ::assets/tts-rules.json is out of sync with docs/tts-kv.txt. Run tools/generate-tts-json.mjs and commit the result.";
+            echo "---- DIFF ----";
+            diff -u assets/tts-rules.json tmp/tts-rules.json || true;
+            exit 1
+          )
+
+      - name: Validate logical consistency & sample apply
+        run: node tools/validate-tts-kv.mjs
+
+      - name: Optional: run tests
+        run: |
+          if grep -q "\"test\"" package.json 2>/dev/null; then
+            npm test --silent
+          else
+            echo "No npm test script defined; skipping."
+          fi

@@ -1,0 +1,48 @@
+name: TTS KV Lint
+
+on:
+  push:
+    branches: [ "dev" ]
+    paths:
+      - "docs/tts-kv.txt"
+      - "assets/tts-rules.json"
+      - "tools/**"
+      - ".github/workflows/tts-kv-lint.yml"
+  pull_request:
+    branches: [ "main", "dev" ]
+    paths:
+      - "docs/tts-kv.txt"
+      - "assets/tts-rules.json"
+      - "tools/**"
+      - ".github/workflows/tts-kv-lint.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate JSON from TXT (to temp)
+        run: |
+          mkdir -p tmp
+          node tools/generate-tts-json.mjs tmp/tts-rules.json
+          echo "Generated tmp/tts-rules.json"
+
+      - name: Ensure committed assets/tts-rules.json exists
+        run: test -f assets/tts-rules.json
+
+      - name: Compare committed JSON with generated JSON
+        run: |
+          diff -u assets/tts-rules.json tmp/tts-rules.json || (echo "::error ::assets/tts-rules.json is out of sync with docs/tts-kv.txt. Run generator and commit the result."; exit 1)
+
+      - name: Validate logical consistency & sample apply
+        run: node tools/validate-tts-kv.mjs
