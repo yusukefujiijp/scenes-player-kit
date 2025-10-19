@@ -16,28 +16,6 @@ Notes (delta):
 
 import { analyzeColor, applyColorTheme } from './utils/color.js';
 
-// --- Optional TTS KV dictionary (dynamic import; non-fatal) ---
-let __ttsKvApply = null; // false=not available / function=apply
-async function loadTtsKvOptional(){
-  if (__ttsKvApply !== null) return; // already tried
-  try {
-    const mod = await import('./tts-kv-simple.js');
-    __ttsKvApply =
-      (mod && typeof mod.applyTtsKv === 'function') ? mod.applyTtsKv :
-      (mod && mod.default && typeof mod.default.applyTtsKv === 'function') ? mod.default.applyTtsKv :
-      false;
-    if (mod && typeof mod.loadTtsKv === 'function'){
-      try { await mod.loadTtsKv(); } catch(_){}
-    }
-  } catch(_) {
-    __ttsKvApply = false; // not available
-  }
-}
-function applyTtsKvIfAny(text){
-  if (!__ttsKvApply) return text;
-  try { return __ttsKvApply(String(text||'')); } catch(_) { return text; }
-}
-
 'use strict';
 
 /* ======================= Feature flags ======================= */
@@ -242,14 +220,7 @@ function speakStrict(text, rate = rateFor('narr'), role='narr'){
   await ensureResumed();
 
   const fixes = getSpeechFixes();
-  let speakText = cleaned;
-  for (const k of Object.keys(fixes)){
-    if(!k) continue;
-    speakText = speakText.split(k).join(String(fixes[k]??''));
-  }
-  // Optional runtime KV dictionary
-  try { await loadTtsKvOptional(); } catch(_){}
-  speakText = applyTtsKvIfAny(speakText);
+  let speakText = cleaned; for(const k of Object.keys(fixes)){ if(!k) continue; speakText = speakText.split(k).join(String(fixes[k]??'')); }
   if(!speakText.trim()) return resolve();
 
   const u = new SpeechSynthesisUtterance(speakText);
@@ -575,9 +546,6 @@ async function boot(){
    window.__ttsVoiceMap = window.__ttsVoiceMap || {};
    if(VC && VC.defaults){ ['tag','titleKey','title','narr'].forEach(k=>{ if(!window.__ttsVoiceMap[k] && VC.defaults[k]) window.__ttsVoiceMap[k]=VC.defaults[k]; }); }
   }catch(_){ }
-
-  // Fire-and-forget preload of optional KV dictionary (non-blocking)
-  try { loadTtsKvOptional().catch(()=>{}); } catch(_){}
 
   await gotoPage(0);
  }catch(e){
