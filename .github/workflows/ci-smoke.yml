@@ -1,0 +1,19 @@
+name: CI (smoke)
+on:
+  pull_request:
+    branches: [ main ]
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Basic smoke check
+        run: |
+          # 最小：index.html が存在するか
+          if [ ! -f index.html ]; then
+            echo "index.html missing"
+            exit 1
+          fi
+          echo "smoke ok"
