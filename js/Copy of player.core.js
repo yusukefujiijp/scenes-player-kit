@@ -586,11 +586,7 @@ export const player = {
   getScene:() => (State.scenes && State.scenes[State.idx]) || null
 };
 // ---- Global alias for debug panel & external modules ----
-try {
-  if (typeof window !== 'undefined') {
-    window.__player = Object.assign((window.__player || {}), player);
-  }
-} catch (_) {}
+try{ if (typeof window !== 'undefined') { window.__player = Object.assign((window.__player||{}), player); } }catch(_){ }
 
 window.__playerCore = Object.assign((window.__playerCore || {}), {
  gotoNext, gotoPrev, gotoPage, rateFor, effRateFor, chooseVoice, primeTTS,
