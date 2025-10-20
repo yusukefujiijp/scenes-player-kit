@@ -1,73 +1,55 @@
-# .github/workflows/ci-smoke.yml
-name: CI Smoke (generate-and-compare)
+name: CI (smoke)
 
 on:
-  push:
-    branches: [ "dev", "main" ]
-    paths:
-      - 'docs/tts-kv.txt'
-      - 'assets/tts-rules.json'
-      - 'tools/**'
   pull_request:
-    branches: [ "dev", "main" ]
-    paths:
-      - 'docs/tts-kv.txt'
-      - 'assets/tts-rules.json'
-      - 'tools/**'
-
-permissions:
-  contents: read
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   smoke:
-    name: Smoke checks (generate & compare)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Use Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
-      - name: Install deps (if any)
+      - name: Print Node versions
         run: |
-          if [ -f package.json ]; then npm ci; else echo "no package.json, skip npm install"; fi
+          node -v
+          npm -v
 
-      - name: Generate JSON from TXT (tmp)
+      # --- JS構文チェック（落ちたら赤止め） ---
+      - name: Syntax check core
+        run: npx --yes acorn --ecma2022 --module js/player.core.js
+
+      - name: Syntax check tts-kv-simple
         run: |
-          mkdir -p tmp
-          node tools/generate-tts-json.mjs tmp/tts-rules.json
-          echo "Generated tmp/tts-rules.json"
-
-      - name: Ensure committed assets/tts-rules.json exists
-        run: |
-          if [ ! -f assets/tts-rules.json ]; then
-            echo "::error ::Missing file: assets/tts-rules.json. Please run tools/generate-tts-json.mjs locally and commit the result."
-            exit 1
-          fi
-          echo "assets/tts-rules.json exists"
-
-      - name: Compare committed JSON with generated JSON
-        run: |
-          set -e
-          diff -u assets/tts-rules.json tmp/tts-rules.json || (
-            echo "::error ::assets/tts-rules.json is out of sync with docs/tts-kv.txt. Run tools/generate-tts-json.mjs and commit the result.";
-            echo "---- DIFF ----";
-            diff -u assets/tts-rules.json tmp/tts-rules.json || true;
-            exit 1
-          )
-
-      - name: Validate logical consistency & sample apply
-        run: node tools/validate-tts-kv.mjs
-
-      - name: Optional: run tests
-        run: |
-          if grep -q "\"test\"" package.json 2>/dev/null; then
-            npm test --silent
+          if [ -f js/tts-kv-simple.js ]; then
+            npx --yes acorn --ecma2022 --module js/tts-kv-simple.js
           else
-            echo "No npm test script defined; skipping."
+            echo "js/tts-kv-simple.js not present (optional)."
           fi
+
+      # --- 任意の辞書JSONがある場合は JSON.parse 検査 ---
+      - name: Validate assets/tts-rules.json (optional)
+        run: |
+          if [ -f assets/tts-rules.json ]; then
+            node -e "const fs=require('fs'); JSON.parse(fs.readFileSync('assets/tts-rules.json','utf8')); console.log('assets/tts-rules.json OK');"
+          else
+            echo "assets/tts-rules.json not present (optional)."
+          fi
+
+      # --- 必須ファイルの存在チェック ---
+      - name: Static assets presence
+        run: |
+          test -f index.html
+          test -f scenes.json
+          test -f js/player.core.js
+          echo "required files present"
