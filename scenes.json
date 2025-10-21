@@ -1,24 +1,76 @@
 {
   "videoMeta": {
-    "dossierId": "tts-narrTTS-smoke-v1",
-    "creationTimestamp": "2025-10-20T12:00:00Z",
-    "theme": "narr / narrTTS smoke",
-    "bannerText": "TTS read test",
-    "advancePolicy": { "quietMs": 300, "postDelayMs": 250 },
-    "contract": { "versionThemeMap": { "A": "dark" } }
+    "dossierId": "creation-week-day3-sample-v1",
+    "creationTimestamp": "2025-10-21T19:30:00Z",
+    "theme": "就寝前の深い祈りへの誘導",
+    "thumbnailText": "第三日：乾いた地と実り",
+    "bannerText": "天地創造 — 第三日",
+    "meta": { "subTheme": "天地創造の第三日目" },
+    "contract": {
+      "structure": { "requireOpeningEffect": true, "requireTransitionT": true, "requireClosingEffect": true },
+      "versionThemeMap": { "A": "dark", "T": "dark" }
+    },
+    "advancePolicy": { "quietMs": 350, "postDelayMs": 300 }
   },
   "tts": { "filter": { "jaOnly": true } },
   "scenes": [
-    { "page": "1", "type": "placeholder", "title": "Tap to Start" },
-
-    { "page": "2", "type": "content", "version": "A",
-      "sectionTags": ["#TTS", "#narrTTS", "#smoke"],
-      "title_key": "【テスト】",
-      "title": "読み分離テスト",
-      "symbol": "🔊",
-      "base": "#101018",
-      "narr": "今日は一日よく頑張りました。",
-      "narrTTS": "きょう わ いちにち よく がんばりました。"
+    {
+      "page": "1",
+      "type": "placeholder",
+      "title": "Tap to Start",
+      "titleTTS": "たっぷ とぅ すたーと",
+      "narr": "",
+      "narrTTS": ""
+    },
+    {
+      "page": "2",
+      "type": "effect",
+      "effectRole": "opening",
+      "effect": "light-in",
+      "base": "#000000",
+      "effectDuration": 1200
+    },
+    {
+      "page": "3",
+      "type": "content",
+      "version": "A",
+      "sectionTags": ["#Day3","#Foundation","#Soil"],
+      "title_key": "【導入】",
+      "titleKeyTTS": "どうにゅう",
+      "title": "静かな大地",
+      "titleTTS": "しずかな だいち",
+      "symbol": "🌱",
+      "base": "#0b0f13",
+      "narr": "乾いた地が現れる。心の中の水は、少しずつ形を取り始める。",
+      "narrTTS": "かわいた だち が あらわれる。こころ の なか の みず は すこしずつ かたち を とり はじめる。いま は ただ それを みつめてください。"
+    },
+    {
+      "page": "4",
+      "type": "content",
+      "version": "A",
+      "sectionTags": ["#Day3","#Roots","#Steady"],
+      "title_key": "【第三日】",
+      "titleKeyTTS": "だいさんにち",
+      "title": "根を下ろす",
+      "titleTTS": "ね を おろす",
+      "symbol": "🌿",
+      "base": "#11131a",
+      "narr": "穏やかな呼吸で、体の重さが床に伝わるのを感じる。小さな静けさが根を張るように、あなたの内側も安定していきます。",
+      "narrTTS": "おだやか な こきゅう で　からだ の おもさ が　ゆか に つたわる の を かんじる。ちいさな しずけさ が　ね を はる ように　あなた の うちがわ も　あんてい して いきます。ここで ゆっくり と　ひとつ め の いのり を ささげます。"
+    },
+    {
+      "page": "5",
+      "type": "content",
+      "version": "A",
+      "sectionTags": ["#Day3","#Fruit","#Thanksgiving"],
+      "title_key": "【祈り】",
+      "titleKeyTTS": "いのり",
+      "title": "実りの願い",
+      "titleTTS": "みのり の ねがい",
+      "symbol": "🍇",
+      "base": "#0f1216",
+      "narr": "『主よ、私のこころに実りを与えたまえ』と静かに唱えます。その言葉とともに、余分な思いを一つずつ手放していきましょう。",
+      "narrTTS": "しゅよ、わたし の こころ に みのり を あたえたまえ。と　しずか に となえます。その ことば とともに　よぶんな おもい を　ひとつ ずつ　てばなして いきましょう。"
     }
   ]
 }

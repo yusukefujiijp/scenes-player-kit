@@ -1,0 +1,24 @@
+{
+  "videoMeta": {
+    "dossierId": "tts-narrTTS-smoke-v1",
+    "creationTimestamp": "2025-10-20T12:00:00Z",
+    "theme": "narr / narrTTS smoke",
+    "bannerText": "TTS read test",
+    "advancePolicy": { "quietMs": 300, "postDelayMs": 250 },
+    "contract": { "versionThemeMap": { "A": "dark" } }
+  },
+  "tts": { "filter": { "jaOnly": true } },
+  "scenes": [
+    { "page": "1", "type": "placeholder", "title": "Tap to Start" },
+
+    { "page": "2", "type": "content", "version": "A",
+      "sectionTags": ["#TTS", "#narrTTS", "#smoke"],
+      "title_key": "【テスト】",
+      "title": "読み分離テスト",
+      "symbol": "🔊",
+      "base": "#101018",
+      "narr": "今日は一日よく頑張りました。",
+      "narrTTS": "きょう わ いちにち よく がんばりました。"
+    }
+  ]
+}
