@@ -1,24 +1,89 @@
 {
   "videoMeta": {
-    "dossierId": "creation-week-day3-sample-v1",
-    "creationTimestamp": "2025-10-21T19:30:00Z",
-    "theme": "就寝前の深い祈りへの誘導",
-    "thumbnailText": "第三日：乾いた地と実り",
-    "bannerText": "天地創造 — 第三日",
-    "meta": { "subTheme": "天地創造の第三日目" },
-    "contract": {
-      "structure": { "requireOpeningEffect": true, "requireTransitionT": true, "requireClosingEffect": true },
-      "versionThemeMap": { "A": "dark", "T": "dark" }
+    "dossierId": "creation-test-title-yoon-variants-v1",
+    "creationTimestamp": "2025-10-23T02:00:00Z",
+    "theme": "就寝前の深い祈りへの誘導（タイトル拗音テスト）",
+    "thumbnailText": "タイトル拗音ABCDテスト",
+    "bannerText": "拗音＋長音化タイトル検証",
+    "meta": {
+      "subTheme": "拗音（にゅ）音声挙動テスト",
+      "testPlan": {
+        "titlePatterns": [
+          "A: どうにゅう",
+          "B: どうニュウ",
+          "C: どうニュー",
+          "D: どうニュう"
+        ],
+        "rates": [
+          1.4,
+          1.2
+        ],
+        "notes": "各タイトルを rate=1.4 / rate=1.2 で手動比較してください（合計 4 patterns × 2 rates = 8 実験）。"
+      }
     },
-    "advancePolicy": { "quietMs": 350, "postDelayMs": 300 }
+    "contract": {
+      "structure": {
+        "requireOpeningEffect": true,
+        "requireTransitionT": true,
+        "requireClosingEffect": false
+      },
+      "versionThemeMap": {
+        "A": "dark",
+        "T": "dark"
+      }
+    },
+    "advancePolicy": {
+      "quietMs": 350,
+      "postDelayMs": 300
+    },
+    "doc": {
+      "version": "1.0.0-test",
+      "lastUpdated": "2025-10-23T02:00:00Z",
+      "rulesMd": [
+        "# タイトル拗音テスト台本（簡易ルール）",
+        "",
+        "## 目的",
+        "- タイトルに含まれる拗音＋母音（例: にゅ + う）が TTS でどのように発音されるかを比較検証する。",
+        "",
+        "## パターン",
+        "- A: 平仮名連続（どうにゅう）",
+        "- B: カタカナ + 母音（どうニュウ）",
+        "- C: カタカナ + 長音（どうニュー）",
+        "- D: 混在表記（どうニュう）",
+        "",
+        "## 運用ルール（台本内記載）",
+        "- page1 は **視覚のみ**（音声無し）でアクティベーション用。録画版はカットして OK。",
+        "- `tts.policy.mode` は `mirror`（表示と読みを一致）でテストを行う。",
+        "- タイトル系の変換ルールは別途検討（今回はタイトルバリエーションを並べて比較）。",
+        "",
+        "## テスト実行方法（手順）",
+        "1. 各タイトルを rate=1.4 で再生して結果を記録。",
+        "2. 各タイトルを rate=1.2 で再生して比較。",
+        "3. 成功/失敗/小ザップ/違和感などをページ毎にメモ（A/B/C/D をラベルに使う）。",
+        "",
+        "— End of Test Manifesto —"
+      ]
+    }
   },
-  "tts": { "filter": { "jaOnly": true } },
+  "tts": {
+    "filter": {
+      "jaOnly": true
+    },
+    "policy": {
+      "mode": "mirror",
+      "commaPause": "space2",
+      "periodPause": "zspaceIfNeeded",
+      "activation": {
+        "page1": "visualOnly"
+      }
+    }
+  },
   "scenes": [
     {
       "page": "1",
       "type": "placeholder",
       "title": "Tap to Start",
-      "titleTTS": "たっぷ とぅ すたーと",
+      "titleTTS": "",
       "narr": "",
       "narrTTS": ""
     },
@@ -34,43 +99,145 @@
       "page": "3",
       "type": "content",
       "version": "A",
-      "sectionTags": ["#Day3","#Foundation","#Soil"],
-      "title_key": "【導入】",
-      "titleKeyTTS": "どうにゅう",
-      "title": "静かな大地",
-      "titleTTS": "しずかな だいち",
-      "symbol": "🌱",
+      "sectionTags": [
+        "#Test",
+        "#TitlePattern",
+        "#導入"
+      ],
+      "title_key": "【導入-A】",
+      "titleKeyTTS": "どうにゅう（A）",
+      "title": "導入パターン A",
+      "titleTTS": "どうにゅう",
+      "symbol": "🅰️",
       "base": "#0b0f13",
-      "narr": "乾いた地が現れる。心の中の水は、少しずつ形を取り始める。",
-      "narrTTS": "かわいた だち が あらわれる。こころ の なか の みず は すこしずつ かたち を とり はじめる。いま は ただ それを みつめてください。"
+      "narr": "短い導入文です。タイトル A の読みを検証します。",
+      "narrTTS": "みじかい どうにゅう の どうにゅう タイトル を けんしょう します。"
     },
     {
       "page": "4",
       "type": "content",
       "version": "A",
-      "sectionTags": ["#Day3","#Roots","#Steady"],
-      "title_key": "【第三日】",
-      "titleKeyTTS": "だいさんにち",
-      "title": "根を下ろす",
-      "titleTTS": "ね を おろす",
-      "symbol": "🌿",
-      "base": "#11131a",
-      "narr": "穏やかな呼吸で、体の重さが床に伝わるのを感じる。小さな静けさが根を張るように、あなたの内側も安定していきます。",
-      "narrTTS": "おだやか な こきゅう で　からだ の おもさ が　ゆか に つたわる の を かんじる。ちいさな しずけさ が　ね を はる ように　あなた の うちがわ も　あんてい して いきます。ここで ゆっくり と　ひとつ め の いのり を ささげます。"
+      "sectionTags": [
+        "#Test",
+        "#TitlePattern",
+        "#導入"
+      ],
+      "title_key": "【導入-B】",
+      "titleKeyTTS": "どうニュウ（B）",
+      "title": "導入パターン B",
+      "titleTTS": "どうニュウ",
+      "symbol": "🅱️",
+      "base": "#10131d",
+      "narr": "短い導入文です。タイトル B の読みを検証します。",
+      "narrTTS": "みじかい どうにゅう の どうニュウ タイトル を けんしょう します。"
     },
     {
       "page": "5",
       "type": "content",
       "version": "A",
-      "sectionTags": ["#Day3","#Fruit","#Thanksgiving"],
-      "title_key": "【祈り】",
-      "titleKeyTTS": "いのり",
-      "title": "実りの願い",
-      "titleTTS": "みのり の ねがい",
-      "symbol": "🍇",
+      "sectionTags": [
+        "#Test",
+        "#TitlePattern",
+        "#導入"
+      ],
+      "title_key": "【導入-C】",
+      "titleKeyTTS": "どうニュー（C）",
+      "title": "導入パターン C",
+      "titleTTS": "どうニュー",
+      "symbol": "🅲️",
+      "base": "#151325",
+      "narr": "短い導入文です。タイトル C の読みを検証します。",
+      "narrTTS": "みじかい どうにゅう の どうニュー タイトル を けんしょう します。"
+    },
+    {
+      "page": "6",
+      "type": "content",
+      "version": "A",
+      "sectionTags": [
+        "#Test",
+        "#TitlePattern",
+        "#導入"
+      ],
+      "title_key": "【導入-D】",
+      "titleKeyTTS": "どうニュう（D）",
+      "title": "導入パターン D",
+      "titleTTS": "どうニュう",
+      "symbol": "🅳️",
+      "base": "#11131a",
+      "narr": "短い導入文です。タイトル D の読みを検証します。",
+      "narrTTS": "みじかい どうにゅう の どうニュう タイトル を けんしょう します。"
+    },
+    {
+      "page": "7",
+      "type": "content",
+      "version": "A",
+      "sectionTags": [
+        "#Test",
+        "#TitlePattern",
+        "#祈り"
+      ],
+      "title_key": "【祈り-A】",
+      "titleKeyTTS": "どうにゅう（A）",
+      "title": "祈りパターン A",
+      "titleTTS": "どうにゅう",
+      "symbol": "🙏A",
+      "base": "#0e111a",
+      "narr": "祈りパターン A。導入以外の位置での発音を確認します。",
+      "narrTTS": "いのり ぱたーん A。どうにゅう の はつおん を かくにん します。"
+    },
+    {
+      "page": "8",
+      "type": "content",
+      "version": "A",
+      "sectionTags": [
+        "#Test",
+        "#TitlePattern",
+        "#祈り"
+      ],
+      "title_key": "【祈り-B】",
+      "titleKeyTTS": "どうニュウ（B）",
+      "title": "祈りパターン B",
+      "titleTTS": "どうニュウ",
+      "symbol": "🙏B",
+      "base": "#0f1322",
+      "narr": "祈りパターン B。導入以外の位置での発音を確認します。",
+      "narrTTS": "いのり ぱたーん B。どうニュウ の はつおん を かくにん します。"
+    },
+    {
+      "page": "9",
+      "type": "content",
+      "version": "A",
+      "sectionTags": [
+        "#Test",
+        "#TitlePattern",
+        "#祈り"
+      ],
+      "title_key": "【祈り-C】",
+      "titleKeyTTS": "どうニュー（C）",
+      "title": "祈りパターン C",
+      "titleTTS": "どうニュー",
+      "symbol": "🙏C",
       "base": "#0f1216",
-      "narr": "『主よ、私のこころに実りを与えたまえ』と静かに唱えます。その言葉とともに、余分な思いを一つずつ手放していきましょう。",
-      "narrTTS": "しゅよ、わたし の こころ に みのり を あたえたまえ。と　しずか に となえます。その ことば とともに　よぶんな おもい を　ひとつ ずつ　てばなして いきましょう。"
+      "narr": "祈りパターン C。導入以外の位置での発音を確認します。",
+      "narrTTS": "いのり ぱたーん C。どうニュー の はつおん を かくにん します。"
+    },
+    {
+      "page": "10",
+      "type": "content",
+      "version": "A",
+      "sectionTags": [
+        "#Test",
+        "#TitlePattern",
+        "#祈り"
+      ],
+      "title_key": "【祈り-D】",
+      "titleKeyTTS": "どうニュう（D）",
+      "title": "祈りパターン D",
+      "titleTTS": "どうニュう",
+      "symbol": "🙏D",
+      "base": "#11121a",
+      "narr": "祈りパターン D。導入以外の位置での発音を確認します。",
+      "narrTTS": "いのり ぱたーん D。どうニュう の はつおん を かくにん します。"
     }
   ]
 }
