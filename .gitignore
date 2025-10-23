@@ -19,6 +19,7 @@ js/_archives/
 *.tar
 *.tar.gz
 *.log
+*.bak
 
 # Secrets / local env
 .env
