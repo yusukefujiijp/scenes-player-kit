@@ -1,6 +1,6 @@
 /*!
 Project:  scenes-player-kit
-File:     js/player.core.js
+File:     js/player-core.js
 Role:     Player Core (page-end stop default + Stop ACK UI hooks + Hard Stop hook)
 UX:       Emits UI-friendly custom events for TTS/playing states (Phase2)
 Roadmap:  Phase3/4/6 — TTS watchdog hardening, event-bus hooks, QuickBar Next連携
@@ -14,8 +14,29 @@ Notes (delta):
  - speakパイプ: scrub → stripMarkdownLight → runtime speechFixes → speakOrWait（watchdog付き）
 */
 
-import { loadTtsKv, applyTtsKv } from './tts-kv-simple.js';
 import { analyzeColor, applyColorTheme } from './utils/color.js';
+
+// --- Optional TTS KV dictionary (dynamic import; non-fatal) ---
+let __ttsKvApply = null; // false=not available / function=apply
+async function loadTtsKvOptional(){
+  if (__ttsKvApply !== null) return; // already tried
+  try {
+    const mod = await import('./tts-kv-simple.js');
+    __ttsKvApply =
+      (mod && typeof mod.applyTtsKv === 'function') ? mod.applyTtsKv :
+      (mod && mod.default && typeof mod.default.applyTtsKv === 'function') ? mod.default.applyTtsKv :
+      false;
+    if (mod && typeof mod.loadTtsKv === 'function'){
+      try { await mod.loadTtsKv(); } catch(_){}
+    }
+  } catch(_) {
+    __ttsKvApply = false; // not available
+  }
+}
+function applyTtsKvIfAny(text){
+  if (!__ttsKvApply) return text;
+  try { return __ttsKvApply(String(text||'')); } catch(_) { return text; }
+}
 
 'use strict';
 
@@ -148,21 +169,6 @@ let jpVoice=null; function refreshJPVoice(){ const list=getVoicesSafe(); jpVoice
 refreshJPVoice();
 try{ window.speechSynthesis.addEventListener('voiceschanged', ()=>{ refreshJPVoice(); }); }catch(_){ }
 
-function waitVoices() {
-  return new Promise(resolve => {
-    try{
-      const s = window.speechSynthesis;
-      const v = s.getVoices();
-      if (v && v.length) return resolve(v);
-      s.addEventListener('voiceschanged', () => resolve(s.getVoices()), { once: true });
-      // Safety fallback
-      setTimeout(() => resolve(s.getVoices()), 800);
-    }catch(e){
-      resolve([]);
-    }
-  });
-}
-
 function voiceById(key){ if(!key) return null; const list=getVoicesSafe(); let v=list.find(x=>x.voiceURI===key); if(v) return v; if(key.includes('|')){ const [lang,name]=key.split('|'); v=list.find(x=>x.lang===lang && x.name===name); if(v) return v; } return list.find(x=>x.name===key)||list.find(x=>x.lang===key)||null; }
 function chooseVoice(role){ const vm=window.__ttsVoiceMap||{}, map=vm[role]; if(map){ if(typeof map==='string'){ const v=voiceById(map); if(v) return v; } else if(map && typeof map==='object'){ try{ if(typeof SpeechSynthesisVoice!=='undefined' && map instanceof SpeechSynthesisVoice) return map; }catch(_){} const key=map.voiceURI||((map.lang||'')+'|'+(map.name||'')); const v=voiceById(key); if(v) return v; } }
  try{ if(window.__ttsUtils && typeof __ttsUtils.pick==='function'){ const p=__ttsUtils.pick(role); if(p&&p.id){ const v=voiceById(p.id); if(v) return v; } } }catch(_){}
@@ -216,12 +222,12 @@ function splitChunksJa(s, maxLen=90){
 async function ensureResumed(){ try{ if('speechSynthesis' in window && speechSynthesis.paused){ speechSynthesis.resume(); } }catch(_){} await sleep(300); const elapsed=nowMs() - (Ctrl.lastCancelAt||0); if(elapsed>=0 && elapsed<280) await sleep(280 - elapsed); }
 
 /* ========================= Stop ACK / State ================== */
-function requestSoftStop(){ if(!Ctrl.stopRequested){ Ctrl.stopRequested = true; Ctrl.stopReqAt = nowMs(); try{ window.dispatchEvent(new CustomEvent('player:stop-ack', { detail:{ ts: Ctrl.stopReqAt } })); }catch(_){} } }
+function requestSoftStop(){ if(!Ctrl.stopRequested){ Ctrl.stopRequested = true; Ctrl.stopReqAt = nowMs(); try{ window.dispatchEvent(new CustomEvent('player:stop-ack', { detail:{ ts: Ctrl.stopReqAt } })); }catch(_){ } } }
 function finalizeStopIfNeeded(context){
  if(Ctrl.stopRequested && !Ctrl.stopped){
   Ctrl.stopped = true;
   const t = nowMs(); const lat = Math.max(0, Math.round(t - (Ctrl.stopReqAt||t)));
-  try{ window.dispatchEvent(new CustomEvent('player:stop-confirm', { detail:{ latencyMs: lat, context: String(context||'') } })); }catch(_){}
+  try{ window.dispatchEvent(new CustomEvent('player:stop-confirm', { detail:{ latencyMs: lat, context: String(context||'') } })); }catch(_){ }
   setPending(false);
  }
 }
@@ -236,22 +242,15 @@ function speakStrict(text, rate = rateFor('narr'), role='narr'){
   await ensureResumed();
 
   const fixes = getSpeechFixes();
-  let speakText = cleaned; for(const k of Object.keys(fixes)){ if(!k) continue; speakText = speakText.split(k).join(String(fixes[k]??'')); }
+  let speakText = cleaned;
+  for (const k of Object.keys(fixes)){
+    if(!k) continue;
+    speakText = speakText.split(k).join(String(fixes[k]??''));
+  }
+  // Optional runtime KV dictionary
+  try { await loadTtsKvOptional(); } catch(_){}
+  speakText = applyTtsKvIfAny(speakText);
   if(!speakText.trim()) return resolve();
-
-  // --- Apply runtime dictionary (KV) to the chunk BEFORE creating utterance ---
-  try{
-    if (typeof applyTtsKv === 'function') {
-      const before = speakText;
-      try { speakText = applyTtsKv(speakText); } catch(e) { console.warn('applyTtsKv error', e); }
-      if (before !== speakText) {
-        try{ console.debug && console.debug('[tts-kv] applied', { before, after: speakText }); }catch(_){}
-      }
-    }
-  }catch(_){}
-
-  // ensure voices available (wait short time if needed)
-  try{ await waitVoices(); }catch(_){}
 
   const u = new SpeechSynthesisUtterance(speakText);
   u.lang='ja-JP'; const v=chooseVoice(role)||jpVoice; if(v) u.voice=v; const eff=effRateFor(role, rate); u.rate=eff;
@@ -263,7 +262,7 @@ function speakStrict(text, rate = rateFor('narr'), role='narr'){
   u.onpause = ()=>{ emitTtsState({ paused:true  }); };
   u.onresume= ()=>{ emitTtsState({ paused:false }); };
   u.onend=done;
-  u.onerror=(ev)=>{ try{ emit('player:tts-error', { role, reason: (ev && ev.error) || 'error' }); }catch(_){} done(); };
+  u.onerror=(ev)=>{ try{ emit('player:tts-error', { role, reason: (ev && ev.error) || 'error' }); }catch(_){ } done(); };
 
   try{ speechSynthesis.speak(u); }catch(_){ return done(); }
 
@@ -341,7 +340,7 @@ async function speakOrWait(text, rate = rateFor('narr'), role='narr'){
 /* =========== TTS sanitize bridge（narrTTS優先） ============== */
 let __ttsSanModule = null;
 async function __getNarrForTTS(scene){
- try{ __ttsSanModule = __ttsSanModule || await import('./tts_sanitize.js'); if(__ttsSanModule && typeof __ttsSanModule.getTtsText==='function') return __ttsSanModule.getTtsText(scene); }catch(_){}
+ try{ __ttsSanModule = __ttsSanModule || await import('./tts-sanitize.js'); if(__ttsSanModule && typeof __ttsSanModule.getTtsText==='function') return __ttsSanModule.getTtsText(scene); }catch(_){}
  const _fallbackBasic = s => String(s||'').replace(/[\u2300-\u23FF\uFE0F]|[\uD83C-\uDBFF][\uDC00-\uDFFF]/g,'').replace(/[⏱⏲⏰⌛️]/g,'');
  return _fallbackBasic(scene && (scene.narrTTS || scene.narr));
 }
@@ -454,8 +453,13 @@ async function runContentSpeech(scene){
    .join('、');
   if (spoken) { await speakOrWait(spoken, rateFor('tag'), 'tag'); }
  }
- if(!muted && f.readTitleKey && scene.title_key){ await speakOrWait(scene.title_key, rateFor('titleKey'), 'titleKey'); }
- if(!muted && f.readTitle && scene.title){ await speakOrWait(scene.title, rateFor('title'), 'title'); }
+ // === title_key を *_TTS 優先で ===
+ const tkRead = (scene && (scene.titleKeyTTS ?? scene.title_key)) || '';
+ if(!muted && f.readTitleKey && tkRead){ await speakOrWait(tkRead, rateFor('titleKey'), 'titleKey'); }
+ // === title を *_TTS 優先で ===
+ const tiRead = (scene && (scene.titleTTS ?? scene.title)) || '';
+ if(!muted && f.readTitle && tiRead){ await speakOrWait(tiRead, rateFor('title'), 'title'); }
+ // === 本文は narrTTS 優先（現状の挙動を維持） ===
  if(f.readNarr && scene.narr){ const narrSafe = await __getNarrForTTS(scene); await speakOrWait(narrSafe, rateFor('narr'), 'narr'); }
 }
 
@@ -542,13 +546,13 @@ async function gotoPage(i){
 async function gotoNext(){
  await ensureResumed();
  const N=(State.scenes||[]).length;
- if(State.idx + 1 >= N){ try{ window.dispatchEvent(new CustomEvent('player:end')); }catch(_){} return; }
+ if(State.idx + 1 >= N){ try{ window.dispatchEvent(new CustomEvent('player:end')); }catch(_){ } return; }
  emit('player:navigation-queued', { from: State.idx, to: State.idx+1 });
  await gotoPage(State.idx + 1);
 }
 async function gotoPrev(){
  await ensureResumed();
- if(State.idx - 1 < 0){ try{ window.dispatchEvent(new CustomEvent('player:begin')); }catch(_){} return; }
+ if(State.idx - 1 < 0){ try{ window.dispatchEvent(new CustomEvent('player:begin')); }catch(_){ } return; }
  emit('player:navigation-queued', { from: State.idx, to: State.idx-1 });
  await gotoPage(State.idx - 1);
 }
@@ -577,14 +581,8 @@ async function boot(){
    if(VC && VC.defaults){ ['tag','titleKey','title','narr'].forEach(k=>{ if(!window.__ttsVoiceMap[k] && VC.defaults[k]) window.__ttsVoiceMap[k]=VC.defaults[k]; }); }
   }catch(_){ }
 
-  // --- load runtime TTS KV dictionary if available (non-fatal) ---
-  try{
-    if (typeof loadTtsKv === 'function') {
-      await loadTtsKv().catch(e=>{ console.warn('[tts-kv] load failed', e); });
-    }
-  }catch(e){
-    console.warn('[tts-kv] loadTtsKv threw', e);
-  }
+  // Fire-and-forget preload of optional KV dictionary (non-blocking)
+  try { loadTtsKvOptional().catch(()=>{}); } catch(_){}
 
   await gotoPage(0);
  }catch(e){
@@ -597,7 +595,7 @@ async function boot(){
 async function hardStop(){
  requestSoftStop(); // UI的には止めたい意図を共有
  setPending(true);
- try{ if('speechSynthesis' in window){ speechSynthesis.cancel(); Ctrl.lastCancelAt=nowMs(); await sleep(280); } }catch(_){}
+ try{ if('speechSynthesis' in window){ speechSynthesis.cancel(); Ctrl.lastCancelAt=nowMs(); await sleep(280); } }catch(_){ }
  Ctrl.stopped = true; // 強制停止は即確定
  finalizeStopIfNeeded('hard');
 }
@@ -625,9 +623,11 @@ export const player = {
   getScene:() => (State.scenes && State.scenes[State.idx]) || null
 };
 // ---- Global alias for debug panel & external modules ----
-try{ if (typeof window !== 'undefined') { 
-  window.__player = Object.assign((window.__player||{}), player); 
-}catch(_){ }
+try {
+  if (typeof window !== 'undefined') {
+    window.__player = Object.assign((window.__player || {}), player);
+  }
+} catch (_) {}
 
 window.__playerCore = Object.assign((window.__playerCore || {}), {
  gotoNext, gotoPrev, gotoPage, rateFor, effRateFor, chooseVoice, primeTTS,

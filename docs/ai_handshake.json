@@ -31,9 +31,9 @@
   },
 
   "runtimeContract": {
-    "loadOrder": ["./style.css", "./debug_panel.js", "./player.core.js"],
+    "loadOrder": ["./style.css", "./debug_panel.js", "./player-core.js"],
     "noESModules": true,
-    "backgroundAuthority": "player.core.js",
+    "backgroundAuthority": "player-core.js",
     "forbid": { "cssImportantOnBgColor": true, "cssBackgroundOverrides": true },
     "dom": {
       "banner": "#banner", "bgColor": "#bgColor", "bgBreath": "#bgBreath",
@@ -152,7 +152,7 @@
 
   "knownPitfalls": [
     "Do NOT use !important on #bgColor background-color (causes transparent bug)",
-    "Do NOT change the load order (style.css → debug_panel.js → player.core.js)",
+    "Do NOT change the load order (style.css → debug_panel.js → player-core.js)",
     "Avoid background shorthand that overrides color on #bgColor",
     "Hard-reload after CSS/JS edits to avoid stale cache",
     "Shortcuts opens in foreground; not suitable during screen recording",
@@ -175,7 +175,7 @@
   "handoffNotes": {
     "status": "stable",
     "next": [
-      "Add optional ?script=URL query override in player.core.js (keep current default)",
+      "Add optional ?script=URL query override in player-core.js (keep current default)",
       "Map videoMeta.tts.roleVoiceHints at runtime with graceful fallback",
       "Consider lightweight smoke tests once a CLI/toolchain exists"
     ],

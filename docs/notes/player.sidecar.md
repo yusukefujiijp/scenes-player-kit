@@ -3,13 +3,13 @@ title: "AI-New Era: player.sidecar — 設計と運用（shorts-player-kit）"
 updated: "2025-08-21 21:05 JST"
 artifact: "notes/player.sidecar.md"
 relates_to:
-  - "./player.core.js"
+  - "./player-core.js"
   - "./style.css"
   - "./debug_panel.js"
   - "./scenes.json"
 ai_handshake: "./ai_handshake.json#runtimeContract"
 ai_handshake_version: "2.0"
-load_order: ["./style.css","./debug_panel.js","./player.core.js"]
+load_order: ["./style.css","./debug_panel.js","./player-core.js"]
 safe_area:
   viewport_fit_cover: true
   visual_viewport_follow: true
@@ -33,14 +33,14 @@ license: "MIT (planned)"
 # AI-New Era: player.sidecar — 設計と運用
 
 1. 目的と適用範囲  
-   1.1 **目的:** `player.core.js` の設計判断・既知の落とし穴・運用規範を**言語化**し、スレ移行時の認識齟齬を防ぐ。  
+   1.1 **目的:** `player-core.js` の設計判断・既知の落とし穴・運用規範を**言語化**し、スレ移行時の認識齟齬を防ぐ。  
    1.2 **適用:** ランタイム非依存のドキュメント。人とAIの両読者が対象。
 
 2. 役割分担（Runtime Contract 要約）  
    2.1 **Player（JS）最終決定:** `scene.base` を `#bgColor` と `body` に**直塗り**（`setBackdropFromBase(hex, themeHint)`）。  
    2.2 **CSSの責務限定:** ベール/帯/文字のみ。`#bgColor` の `background-color` を **!important/ショートハンドで上書きしない**。  
    2.3 **Debug Panelの非干渉:** 背景・ロード順に影響しない**UI支援限定**。  
-   2.4 **ロード順:** `style.css` → `debug_panel.js` → `player.core.js`（ESM不使用）。  
+   2.4 **ロード順:** `style.css` → `debug_panel.js` → `player-core.js`（ESM不使用）。  
    2.5 **台本 SSoT:** `scenes.json`（`base` は空にしない。schemaで検出）。
 
 3. レンダリング / テーマ / 効果  
@@ -64,7 +64,7 @@ license: "MIT (planned)"
 6. 背景透明化の再発防止（チェックリスト）  
    6.1 **CSS禁止:** `#bgColor` を `!important` や `background` ショートハンドで上書きしない。  
    6.2 **JS直塗り:** `setBackdropFromBase` が**常に**最終決定。  
-   6.3 **ロード順厳守:** `style.css` → `debug_panel.js` → `player.core.js`。  
+   6.3 **ロード順厳守:** `style.css` → `debug_panel.js` → `player-core.js`。  
    6.4 **キャッシュ:** 修正時は**ハードリロード**で検証。  
    6.5 **schema:** 最初のcontentシーン `base` 欠落は**lintエラー**にする（将来ルール）。
 
@@ -102,7 +102,7 @@ runShortcutForText(text) => void
 
 11. コード接点（3Stepナビ）  
     11.1 操作: 置換（推奨）／挿入／削除を明記。  
-    11.2 ファイル: player.core.js / debug_panel.js / style.css。  
+    11.2 ファイル: player-core.js / debug_panel.js / style.css。  
     11.3 検索ワード:  
         - 11.3.1 Player背景直塗り → function setBackdropFromBase(（直前に isValidHex6）  
         - 11.3.2 TTS読上げ順 → async function speakScene(（readNote 分岐付近）  

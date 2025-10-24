@@ -27,7 +27,7 @@ jobs:
 
       # --- JS構文チェック（落ちたら赤止め） ---
       - name: Syntax check core
-        run: npx --yes acorn --ecma2022 --module js/player.core.js
+        run: npx --yes acorn --ecma2022 --module js/player-core.js
 
       - name: Syntax check tts-kv-simple
         run: |
@@ -51,5 +51,5 @@ jobs:
         run: |
           test -f index.html
           test -f scenes.json
-          test -f js/player.core.js
+          test -f js/player-core.js
           echo "required files present"

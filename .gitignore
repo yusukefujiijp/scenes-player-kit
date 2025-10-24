@@ -15,6 +15,7 @@ coverage/
 # Project-specific (must not publish)
 backup/**
 js/_archives/
+docs/changes
 *.zip
 *.tar
 *.tar.gz

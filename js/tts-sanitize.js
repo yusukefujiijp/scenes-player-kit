@@ -220,7 +220,7 @@ export function getTtsForRole(scene, role) {
 
 /**
  * 後方互換 API（従来は narr 系専用の取得関数）
- * player.core.js から import される想定。
+ * player-core.js から import される想定。
  */
 export function getTtsText(scene) {
   return getTtsForRole(scene, 'narr');

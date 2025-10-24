@@ -48,7 +48,7 @@
 
 	<script src="./js/tts-voice-utils.js" defer></script>
 	<script src="./js/scene-effects.js" defer></script>
-	<script type="module" src="./js/player.core.js"></script>
+	<script type="module" src="./js/player-core.js"></script>
 	<script src="./js/debug_config.js" defer></script>
 	<script type="module" src="./js/debug_panel.js"></script>
 	<script src="./js/viewport_handler.js" defer></script>

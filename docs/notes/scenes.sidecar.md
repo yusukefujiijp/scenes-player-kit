@@ -4,7 +4,7 @@ updated: "2025-08-21 22:15 JST"
 artifact: "notes/scenes.sidecar.md"
 relates_to:
   - "./scenes.json"
-  - "./player.core.js"
+  - "./player-core.js"
   - "./style.css"
   - "./debug_panel.js"
 ai_handshake: "./ai_handshake.json#scriptSource"
@@ -18,7 +18,7 @@ theme:
   B: "dark"
   T: "dark"
 background:
-  authority: "player.core.js"
+  authority: "player-core.js"
   property: "scene.base"
 tts:
   defaults: { readTag: true, readTitleKey: true, readTitle: true, readNarr: true, readNote: false }
@@ -43,7 +43,7 @@ license: "MIT (planned)"
    2.5 **TTS既定**: Tag / TitleKey / Title / Narr = ON, Note = OFF（DPで切替）。
 
 3. 背景決定とA/B/T  
-   3.1 **最終決定者**: `player.core.js` が `scene.base` を `#bgColor` と `body` へ**直塗り**。  
+   3.1 **最終決定者**: `player-core.js` が `scene.base` を `#bgColor` と `body` へ**直塗り**。  
    3.2 **CSSの責務**: **ベール/帯/文字のみ**（`!important` や `background` ショートハンドで上書きしない）。  
    3.3 **テーマ**: `body.version-{A|B|T}`（A=明薄、B/T=暗）で雰囲気層を切替。**背景本体は base**。
 
@@ -70,7 +70,7 @@ license: "MIT (planned)"
 
 7. 既知の落とし穴（Pitfalls）  
    7.1 `#bgColor` を `!important` や `background` ショートハンドで上書き → **透明化**。  
-   7.2 ロード順崩れ（`style.css → debug_panel.js → player.core.js`）→ 背景決定負け。  
+   7.2 ロード順崩れ（`style.css → debug_panel.js → player-core.js`）→ 背景決定負け。  
    7.3 `base` 未指定 → フォールバックに落ちるが**原則禁止**（意図が曖昧）。  
    7.4 キャッシュ汚染 → **ハードリロード**で検証。
 
