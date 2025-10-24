@@ -46,7 +46,7 @@ shorts-player-kit/
 ├─ content/             # 台本アーカイブ（DayX_YYYYMMDD.json）
 ├─ docs/                # ドキュメント（INDEX.md 起点）
 │  └─ tools/            # a-Shell関連（policy / inventory など）
-├─ js/                  # player.core.js / debug_panel.js / effects ほか
+├─ js/                  # player-core.js / debug_panel.js / effects ほか
 ├─ releases/            # 配布物・タグ候補（任意）
 ├─ index.html           # エントリ（script 読み順は runtime契約に従う）
 ├─ scenes.json          # 現行台本

@@ -18,15 +18,15 @@ shorts-player-kit/
 │   └─ global-zoom-guard.js # 端末ズーム/安全域ガード
 ├─ debug_panel.js           # 折畳み式デバッグUI
 ├─ index.html               # エントリ（ロード順を規定）
-├─ player.core.js           # 本体（レンダ/遷移/音声）
+├─ player-core.js           # 本体（レンダ/遷移/音声）
 ├─ README.md                # 本書
 ├─ scenes.json              # 外部データ本体（差し替え対象）
 ├─ schema.json              # データ契約（スキーマ）
 └─ style.css                # スタイル（版面の不動化を含む）
 
 2.2 **ロード順（厳守）**  
-2.2.1 `style.css` → `debug_panel.js` → `player.core.js`（`defer` 推奨）。  
-2.2.2 `scenes.json` は `player.core.js` 内 `fetch('./scenes.json')` で取得。  
+2.2.1 `style.css` → `debug_panel.js` → `player-core.js`（`defer` 推奨）。  
+2.2.2 `scenes.json` は `player-core.js` 内 `fetch('./scenes.json')` で取得。  
 2.2.3 **インラインJSON（`<script type="application/json">`）は使用しない**（設計方針）。
 
 ---
@@ -35,7 +35,7 @@ shorts-player-kit/
 3.1 **Textastic**: `index.html` を開くだけで動作。帯（バナー）表示後、▶︎で再生。  
 3.2 **ローカルHTTP推奨（予備）**: 端末・環境により `fetch` が `file://` 経由で拒否される場合は、簡易HTTPサーバ（例: `python -m http.server`）を使用。  
 3.3 **JSON差し替え運用**: `scenes.json` を入れ替え → 即時リロードで反映。  
-3.4 **TTS（端末音声）**: 初回は**ユーザー操作**（タップ等）でアンロック（`player.core.js` で `touchstart/click/keydown` をリッスン）。
+3.4 **TTS（端末音声）**: 初回は**ユーザー操作**（タップ等）でアンロック（`player-core.js` で `touchstart/click/keydown` をリッスン）。
 
 ---
 
@@ -78,7 +78,7 @@ shorts-player-kit/
 	6.	操作／挙動
 6.1 基本: ▶︎で一連再生。Debug Panel から Prev/Next/Goto/Play/Stop。
 6.2 TTS: Tag/TitleKey/Title/Narr の読み上げON/OFF切替と声種マップ選択。
-6.3 テーマ: 背景色と影のレシピは player.core.js / style.css に定義（A/B/…）。
+6.3 テーマ: 背景色と影のレシピは player-core.js / style.css に定義（A/B/…）。
 6.4 フォント: Google Fonts を使用（通信不可でも代替フォントで破綻しない設計）。
 
 ⸻

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta id="vp" name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+	<meta name="generator" content="NS-Core (Propose/Justify/Min-Execute/Verify/Record)" />
+
+	<meta name="description" content="shorts-player-kit のデモ。iOSでも軽快に動作する短編プレイヤーの実験プロジェクト。" />
+	<title>shorts-player-kit | 短編プレイヤーのデモ</title>
+
+	<link rel="canonical" href="https://yusukefujiijp.github.io/shorts-player-kit/" />
+
+	<meta property="og:type" content="website" />
+	<meta property="og:locale" content="ja_JP" />
+	<meta property="og:site_name" content="shorts-player-kit" />
+	<meta property="og:title" content="shorts-player-kit | 短編プレイヤーのデモ" />
+	<meta property="og:description" content="shorts-player-kit のデモ。iOSでも軽快に動作する短編プレイヤーの実験プロジェクト。" />
+	<meta property="og:url" content="https://yusukefujiijp.github.io/shorts-player-kit/" />
+	<meta property="og:image" content="./assets/ogp.png" />
+
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="shorts-player-kit | 短編プレイヤーのデモ" />
+	<meta name="twitter:description" content="shorts-player-kit のデモ。iOSでも軽快に動作する短編プレイヤーの実験プロジェクト。" />
+	<meta name="twitter:image" content="./assets/ogp.png" />
+
+	<link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
+	<link rel="icon" type="image/x-icon" href="./assets/favicon.ico" />
+
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Shippori+Mincho:wght@700&display=swap" rel="stylesheet" />
+
+	<link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+	<header id="banner" role="banner" aria-live="polite"></header>
+
+	<div id="bgColor"></div>
+	<div id="bgBreath"></div>
+
+	<div id="wrapper">
+		<main id="content" role="main" aria-live="polite"></main>
+	</div>
+
+	<div id="debug-panel"></div>
+
+	<script src="./js/tts-voice-utils.js" defer></script>
+	<script src="./js/scene-effects.js" defer></script>
+	<script type="module" src="./js/player-core.js"></script>
+	<script src="./js/debug_config.js" defer></script>
+	<script type="module" src="./js/debug_panel.js"></script>
+	<script src="./js/viewport_handler.js" defer></script>
+
+	<noscript>
+		<style>
+			#wrapper {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				height: 100dvh;
+			}
+
+			#content {
+				max-width: 640px;
+				padding: 1rem;
+				font-family: system-ui, sans-serif;
+			}
+		</style>
+		<main id="content">
+			<h1>JavaScript がオフになっています</h1>
+			<p>このプレイヤーは JavaScript により背景・演出・読み上げを制御します。<br>有効化してページを再読み込みしてください。</p>
+		</main>
+	</noscript>
+
+	<script defer src="./js/global-zoom-guard.js"></script>
+</body>
+
+</html>

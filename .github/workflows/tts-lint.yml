@@ -1,0 +1,18 @@
+name: TTS Dictionary Lint
+on:
+  pull_request:
+    paths:
+      - 'docs/TTS-DICTIONARY.md'
+      - 'tools/**'
+jobs:
+  tts-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Generate JSON
+        run: node tools/generate-tts-json.js
+      - name: Validate JSON
+        run: node tools/validate-tts-json.js
