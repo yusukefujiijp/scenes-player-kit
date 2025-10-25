@@ -1,20 +1,39 @@
 name: smoke
+
 on:
-  push: { branches: [ "dev", "main" ] }
-  pull_request: { branches: [ "main" ] }
+  push:
+    branches:
+      - dev
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Validate scenes.json syntax
-        run: node -e "JSON.parse(require('fs').readFileSync('scenes.json','utf8')); console.log('OK: scenes.json parsed')"
+        run: |
+          node -e 'JSON.parse(require("fs").readFileSync("scenes.json","utf8")); console.log("OK: scenes.json parsed");'
+
       - name: Check required files
         run: |
           test -f index.html
           test -f style.css
           test -d js
           echo "OK: required files exist"
+
       - name: Gate validation (scene[0] must be a silent invisible placeholder)
         run: |
-          node -e "const j=JSON.parse(require('fs').readFileSync('scenes.json','utf8'));const s=j.scenes?.[0]||{};if(!(s.type==='placeholder'&&s.display===false&&s.tts?.mute===true)){throw new Error('Gate NG: scene[0] must be placeholder & display:false & tts.mute:true');}console.log('Gate OK')"
+          node -e '
+          const fs = require("fs");
+          const j = JSON.parse(fs.readFileSync("scenes.json","utf8"));
+          const s = (j.scenes && j.scenes[0]) || {};
+          if (!(s.type === "placeholder" && s.display === false && s.tts && s.tts.mute === true)) {
+            throw new Error("Gate NG: scene[0] must be placeholder & display:false & tts.mute:true");
+          }
+          console.log("Gate OK");
+          '
