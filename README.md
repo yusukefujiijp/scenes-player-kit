@@ -1,4 +1,4 @@
-scenes-player-kit → 次期「scenes-player」へ（iOS-first）
+scenes-player-kit（iOS-first）
 
 作成: 2025/10/19 → 最終更新: 2025/10/22
 対象: iPhoneオンリー開発（Textastic / Working Copy / a-Shell など）
@@ -84,7 +84,7 @@ CI（最小 “Smoke”）
 	•	Node.js 20 / acorn で 構文チェック（落ちたら赤止め）
 	•	必須ファイルの 存在確認
 	•	任意ファイル（js/tts-kv-simple.js / assets/tts-rules.json）があれば軽検証
-	•	ワークフロー例: .github/workflows/ci-smoke.yml
+	•	ワークフロー例: .github/workflows/smoke.yml
 
 ⸻
 
