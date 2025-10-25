@@ -44,7 +44,7 @@ python3 -m http.server 8080
 2. `index.html` に `<style>` を置かない（見た目は `style.css` のみ＝Render Contract）
 3. `#wrapper/#content` が `min-height: var(--visual-viewport-h, 100dvh)` を読んでいるか
 4. Debug Panel の高さ変数 `--debug-panel-h` が本文 `padding-bottom` に伝搬しているか
-5. 長文の飛ばし：`player.core.js` のチャンク化＋静寂ゲートが有効か
+5. 長文の飛ばし：`player-core.js` のチャンク化＋静寂ゲートが有効か
 6. 誤読（例：「一日」を「ついたち」）は **TTS-DICTIONARY.md** の置換ルールで対処
 
 ---
@@ -62,7 +62,7 @@ python3 -m http.server 8080
 ├── index.html              # HTML 素体（<style> 禁止）
 ├── style.css               # 見た目の単一ソース（Render Contract v1.1）
 ├── js/
-│   ├── player.core.js      # 状態機械・描画・TTS・遷移
+│   ├── player-core.js      # 状態機械・描画・TTS・遷移
 │   ├── tts-voice-utils.js  # 声カタログ + 役割別・絶対レート
 │   ├── scene-effects.js    # 軽量エフェクト
 │   ├── debug_panel.js      # UI 状態（見た目は CSS 側）

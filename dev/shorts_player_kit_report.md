@@ -47,7 +47,7 @@
       - __MACOSX/shorts-player-kit/js/._README.md
       - __MACOSX/shorts-player-kit/js/._debug_config.js
       - __MACOSX/shorts-player-kit/js/._debug_panel.js
-      - __MACOSX/shorts-player-kit/js/._player.core.js
+      - __MACOSX/shorts-player-kit/js/._player-core.js
       - __MACOSX/shorts-player-kit/js/._scene-effects.js
       - __MACOSX/shorts-player-kit/js/._tts-sanitize.js
       - __MACOSX/shorts-player-kit/js/._tts-voice-utils.js

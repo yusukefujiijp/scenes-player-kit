@@ -9,17 +9,17 @@ targets:
         operation: "insert-after"
         anchors:
           prev: "<!-- MUST #2a: tts-voice-utils.js -->"
-          anchor: "<!-- MUST #2: debug_panel.js, then MUST #3: player.core.js -->"
+          anchor: "<!-- MUST #2: debug_panel.js, then MUST #3: player-core.js -->"
           next: "<script src=\"./debug_panel.js\" defer></script>"
         block: |
           <!-- MUST #2a: tts-voice-utils.js -->
           <script src="./js/tts-voice-utils.js" defer></script>
 
-          <!-- MUST #2: debug_panel.js, then MUST #3: player.core.js -->
+          <!-- MUST #2: debug_panel.js, then MUST #3: player-core.js -->
           <script src="./debug_panel.js" defer></script>
-          <script src="./player.core.js" defer></script>
+          <script src="./player-core.js" defer></script>
 
-  - file: "player.core.js"
+  - file: "player-core.js"
     ops:
       - name: "wireup-tts-setup-in-init"
         operation: "replace-block"
