@@ -1,243 +1,163 @@
 {
-  "videoMeta": {
-    "dossierId": "creation-test-title-yoon-variants-v1",
-    "creationTimestamp": "2025-10-23T02:00:00Z",
-    "theme": "就寝前の深い祈りへの誘導（タイトル拗音テスト）",
-    "thumbnailText": "タイトル拗音ABCDテスト",
-    "bannerText": "拗音＋長音化タイトル検証",
+  "doc": {
+    "version": "5.0.0",
+    "lastUpdated": "2025-10-26T00:00:00Z",
+    "rulesMd": [
+      "先頭は必ず page1=placeholder（無音/テキスト無し）。録画ではカット。",
+      "TTSは二層: 表示(narr/title/title_key) と 読み(narrTTS/titleTTS/titleKeyTTS)。",
+      "tts.policy = { mode:mirror, commaPause:space2, periodPause:zspaceIfNeeded, yoon:katakana, activation.page1=visualOnly }。",
+      "contentシーンは symbol を必須（絵文字・記号はUIで保持、TTSでは黙らせる）。",
+      "opening/transition/closing の effect を最低1枚ずつ含める。"
+    ],
+    "checklist": [
+      "page1に title/narr が無い（空）ことを確認",
+      "opening/transition/closing の3役が scenes に存在",
+      "narr は各contentで少なくとも1つの改行を含む",
+      "title_key は【〜】表記、titleKeyTTS は読みを明示"
+    ],
     "meta": {
-      "subTheme": "拗音（にゅ）音声挙動テスト",
-      "testPlan": {
-        "titlePatterns": [
-          "A: どうにゅう",
-          "B: どうニュウ",
-          "C: どうニュー",
-          "D: どうニュう"
-        ],
-        "rates": [
-          1.4,
-          1.2
-        ],
-        "notes": "各タイトルを rate=1.4 / rate=1.2 で手動比較してください（合計 4 patterns × 2 rates = 8 実験）。"
-      }
-    },
-    "contract": {
-      "structure": {
-        "requireOpeningEffect": true,
-        "requireTransitionT": true,
-        "requireClosingEffect": false
-      },
-      "versionThemeMap": {
-        "A": "dark",
-        "T": "dark"
-      }
-    },
-    "advancePolicy": {
-      "quietMs": 350,
-      "postDelayMs": 300
-    },
-    "doc": {
-      "version": "1.0.0-test",
-      "lastUpdated": "2025-10-23T02:00:00Z",
-      "rulesMd": [
-        "# タイトル拗音テスト台本（簡易ルール）",
-        "",
-        "## 目的",
-        "- タイトルに含まれる拗音＋母音（例: にゅ + う）が TTS でどのように発音されるかを比較検証する。",
-        "",
-        "## パターン",
-        "- A: 平仮名連続（どうにゅう）",
-        "- B: カタカナ + 母音（どうニュウ）",
-        "- C: カタカナ + 長音（どうニュー）",
-        "- D: 混在表記（どうニュう）",
-        "",
-        "## 運用ルール（台本内記載）",
-        "- page1 は **視覚のみ**（音声無し）でアクティベーション用。録画版はカットして OK。",
-        "- `tts.policy.mode` は `mirror`（表示と読みを一致）でテストを行う。",
-        "- タイトル系の変換ルールは別途検討（今回はタイトルバリエーションを並べて比較）。",
-        "",
-        "## テスト実行方法（手順）",
-        "1. 各タイトルを rate=1.4 で再生して結果を記録。",
-        "2. 各タイトルを rate=1.2 で再生して比較。",
-        "3. 成功/失敗/小ザップ/違和感などをページ毎にメモ（A/B/C/D をラベルに使う）。",
-        "",
-        "— End of Test Manifesto —"
+      "manifestoMd": [
+        "GitHub学習を“毎日30秒の勝ち筋”として定着させる。",
+        "ブランチは短命、保存点はタグ、戻し方はRevert-first。"
       ]
-    }
-  },
-  "tts": {
-    "filter": {
-      "jaOnly": true
     },
+    "oneShot": [
+      "あなたはscenes-player用スクリプトの生成AI。schema v5.0.0 を厳守し、表示と読みを分離せよ。"
+    ]
+  },
+
+  "videoMeta": {
+    "dossierId": "github-learning-v5",
+    "creationTimestamp": "2025-10-26T00:00:00Z",
+    "theme": "GitHub学習",
+    "thumbnailText": "GitHub学習",
+    "bannerText": "毎日30秒で前進",
+    "meta": {
+      "subTheme": "我々(私とAI)の悩みにリアルタイムで的を射た内容",
+      "tts": { "filter": { "jaOnly": true } }
+    },
+    "ui": {
+      "a11y": { "prefersReducedMotion": false }
+    },
+    "advancePolicy": { "mode": "auto", "quietMs": 300, "postDelayMs": 250 }
+  },
+
+  "tts": {
+    "lang": "ja-JP",
+    "rate": 1.12,
+    "filter": { "jaOnly": true },
     "policy": {
       "mode": "mirror",
       "commaPause": "space2",
       "periodPause": "zspaceIfNeeded",
-      "activation": {
-        "page1": "visualOnly"
-      }
+      "yoon": "katakana",
+      "activation": { "page1": "visualOnly" }
     }
   },
+
   "scenes": [
     {
       "page": "1",
       "type": "placeholder",
-      "title": "Tap to Start",
-      "titleTTS": "",
-      "narr": "",
-      "narrTTS": ""
+      "base": "#000000"
     },
+
     {
       "page": "2",
       "type": "effect",
-      "effectRole": "opening",
       "effect": "light-in",
-      "base": "#000000",
-      "effectDuration": 1200
+      "effectRole": "opening",
+      "uiVersion": "A",
+      "base": "#0B3D91",
+      "durationMs": 900
     },
+
     {
       "page": "3",
       "type": "content",
       "version": "A",
-      "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#導入"
-      ],
-      "title_key": "【導入-A】",
-      "titleKeyTTS": "どうにゅう（A）",
-      "title": "導入パターン A",
-      "titleTTS": "どうにゅう",
-      "symbol": "🅰️",
-      "base": "#0b0f13",
-      "narr": "短い導入文です。タイトル A の読みを検証します。",
-      "narrTTS": "みじかい どうにゅう の どうにゅう タイトル を けんしょう します。"
+      "sectionTags": ["#Intro", "#Mindset"],
+      "title_key": "【導入】",
+      "titleKeyTTS": "どうニュー",
+      "title": "ようこそ、GitHub学習へ",
+      "titleTTS": "ようこそ  GitHub がくしゅう へ",
+      "symbol": "🧭💡",
+      "base": "#102A43",
+      "narr": "GitHubを“ゲーム化”して学びます。\nmainは本棚、tagはしおり。",
+      "narrTTS": "GitHub を  “ゲームか” して  まなびます。　メイン は  ほんだな、　タグ は  しおり。",
+      "effect": "fade-in",
+      "durationHintMs": 2600
     },
+
     {
       "page": "4",
       "type": "content",
       "version": "A",
-      "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#導入"
-      ],
-      "title_key": "【導入-B】",
-      "titleKeyTTS": "どうニュウ（B）",
-      "title": "導入パターン B",
-      "titleTTS": "どうニュウ",
-      "symbol": "🅱️",
-      "base": "#10131d",
-      "narr": "短い導入文です。タイトル B の読みを検証します。",
-      "narrTTS": "みじかい どうにゅう の どうニュウ タイトル を けんしょう します。"
+      "sectionTags": ["#Daily", "#Routine"],
+      "title_key": "【毎日の型】",
+      "titleKeyTTS": "まいにち の  かた",
+      "title": "Pull→編集→Commit→Push→Tag",
+      "titleTTS": "プル→ へんしゅう→ コミット→ プッシュ→ タグ",
+      "symbol": "🗂️✅",
+      "base": "#0D3B66",
+      "narr": "mainへ切替→Pull(Rebase)。\n編集→Commit→Push。動作OKでタグ。",
+      "narrTTS": "メイン へ  きりかえ→ Pull  リベース。　へんしゅう→ コミット→ プッシュ。　どうさ OK で  タグ。",
+      "effect": "slide-up",
+      "durationHintMs": 2800
     },
+
     {
       "page": "5",
-      "type": "content",
-      "version": "A",
-      "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#導入"
-      ],
-      "title_key": "【導入-C】",
-      "titleKeyTTS": "どうニュー（C）",
-      "title": "導入パターン C",
-      "titleTTS": "どうニュー",
-      "symbol": "🅲️",
-      "base": "#151325",
-      "narr": "短い導入文です。タイトル C の読みを検証します。",
-      "narrTTS": "みじかい どうにゅう の どうニュー タイトル を けんしょう します。"
+      "type": "effect",
+      "effect": "veil-sweep",
+      "effectRole": "transition",
+      "uiVersion": "A",
+      "base": "#112D4E",
+      "durationMs": 700
     },
+
     {
       "page": "6",
       "type": "content",
       "version": "A",
-      "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#導入"
-      ],
-      "title_key": "【導入-D】",
-      "titleKeyTTS": "どうニュう（D）",
-      "title": "導入パターン D",
-      "titleTTS": "どうニュう",
-      "symbol": "🅳️",
-      "base": "#11131a",
-      "narr": "短い導入文です。タイトル D の読みを検証します。",
-      "narrTTS": "みじかい どうにゅう の どうニュう タイトル を けんしょう します。"
+      "sectionTags": ["#Rollback", "#Safety"],
+      "title_key": "【戻し方】",
+      "titleKeyTTS": "もどしかた",
+      "title": "タグ→採用宣言→Revert/Cherry-pick",
+      "titleTTS": "タグ→ さいよう せんげん→ リバート／ チェリーピック",
+      "symbol": "🔖🧯",
+      "base": "#0B132B",
+      "narr": "乖離したら、まず保存点タグ。\nどちらを正にするか決め、RevertかCherry-pick。",
+      "narrTTS": "かいり したら、 まず  ほぞんてん タグ。　どちら を  せい に するか きめ、 Revert か Cherry  pick。",
+      "effect": "fade-in",
+      "durationHintMs": 2600
     },
+
     {
       "page": "7",
       "type": "content",
       "version": "A",
-      "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#祈り"
-      ],
-      "title_key": "【祈り-A】",
-      "titleKeyTTS": "どうにゅう（A）",
-      "title": "祈りパターン A",
-      "titleTTS": "どうにゅう",
-      "symbol": "🙏A",
-      "base": "#0e111a",
-      "narr": "祈りパターン A。導入以外の位置での発音を確認します。",
-      "narrTTS": "いのり ぱたーん A。どうにゅう の はつおん を かくにん します。"
+      "sectionTags": ["#Rename", "#Boss"],
+      "title_key": "【名前変更の攻略】",
+      "titleKeyTTS": "なまえ へんこう の  こうりゃく",
+      "title": "ハンドシェイクで衝突を弱める",
+      "titleTTS": "ハンドシェイク で  しょうとつ を よわめる",
+      "symbol": "🧩🔧",
+      "base": "#1B2A41",
+      "narr": "先にmainでA→Bへ“名前だけ”移す。\nその後にRebaseすると、競合が減る。",
+      "narrTTS": "さきに  メイン で  A→B へ  “なまえ だけ”  うつす。　そのあと に  Rebase すると、 きょうごう が  へる。",
+      "effect": "slide-up",
+      "durationHintMs": 2400
     },
+
     {
       "page": "8",
-      "type": "content",
-      "version": "A",
-      "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#祈り"
-      ],
-      "title_key": "【祈り-B】",
-      "titleKeyTTS": "どうニュウ（B）",
-      "title": "祈りパターン B",
-      "titleTTS": "どうニュウ",
-      "symbol": "🙏B",
-      "base": "#0f1322",
-      "narr": "祈りパターン B。導入以外の位置での発音を確認します。",
-      "narrTTS": "いのり ぱたーん B。どうニュウ の はつおん を かくにん します。"
-    },
-    {
-      "page": "9",
-      "type": "content",
-      "version": "A",
-      "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#祈り"
-      ],
-      "title_key": "【祈り-C】",
-      "titleKeyTTS": "どうニュー（C）",
-      "title": "祈りパターン C",
-      "titleTTS": "どうニュー",
-      "symbol": "🙏C",
-      "base": "#0f1216",
-      "narr": "祈りパターン C。導入以外の位置での発音を確認します。",
-      "narrTTS": "いのり ぱたーん C。どうニュー の はつおん を かくにん します。"
-    },
-    {
-      "page": "10",
-      "type": "content",
-      "version": "A",
-      "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#祈り"
-      ],
-      "title_key": "【祈り-D】",
-      "titleKeyTTS": "どうニュう（D）",
-      "title": "祈りパターン D",
-      "titleTTS": "どうニュう",
-      "symbol": "🙏D",
-      "base": "#11121a",
-      "narr": "祈りパターン D。導入以外の位置での発音を確認します。",
-      "narrTTS": "いのり ぱたーん D。どうニュう の はつおん を かくにん します。"
+      "type": "effect",
+      "effect": "fade-to-black",
+      "effectRole": "closing",
+      "uiVersion": "A",
+      "base": "#000000",
+      "durationMs": 850
     }
   ]
 }
