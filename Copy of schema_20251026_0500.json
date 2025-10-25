@@ -1,14 +1,14 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://scenes-player/schema/v5.0.0",
-  "title": "Scenes Player Script Schema v5.0.0 (iPhone-first / Two-layer TTS / Symbol-emoji safe)",
-  "description": "本スキーマは、表示（narr / title / title_key）と読み（narrTTS / titleTTS / titleKeyTTS）の二層構成を前提にします。page1 はアクティベーション・ゲート（音声なし）を固定。TTS 整形ポリシは top-level tts.policy に記述し、js/tts-sanitize.js と連動します。特に symbol 要素（絵文字・顔文字・象徴記号）は UI 表現の要であり、**必ず保持**します（TTS ではサニタイズにより無音化しても、表示は消さない）。",
-  "type": "object",
+  "title": "Scenes Player Script Schema v5.0.0 (Two-layer TTS, iPhone-first, Emoji/Kaomoji-safe)",
+  "description": "このスキーマは『表示(narr/title/title_key) と 読み(narrTTS/titleTTS/titleKeyTTS) の二層』を前提とし、page1 をアクティベーションゲート（音声なし）として固定します。絵文字・顔文字（ビジュアル要素）は表示では歓迎し、TTS 経路では js/tts-sanitize.js により安全に黙殺（無音化）します。TTS の休止・拗音処理ポリシは top-level tts.policy に記述し、実行時に連動します。",
 
+  "type": "object",
   "properties": {
     "doc": {
       "type": "object",
-      "description": "台本自身が運用ルール・意図・手順を内包する自己記述ブロック。AI はスレッドごとに忘れても、この台本は覚えている。",
+      "description": "台本自身が自分の運用ルールを保持する自己記述ブロック。AI/人間どちらが触っても意図を継承できる“記憶”。ここに絵文字/顔文字の扱い（表示歓迎・TTS黙殺）や、二層TTSの原則、録画前提などを明示する。",
       "properties": {
         "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
         "lastUpdated": { "type": "string", "format": "date-time" },
@@ -20,11 +20,6 @@
             "manifestoMd": { "type": "array", "items": { "type": "string" } }
           },
           "additionalProperties": true
-        },
-        "oneShot": {
-          "type": "array",
-          "description": "将来の生成AIに渡す理想的 One-Shot（Markdown 行の配列）。この台本だけで振る舞いを再現できるようにする。",
-          "items": { "type": "string" }
         }
       },
       "required": ["version", "lastUpdated", "rulesMd"],
@@ -33,7 +28,7 @@
 
     "videoMeta": {
       "type": "object",
-      "description": "作品メタ。順序は doc → videoMeta → tts → scenes の並びを推奨（検証順ではなく“読む順”）。",
+      "description": "ビデオ/作品全体に関するメタ。UIテーマ・自動遷移ポリシ・構成契約などを含む。",
       "properties": {
         "dossierId": { "type": "string", "pattern": "^[A-Za-z0-9._-]+$" },
         "creationTimestamp": { "type": "string", "format": "date-time" },
@@ -48,7 +43,7 @@
             "subTheme": { "type": "string" },
             "tts": {
               "type": "object",
-              "description": "後方互換のため残置。推奨は top-level tts に一本化。",
+              "description": "（後方互換）推奨は top-level tts に一本化。",
               "properties": {
                 "filter": {
                   "type": "object",
@@ -64,7 +59,7 @@
 
         "tts": {
           "type": "object",
-          "description": "後方互換（推奨は top-level tts）。",
+          "description": "（後方互換）推奨は top-level tts。",
           "properties": {
             "lang": { "type": "string" },
             "voicePreferences": { "type": "array", "items": { "type": "string" } },
@@ -103,6 +98,7 @@
 
         "contract": {
           "type": "object",
+          "description": "構成契約。どのタイプのエフェクトを必須にするか等を定義。フラグに応じて schema 側の必須性判定が変わる（条件付き）。",
           "properties": {
             "structure": {
               "type": "object",
@@ -135,7 +131,7 @@
 
     "tts": {
       "type": "object",
-      "description": "TTS 設定の単一ハブ。ポリシは js/tts-sanitize.js と連動し、iPhone Safari の挙動に最適化。",
+      "description": "TTS設定の単一ハブ。js/tts-sanitize.js と連動。拗音のカタカナ化/句読点休止/placeholder無音化などをここで宣言。",
       "properties": {
         "lang": { "type": "string", "default": "ja-JP" },
         "rate": { "type": "number", "minimum": 0.5, "maximum": 2.0 },
@@ -147,7 +143,7 @@
         },
         "policy": {
           "type": "object",
-          "description": "TTS 整形ポリシ。mirror=表示と読みの意味一致。句読点休止と拗音変換を制御。",
+          "description": "TTS 整形ポリシ。mirror=表示と読みの意味一致。句読点→休止と拗音→カタカナ変換を制御。絵文字/顔文字は表示歓迎・TTS黙殺（サニタイザ固定動作）。",
           "properties": {
             "mode": { "type": "string", "enum": ["mirror", "free"], "default": "mirror" },
             "commaPause": { "type": "string", "enum": ["space2", "none"], "default": "space2" },
@@ -170,7 +166,7 @@
     "scenes": {
       "type": "array",
       "minItems": 1,
-      "description": "先頭は必ず Play専用の placeholder（音声なし）。以降は content/effect。",
+      "description": "先頭は必ず Play専用の placeholder（音声なし/録画時はカット）。以降は content/effect。",
       "items": [
         {
           "allOf": [
@@ -188,40 +184,103 @@
 
   "allOf": [
     {
-      "description": "opening が少なくとも1枚存在",
-      "properties": {
-        "scenes": {
-          "type": "array",
-          "contains": {
-            "type": "object",
-            "properties": { "type": { "const": "effect" }, "effectRole": { "const": "opening" } },
-            "required": ["type", "effectRole"]
+      "description": "contract.structure.requireOpeningEffect===true のときだけ opening を要求",
+      "if": {
+        "properties": {
+          "videoMeta": {
+            "properties": {
+              "contract": {
+                "properties": {
+                  "structure": {
+                    "properties": { "requireOpeningEffect": { "const": true } },
+                    "required": ["requireOpeningEffect"]
+                  }
+                },
+                "required": ["structure"]
+              }
+            },
+            "required": ["contract"]
+          }
+        },
+        "required": ["videoMeta"]
+      },
+      "then": {
+        "properties": {
+          "scenes": {
+            "type": "array",
+            "contains": {
+              "type": "object",
+              "properties": { "type": { "const": "effect" }, "effectRole": { "const": "opening" } },
+              "required": ["type", "effectRole"]
+            }
           }
         }
       }
     },
     {
-      "description": "transition が少なくとも1枚存在",
-      "properties": {
-        "scenes": {
-          "type": "array",
-          "contains": {
-            "type": "object",
-            "properties": { "type": { "const": "effect" }, "effectRole": { "const": "transition" } },
-            "required": ["type", "effectRole"]
+      "description": "contract.structure.requireTransitionT===true のときだけ transition を要求",
+      "if": {
+        "properties": {
+          "videoMeta": {
+            "properties": {
+              "contract": {
+                "properties": {
+                  "structure": {
+                    "properties": { "requireTransitionT": { "const": true } },
+                    "required": ["requireTransitionT"]
+                  }
+                },
+                "required": ["structure"]
+              }
+            },
+            "required": ["contract"]
+          }
+        },
+        "required": ["videoMeta"]
+      },
+      "then": {
+        "properties": {
+          "scenes": {
+            "type": "array",
+            "contains": {
+              "type": "object",
+              "properties": { "type": { "const": "effect" }, "effectRole": { "const": "transition" } },
+              "required": ["type", "effectRole"]
+            }
           }
         }
       }
     },
     {
-      "description": "closing が少なくとも1枚存在（作品によっては省略可だが既定は要求）",
-      "properties": {
-        "scenes": {
-          "type": "array",
-          "contains": {
-            "type": "object",
-            "properties": { "type": { "const": "effect" }, "effectRole": { "const": "closing" } },
-            "required": ["type", "effectRole"]
+      "description": "contract.structure.requireClosingEffect===true のときだけ closing を要求",
+      "if": {
+        "properties": {
+          "videoMeta": {
+            "properties": {
+              "contract": {
+                "properties": {
+                  "structure": {
+                    "properties": { "requireClosingEffect": { "const": true } },
+                    "required": ["requireClosingEffect"]
+                  }
+                },
+                "required": ["structure"]
+              }
+            },
+            "required": ["contract"]
+          }
+        },
+        "required": ["videoMeta"]
+      },
+      "then": {
+        "properties": {
+          "scenes": {
+            "type": "array",
+            "contains": {
+              "type": "object",
+              "properties": { "type": { "const": "effect" }, "effectRole": { "const": "closing" } },
+              "required": ["type", "effectRole"]
+            }
           }
         }
       }
@@ -306,7 +365,7 @@
 
     "placeholderScene": {
       "type": "object",
-      "description": "Page-1 のアクティベーション・ゲート（音声なし・表示のみ）。録画ではカット推奨。Symbol は不要・任意。",
+      "description": "Page-1 のアクティベーションゲート（音声なし）。録画時はカットOK。タイトル等に絵文字・顔文字を入れても表示はOK、TTSは常に黙殺。",
       "properties": {
         "page": { "$ref": "#/$defs/pageId" },
         "type": { "type": "string", "const": "placeholder" },
@@ -322,7 +381,7 @@
 
     "contentScene": {
       "type": "object",
-      "description": "本文を持つ通常シーン（A/B/T）。二層TTS（*TTS）を必須。**symbol には絵文字・顔文字の使用を強く推奨**（例: \"✨😇🙏\", \"🕯️安🕯️\", \"( ^_^ )\"）。TTS では絵文字は黙らせるが、**表示は必ず保持**する。",
+      "description": "本文を持つ通常シーン（A/B/T）。type:'content'。**二層TTS（*TTS）必須**。表示テキストには絵文字・顔文字・記号の使用OK（視覚演出）。TTS 経路では自動で無音化される（安全）。",
       "properties": {
         "page": { "$ref": "#/$defs/pageId" },
         "type": { "type": "string", "const": "content" },
@@ -331,25 +390,16 @@
         "sectionTags": { "$ref": "#/$defs/sectionTags" },
 
         "title_key": { "type": "string", "pattern": "^\\u3010.+\\u3011$", "minLength": 2, "maxLength": 20 },
-        "titleKeyTTS": { "type": "string", "minLength": 0, "description": "タイトル鍵の読み（例：『導入』→『どうニュー』や『どうニュウ』など）。" },
+        "titleKeyTTS": { "type": "string", "minLength": 0, "maxLength": 40, "description": "タイトル鍵の読み。拗音はかな素直 or カタカナ拗音（例：『導入』→『どうニュー』）。" },
 
         "title": { "type": "string", "minLength": 1, "maxLength": 28 },
-        "titleTTS": { "type": "string", "minLength": 1, "description": "タイトルの読み。文字数制限なし（TTSの安定優先）。" },
+        "titleTTS": { "type": "string", "minLength": 1, "maxLength": 56, "description": "タイトルの読み（mirror 既定）。" },
 
-        "symbol": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 24,
-          "description": "画面象徴（**絵文字/顔文字/記号**）。TTS では読ませないが、UI 表示では絶対消さない。例: \"✨😇🙏\", \"🕊️\", \"🗣️💡✨\", \"(祈)\"。"
-        },
-
+        "symbol": { "type": "string", "minLength": 1, "maxLength": 16, "description": "絵文字/顔文字/短いシンボル（視覚演出）。TTS では黙殺される。" },
         "base": { "$ref": "#/$defs/hexColor" },
 
-        "narr": { "type": "string", "maxLength": 280, "description": "表示用本文。原則1箇所以上の改行を持つ（\n）。" },
-        "narrTTS": {
-          "type": "string",
-          "description": "読み用本文（**表示と意味一致（mirror）**）。句読点の休止は policy に従い自動整形。**文字数制限なし**（安定読上げを最優先）。"
-        },
+        "narr": { "type": "string", "maxLength": 280, "description": "表示用本文。絵文字/顔文字可（視覚演出）。" },
+        "narrTTS": { "type": "string", "maxLength": 1200, "description": "読み上げ本文（mirror 既定：表示と意味一致）。句読点は policy に従ってスペースに変換可能。" },
 
         "effect": { "type": "string", "enum": ["light-in", "fade-in", "slide-up", "zoom-in"] },
         "durationHintMs": { "type": "integer", "minimum": 0 },
@@ -380,11 +430,11 @@
         "narrTTS"
       ],
       "additionalProperties": false,
+
       "allOf": [
         {
-          "description": "最低1改行（聖なるリズム）",
-          "properties": { "narr": { "pattern": ".*\\n.*" } },
-          "required": ["narr"]
+          "description": "最低1改行（リズム確保）",
+          "properties": { "narr": { "pattern": ".*\\n.*" } }
         },
         {
           "description": "長文>=80では段落推奨（\\n\\n）",
@@ -396,7 +446,7 @@
 
     "effectScene": {
       "type": "object",
-      "description": "純エフェクト。本文キーは禁止（symbol も禁止）。時間キーは t|duration|durationMs|effectDuration のいずれでも可。",
+      "description": "純エフェクト。本文キーは禁止。時間キーは t|duration|durationMs|effectDuration のいずれでも可。絵文字/顔文字は symbol 等を使わないため TTS 経路に影響なし。",
       "properties": {
         "page": { "$ref": "#/$defs/pageId" },
         "type": { "type": "string", "const": "effect" },
@@ -426,9 +476,10 @@
       },
       "required": ["page", "type", "effect", "base"],
       "additionalProperties": false,
+
       "allOf": [
         {
-          "description": "本文キーは禁止（symbol/title/narr など）",
+          "description": "本文キーは禁止（効果のみ）",
           "not": {
             "anyOf": [
               { "required": ["title_key"] },
@@ -445,7 +496,4 @@
       ]
     }
   }
-},
-
-"$comment": "=== Ideal One-Shot for future AIs (貼り付けてから生成) ===\\n\\nあなたは『scenes-player』用の台本ジェネレータです。以下の厳密ルールで JSON を1つだけ出力してください。\\n\\n【目的】就寝前の深い祈りへ、安全で静かな導線を作る。iPhone/Safari のTTS挙動に合わせ、表示と読みを分離しつつ、視覚は豊かに、音声は誤読ゼロへ。\\n\\n【必須構造】\\n- top-level順: doc → videoMeta → tts → scenes。\\n- scenes[0] は type:'placeholder'（音声なし）。実動画は scenes[1]（opening effect）から開始。\\n- 以降は effect/content を織り交ぜ、少なくとも opening/transition/closing を各1枚。\\n\\n【二層TTS】\\n- 表示: narr / title / title_key、読み: narrTTS / titleTTS / titleKeyTTS。\\n- tts.policy.mode = 'mirror'（読みは表示と**意味一致**。読みだけの誘導文追加はしない）。\\n- 句読点: '、'→半角スペース2個、'。'→必要時のみ全角スペースを付与（zspaceIfNeeded）。\\n- 拗音: 'にゅ' 等はカタカナ拗音に変換（例: 導入→titleKeyTTS は『どうニュー』か『どうニュウ』を優先）。\\n- narrTTS / titleTTS は**文字数制限なし**。\\n\\n【symbol（超重要）】\\n- content シーンは **symbol を必須**。絵文字・顔文字・記号を歓迎（例: \"✨😇🙏\", \"🕯️安🕯️\", \"( 祈 )\"）。\\n- **TTSでは読ませない**が、表示からは**絶対に消さない**。\\n\\n【品質ガイド】\\n- narr は必ず1つ以上の改行（\\\\n）を含める。80文字以上なら段落（\\\\n\\\\n）推奨。\\n- sectionTags は1〜3個を推奨（#DayX など）。\\n- base は6桁HEX。version は A/B/T のいずれか。\\n\\n【出力】\\n- スキーマ v5.0.0 に準拠した JSON を **1つだけ**。コードフェンス不要。余計な説明を出力しない。\\n- tts.policy は { mode:'mirror', commaPause:'space2', periodPause:'zspaceIfNeeded', yoon:'katakana', activation:{page1:'visualOnly'} } を既定とする。\\n\\n【例外処理】\\n- 読みの不安定（例:『どうにゅう』が『どうにゆう』化）を避けるため、titleKeyTTS は『どうニュー』を優先（B案）し、C案（どうニュー）で不自然なら『どうニュウ』へ。\\n\\n— この One-Shot を守れば、どのAIでも同じ品質へ収束できます。"
 }
