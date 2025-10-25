@@ -26,7 +26,7 @@
        3.2.2 **Exportボタン** をデバッグパネルに追加  
               3.2.2.1 `🎙 Export m4a（現在）` … 現在シーンのみテキスト収集→Shortcutsで音声化保存。  
               3.2.2.2 `🎧 Export m4a（全体）` … 全シーン結合テキスト→同上。  
-       3.2.3 **player.core.js API** 拡張  
+       3.2.3 **player-core.js API** 拡張  
               3.2.3.1 `collectCurrentText(flags)` と `collectAllText(flags)` を実装（Tag/TitleKey/Title/Narr/Noteの粒度制御）。  
               3.2.3.2 `runShortcutForText(text)` を実装（ショートカット名は `__ttsFlags.shortcutName`）。  
        3.2.4 **Note音声**：`speakScene()` に Note読上げ（末尾）を追加（`readNote`=true時のみ）。
@@ -46,12 +46,12 @@
 4. 実装差分（抜粋要約）
    4.1 **index.html**  
        4.1.1 `<meta name="viewport" content="... viewport-fit=cover">` の上で、`<style>` 内に `env(safe-area-inset-*)` を明示。  
-       4.1.2 デバッグパネル直下配置を維持（`#debug-panel` は末尾、`debug_panel.js`→`player.core.js` の順に `defer`）。  
+       4.1.2 デバッグパネル直下配置を維持（`#debug-panel` は末尾、`debug_panel.js`→`player-core.js` の順に `defer`）。  
    4.2 **debug_panel.js**  
        4.2.1 `readNote` チェックを既定OFF。  
        4.2.2 `m4a（現在/全体）` ボタン追加。`__player.collect*Text()` → `__player.runShortcutForText()` 呼び出し。  
        4.2.3 `visualViewport` 追従・`translateZ(0)` で再描画安定化。  
-   4.3 **player.core.js**  
+   4.3 **player-core.js**  
        4.3.1 `collectCurrentText/collectAllText` 実装（Tag/TitleKey/Title/Narr/Noteの出力順は scene 表示順に準拠）。  
        4.3.2 `speakScene()` に Note読上げを追加（末尾、改行挿入）。  
        4.3.3 `runShortcutForText(text)` 実装（ショートカット名は `window.__ttsFlags.shortcutName`。規定値は `"Make Spoken Audio from Text"`）。
@@ -71,7 +71,7 @@
    6.4 **下端+80px**：機種/バー表示状態で最適値が変動し得る。`env(safe-area-inset-*)` と視覚確認で調整。
 
 7. 運用・移行（次スレAIへの明示）
-   7.1 **ロード順契約厳守**：`style.css → debug_panel.js → player.core.js`（ESM不使用）。  
+   7.1 **ロード順契約厳守**：`style.css → debug_panel.js → player-core.js`（ESM不使用）。  
    7.2 **背景権限**：背景は**JS最終決定**、CSSはベール/帯/文字のみ（`!important`で上書き禁止）。  
    7.3 **挿入/置換の原則**：**ブロックごと置換を優先**。3Step（ファイル名→検索ワード→相対位置）と**直前/直後行の完全体**で指示。  
    7.4 **ショートカット名**：`__ttsFlags.shortcutName` を参照（フォルダ名の固定は**不要**）。
@@ -79,13 +79,13 @@
 8. NS-Core ログ（主要判断）
    8.1 **Propose:** 再生=Web Speech / 保存=m4a（標準） / MP3=実験（a-Shell）へ役割分離。  
    8.2 **Justify:** 画面遷移ゼロの同期性と、後聴き資産化を両立。将来の拡張（RSS/Podcast/MP3）も安全に増築。  
-   8.3 **Min-Execute:** `index.html` へ安全域CSS追加、`debug_panel.js` に Export 2ボタンと `readNote`、`player.core.js` に収集APIを追加。  
+   8.3 **Min-Execute:** `index.html` へ安全域CSS追加、`debug_panel.js` に Export 2ボタンと `readNote`、`player-core.js` に収集APIを追加。  
    8.4 **Verify:** 実機で下端固定/左右欠け解消、Note音声、m4a保存（現在/全体）を確認。  
    8.5 **Record:** 本CHANGESに記録、`docs/CHANGES.min.md` に5行要約、`handshake.json` に“MP3は実験路線”を明記。
 
 9. 5行要約（`docs/CHANGES.min.md` 追記用）
    9.1 Textastic下端固定を **safe-area + visualViewport** で確立（中段固定化を解消）。  
    9.2 デバッグパネルに **Note読み（既定OFF）** と **m4aエクスポート（現在/全体）** を実装。  
-   9.3 `player.core.js` に **collect*Text / runShortcutForText** を追加し、保存系を確立。  
+   9.3 `player-core.js` に **collect*Text / runShortcutForText** を追加し、保存系を確立。  
    9.4 **Siri/HattoriはWeb Speech未露出**のためUI列挙対象外。MP3化は **a-Shell+LAME** の実験路線へ。  
    9.5 **背景=JS最終決定 / !important禁止 / ロード順固定** を再確認し、安定運用を継続。

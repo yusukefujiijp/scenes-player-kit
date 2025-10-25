@@ -1,9 +1,9 @@
 /*!
-Project:  shorts-player-kit
-File:     js/player.core.js
-Role:     Player Core (page-end stop default + Stop ACK UI hooks + Hard Stop hook)
-UX:       Emits UI-friendly custom events for TTS/playing states (Phase2)
-Roadmap:  Phase3/4/6 — TTS watchdog hardening, event-bus hooks, QuickBar Next連携
+Project:  scenes-player-kit
+File:     js/player-core.js
+Role:     Player Core (page-end stop default + Stop ACK UI hooks + Hard Stop hook)
+UX:       Emits UI-friendly custom events for TTS/playing states (Phase2)
+Roadmap:  Phase3/4/6 — TTS watchdog hardening, event-bus hooks, QuickBar Next連携
 Notes (delta):
  - Stopは「ページ末で静停止」を既定化（押下時は自動遷移だけを遮断し、当該ページの読み上げは完了させる）
  - Stop押下の“手応え”を可視化するため、即時ACK/確定ACKのカスタムイベントを追加
@@ -16,6 +16,28 @@ Notes (delta):
 
 import { analyzeColor, applyColorTheme } from './utils/color.js';
 
+// --- Optional TTS KV dictionary (dynamic import; non-fatal) ---
+let __ttsKvApply = null; // false=not available / function=apply
+async function loadTtsKvOptional(){
+  if (__ttsKvApply !== null) return; // already tried
+  try {
+    const mod = await import('./tts-kv-simple.js');
+    __ttsKvApply =
+      (mod && typeof mod.applyTtsKv === 'function') ? mod.applyTtsKv :
+      (mod && mod.default && typeof mod.default.applyTtsKv === 'function') ? mod.default.applyTtsKv :
+      false;
+    if (mod && typeof mod.loadTtsKv === 'function'){
+      try { await mod.loadTtsKv(); } catch(_){}
+    }
+  } catch(_) {
+    __ttsKvApply = false; // not available
+  }
+}
+function applyTtsKvIfAny(text){
+  if (!__ttsKvApply) return text;
+  try { return __ttsKvApply(String(text||'')); } catch(_) { return text; }
+}
+
 'use strict';
 
 /* ======================= Feature flags ======================= */
@@ -25,13 +47,13 @@ window.__ttsFlags = window.__ttsFlags || { readTag: true, readTitleKey: true, re
 /* ======================= Core State ========================== */
 const State = { scenes: [], idx: 0, playingLock: false };
 const Ctrl = {
- stopRequested: false,   // Stop押下直後の要求（ページ末で停止）
- stopped: false,         // Stopが確定し、次遷移や再生を抑止中
- stopReqAt: 0,           // Stop受付時刻（ACKレイテンシ計測用）
- lastCancelAt: 0,        // 直近 cancel() の時刻（Hard Stop整定用）
- activationDone:false,   // 初回可聴ワンショット済み
- navToken: 0,            // ナビ世代トークン（Next/Prev/Goto/Restartで更新）
- videoMeta: {}           // scenes.json の videoMeta（advancePolicy 参照用）
+ stopRequested: false,   // Stop押下直後の要求（ページ末で停止）
+ stopped: false,         // Stopが確定し、次遷移や再生を抑止中
+ stopReqAt: 0,           // Stop受付時刻（ACKレイテンシ計測用）
+ lastCancelAt: 0,        // 直近 cancel() の時刻（Hard Stop整定用）
+ activationDone:false,   // 初回可聴ワンショット済み
+ navToken: 0,            // ナビ世代トークン（Next/Prev/Goto/Restartで更新）
+ videoMeta: {}           // scenes.json の videoMeta（advancePolicy 参照用）
 };
 
 /* ======================= UI-facing State ===================== */
@@ -41,13 +63,13 @@ function emit(name, detail){ try{ window.dispatchEvent(new CustomEvent(name, { d
 function emitTtsState(next){
  const n = {
   speaking: (next.speaking ?? UiState.speaking),
-  paused:   (next.paused   ?? UiState.paused),
-  pending:  (next.pending  ?? UiState.pending),
+  paused:   (next.paused   ?? UiState.paused),
+  pending:  (next.pending  ?? UiState.pending),
  };
  if (n.speaking!==UiState.speaking || n.paused!==UiState.paused || n.pending!==UiState.pending){
   UiState.speaking = n.speaking;
-  UiState.paused   = n.paused;
-  UiState.pending  = n.pending;
+  UiState.paused   = n.paused;
+  UiState.pending  = n.pending;
   emit('player:tts-state', { speaking:UiState.speaking, paused:UiState.paused, pending:UiState.pending });
  }
 }
@@ -162,7 +184,7 @@ function rateFor(role='narr'){ return effRateFor(role, 1.4); }
 async function primeTTS(){ if(!TTS_ENABLED || window.ttsPrimed) return; await new Promise(res=>{ try{ const u=new SpeechSynthesisUtterance(' '); u.lang='ja-JP'; const v=chooseVoice('narr')||jpVoice; if(v) u.voice=v; u.volume=0; u.rate=1.0; let done=false; const fin=()=>{ if(!done){ done=true; window.ttsPrimed=true; res(); } }; u.onend=fin; u.onerror=fin; speechSynthesis.speak(u); setTimeout(fin, 800); }catch(_){ window.ttsPrimed=true; res(); } }); }
 
 /* ========================= Markdown / Scrub ================== */
-function stripMarkdownLight(s){ return String(s||'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/__(.+?)__/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/_(.+?)_/g,'$1').replace(/`([^`]+)`/g,'$1').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'$1').replace(/\[([^\]]+)\]/g,'$1'); }
+function stripMarkdownLight(s){ return String(s||'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/__(.+?)__/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/_(.+?)_/g,'$1').replace(/`([^`]+)`/g,'$1').replace(/$begin:math:display$([^$end:math:display$]+)\]$begin:math:text$([^)]+)$end:math:text$/g,'$1').replace(/$begin:math:display$([^$end:math:display$]+)\]/g,'$1'); }
 function getSpeechFixes(){ try{ const o=window.speechFixes; return (o && typeof o==='object')? o : {}; }catch(_){ return {}; } }
 function scrub(text){ let s=String(text||''); s = s.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g,''); s = s.replace(/[:：]/g,'').trim(); return s; }
 function splitChunksJa(s, maxLen=90){
@@ -200,12 +222,12 @@ function splitChunksJa(s, maxLen=90){
 async function ensureResumed(){ try{ if('speechSynthesis' in window && speechSynthesis.paused){ speechSynthesis.resume(); } }catch(_){} await sleep(300); const elapsed=nowMs() - (Ctrl.lastCancelAt||0); if(elapsed>=0 && elapsed<280) await sleep(280 - elapsed); }
 
 /* ========================= Stop ACK / State ================== */
-function requestSoftStop(){ if(!Ctrl.stopRequested){ Ctrl.stopRequested = true; Ctrl.stopReqAt = nowMs(); try{ window.dispatchEvent(new CustomEvent('player:stop-ack', { detail:{ ts: Ctrl.stopReqAt } })); }catch(_){} } }
+function requestSoftStop(){ if(!Ctrl.stopRequested){ Ctrl.stopRequested = true; Ctrl.stopReqAt = nowMs(); try{ window.dispatchEvent(new CustomEvent('player:stop-ack', { detail:{ ts: Ctrl.stopReqAt } })); }catch(_){ } } }
 function finalizeStopIfNeeded(context){
  if(Ctrl.stopRequested && !Ctrl.stopped){
   Ctrl.stopped = true;
   const t = nowMs(); const lat = Math.max(0, Math.round(t - (Ctrl.stopReqAt||t)));
-  try{ window.dispatchEvent(new CustomEvent('player:stop-confirm', { detail:{ latencyMs: lat, context: String(context||'') } })); }catch(_){}
+  try{ window.dispatchEvent(new CustomEvent('player:stop-confirm', { detail:{ latencyMs: lat, context: String(context||'') } })); }catch(_){ }
   setPending(false);
  }
 }
@@ -220,7 +242,14 @@ function speakStrict(text, rate = rateFor('narr'), role='narr'){
   await ensureResumed();
 
   const fixes = getSpeechFixes();
-  let speakText = cleaned; for(const k of Object.keys(fixes)){ if(!k) continue; speakText = speakText.split(k).join(String(fixes[k]??'')); }
+  let speakText = cleaned;
+  for (const k of Object.keys(fixes)){
+    if(!k) continue;
+    speakText = speakText.split(k).join(String(fixes[k]??''));
+  }
+  // Optional runtime KV dictionary
+  try { await loadTtsKvOptional(); } catch(_){}
+  speakText = applyTtsKvIfAny(speakText);
   if(!speakText.trim()) return resolve();
 
   const u = new SpeechSynthesisUtterance(speakText);
@@ -230,10 +259,10 @@ function speakStrict(text, rate = rateFor('narr'), role='narr'){
   const done=()=>{ if(!settled){ settled=true; resolve(); } };
   u.onstart=()=>{ started=true; /* chunk単位の開始。全体 speaking は speakOrWait 側で管理 */ };
   // pause/resume は発火しない実装もあるが、来たらUIへ橋渡し
-  u.onpause = ()=>{ emitTtsState({ paused:true  }); };
+  u.onpause = ()=>{ emitTtsState({ paused:true  }); };
   u.onresume= ()=>{ emitTtsState({ paused:false }); };
   u.onend=done;
-  u.onerror=(ev)=>{ try{ emit('player:tts-error', { role, reason: (ev && ev.error) || 'error' }); }catch(_){} done(); };
+  u.onerror=(ev)=>{ try{ emit('player:tts-error', { role, reason: (ev && ev.error) || 'error' }); }catch(_){ } done(); };
 
   try{ speechSynthesis.speak(u); }catch(_){ return done(); }
 
@@ -242,7 +271,7 @@ function speakStrict(text, rate = rateFor('narr'), role='narr'){
   const cps = 6.5;
   const punct = (speakText.match(/[。．！？!?]/g)||[]).length;
   const expectedMs = Math.round(1000 + (speakText.length / Math.max(0.8, cps * Math.max(0.8, eff))) * 1000 + punct*180);
-  const hardMaxMs  = Math.min(90000, Math.max(12000, speakText.length*260 + 3000));
+  const hardMaxMs  = Math.min(90000, Math.max(12000, speakText.length*260 + 3000));
 
   // 2.0s 経っても start しない＆speaking=false の時だけ一度だけ再発話
   setTimeout(async ()=>{
@@ -272,7 +301,7 @@ async function speakOrWait(text, rate = rateFor('narr'), role='narr'){
  const myTok = Ctrl.navToken; // 割り込み検出用
  if(TTS_ENABLED){
   const parts = splitChunksJa(cleaned);
-  emitTtsState({ speaking:true });          // 全体 speaking をON
+  emitTtsState({ speaking:true });          // 全体 speaking をON
   emit('player:tts-start', { role, length: cleaned.length, rate: eff });
   try{
    for(let i=0;i<parts.length;i++){
@@ -311,7 +340,7 @@ async function speakOrWait(text, rate = rateFor('narr'), role='narr'){
 /* =========== TTS sanitize bridge（narrTTS優先） ============== */
 let __ttsSanModule = null;
 async function __getNarrForTTS(scene){
- try{ __ttsSanModule = __ttsSanModule || await import('./tts_sanitize.js'); if(__ttsSanModule && typeof __ttsSanModule.getTtsText==='function') return __ttsSanModule.getTtsText(scene); }catch(_){}
+ try{ __ttsSanModule = __ttsSanModule || await import('./tts-sanitize.js'); if(__ttsSanModule && typeof __ttsSanModule.getTtsText==='function') return __ttsSanModule.getTtsText(scene); }catch(_){}
  const _fallbackBasic = s => String(s||'').replace(/[\u2300-\u23FF\uFE0F]|[\uD83C-\uDBFF][\uDC00-\uDFFF]/g,'').replace(/[⏱⏲⏰⌛️]/g,'');
  return _fallbackBasic(scene && (scene.narrTTS || scene.narr));
 }
@@ -424,8 +453,13 @@ async function runContentSpeech(scene){
    .join('、');
   if (spoken) { await speakOrWait(spoken, rateFor('tag'), 'tag'); }
  }
- if(!muted && f.readTitleKey && scene.title_key){ await speakOrWait(scene.title_key, rateFor('titleKey'), 'titleKey'); }
- if(!muted && f.readTitle && scene.title){ await speakOrWait(scene.title, rateFor('title'), 'title'); }
+ // === title_key を *_TTS 優先で ===
+ const tkRead = (scene && (scene.titleKeyTTS ?? scene.title_key)) || '';
+ if(!muted && f.readTitleKey && tkRead){ await speakOrWait(tkRead, rateFor('titleKey'), 'titleKey'); }
+ // === title を *_TTS 優先で ===
+ const tiRead = (scene && (scene.titleTTS ?? scene.title)) || '';
+ if(!muted && f.readTitle && tiRead){ await speakOrWait(tiRead, rateFor('title'), 'title'); }
+ // === 本文は narrTTS 優先（現状の挙動を維持） ===
  if(f.readNarr && scene.narr){ const narrSafe = await __getNarrForTTS(scene); await speakOrWait(narrSafe, rateFor('narr'), 'narr'); }
 }
 
@@ -512,13 +546,13 @@ async function gotoPage(i){
 async function gotoNext(){
  await ensureResumed();
  const N=(State.scenes||[]).length;
- if(State.idx + 1 >= N){ try{ window.dispatchEvent(new CustomEvent('player:end')); }catch(_){} return; }
+ if(State.idx + 1 >= N){ try{ window.dispatchEvent(new CustomEvent('player:end')); }catch(_){ } return; }
  emit('player:navigation-queued', { from: State.idx, to: State.idx+1 });
  await gotoPage(State.idx + 1);
 }
 async function gotoPrev(){
  await ensureResumed();
- if(State.idx - 1 < 0){ try{ window.dispatchEvent(new CustomEvent('player:begin')); }catch(_){} return; }
+ if(State.idx - 1 < 0){ try{ window.dispatchEvent(new CustomEvent('player:begin')); }catch(_){ } return; }
  emit('player:navigation-queued', { from: State.idx, to: State.idx-1 });
  await gotoPage(State.idx - 1);
 }
@@ -547,6 +581,9 @@ async function boot(){
    if(VC && VC.defaults){ ['tag','titleKey','title','narr'].forEach(k=>{ if(!window.__ttsVoiceMap[k] && VC.defaults[k]) window.__ttsVoiceMap[k]=VC.defaults[k]; }); }
   }catch(_){ }
 
+  // Fire-and-forget preload of optional KV dictionary (non-blocking)
+  try { loadTtsKvOptional().catch(()=>{}); } catch(_){}
+
   await gotoPage(0);
  }catch(e){
   console.error('Failed to load scenes.json', e);
@@ -558,7 +595,7 @@ async function boot(){
 async function hardStop(){
  requestSoftStop(); // UI的には止めたい意図を共有
  setPending(true);
- try{ if('speechSynthesis' in window){ speechSynthesis.cancel(); Ctrl.lastCancelAt=nowMs(); await sleep(280); } }catch(_){}
+ try{ if('speechSynthesis' in window){ speechSynthesis.cancel(); Ctrl.lastCancelAt=nowMs(); await sleep(280); } }catch(_){ }
  Ctrl.stopped = true; // 強制停止は即確定
  finalizeStopIfNeeded('hard');
 }
@@ -586,7 +623,11 @@ export const player = {
   getScene:() => (State.scenes && State.scenes[State.idx]) || null
 };
 // ---- Global alias for debug panel & external modules ----
-try{ if (typeof window !== 'undefined') { window.__player = Object.assign((window.__player||{}), player); } }catch(_){ }
+try {
+  if (typeof window !== 'undefined') {
+    window.__player = Object.assign((window.__player || {}), player);
+  }
+} catch (_) {}
 
 window.__playerCore = Object.assign((window.__playerCore || {}), {
  gotoNext, gotoPrev, gotoPage, rateFor, effRateFor, chooseVoice, primeTTS,

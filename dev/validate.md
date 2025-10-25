@@ -20,7 +20,7 @@ validate.md — 台本（scenes.json）の検証手順・運用ルール（完�
 	•	台本保管庫（実行はしない）：
 	•	./content/dayX.json … 作り置きの台本（採用時に scenes.json へコピー）
 	•	プレイヤ中枢：
-	•	./js/player.core.js … Page1=Play-only / TTS / 効果呼出
+	•	./js/player-core.js … Page1=Play-only / TTS / 効果呼出
 	•	./js/scene-effects.js … 効果ユーティリティ（Promise）
 	•	./js/debug_panel.js / ./js/debug_config.js / ./js/tts-voice-utils.js
 
