@@ -14,8 +14,9 @@ coverage/
 
 # Project-specific (must not publish)
 backup/**
-js/_archives/
+**/_archives/
 docs/changes
+**/*Copy of *
 *.zip
 *.tar
 *.tar.gz
@@ -25,3 +26,4 @@ docs/changes
 # Secrets / local env
 .env
 .env.*
+/.github/workflows/ci-smoke-2.yml

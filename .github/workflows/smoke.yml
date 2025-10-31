@@ -1,0 +1,114 @@
+name: smoke
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+  pull_request:
+    branches:
+      - main
+
+# 3.1 最小権限（余計な権限を与えないことで安全性UP）
+permissions:
+  contents: read
+
+# 3.2 同一ブランチでの連続実行を自動キャンセル（“渋滞”での時間ロスを防ぐ）
+concurrency:
+  group: smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Smoke checks
+    runs-on: ubuntu-latest
+    steps:
+      # 3.3 リポ取得
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 3.4 JSON構文検査（最優先で落とす：原因が明快）
+      - name: Validate scenes.json syntax
+        run: |
+          node -e '
+            const fs = require("fs");
+            try {
+              const raw = fs.readFileSync("scenes.json", "utf8");
+              JSON.parse(raw);
+              console.log("OK: scenes.json parses as valid JSON");
+            } catch (e) {
+              console.error("JSON parse error in scenes.json:", e.message);
+              process.exit(1);
+            }
+          '
+
+      # 3.5 必須ファイル存在検査（最小限の出荷ライン）
+      - name: Check required files
+        run: |
+          set -e
+          test -f index.html || (echo "Missing index.html" && exit 1)
+          test -f style.css || (echo "Missing style.css" && exit 1)
+          test -d js || (echo "Missing js/ directory" && exit 1)
+          echo "OK: required files exist"
+
+      # 3.6 Gate検査（schema v5.0.0 スタイル）
+      #     - scene[0] は placeholder で、テキスト/読みが空
+      #     - tts.policy.activation.page1 === "visualOnly"
+      - name: Gate validation (schema v5.0.0 style)
+        run: |
+          node -e '
+            const fs = require("fs");
+            const j = JSON.parse(fs.readFileSync("scenes.json", "utf8"));
+
+            if (!Array.isArray(j.scenes) || j.scenes.length === 0) {
+              throw new Error("Gate NG: scenes array is missing or empty");
+            }
+
+            const s0 = j.scenes[0] || {};
+            const empty = (v) => v === undefined || v === null || (typeof v === "string" && v.length === 0);
+
+            const okPlaceholder =
+              s0.type === "placeholder" &&
+              empty(s0.title) && empty(s0.titleTTS) &&
+              empty(s0.narr)  && empty(s0.narrTTS);
+
+            const okPolicy = j.tts?.policy?.activation?.page1 === "visualOnly";
+
+            if (!(okPlaceholder && okPolicy)) {
+              console.error("DEBUG scene[0] =", JSON.stringify(s0));
+              console.error("DEBUG policy  =", j.tts?.policy);
+              throw new Error("Gate NG: scene[0] must be placeholder(no text/tts) AND tts.policy.activation.page1=visualOnly");
+            }
+
+            console.log("Gate OK: placeholder+policy");
+          '
+
+      # 3.7 “やさしい追加チェック”（失敗させないSoft Check：改善のヒントだけ出す）
+      - name: Optional soft checks (non-fatal hints)
+        run: |
+          node -e '
+            const fs = require("fs");
+            const j  = JSON.parse(fs.readFileSync("scenes.json", "utf8"));
+            const roles = new Set();
+
+            // opening / transition / closing をゆるく確認（足りなくても警告のみ）
+            for (const s of j.scenes || []) {
+              if (s.type === "effect" && typeof s.effectRole === "string") roles.add(s.effectRole);
+            }
+            const want = ["opening", "transition", "closing"];
+            const miss = want.filter(r => !roles.has(r));
+            if (miss.length) {
+              console.warn("WARN: missing effectRole(s): " + miss.join(", ") + " — smokeでは失敗にしません。後で追加を検討してください。");
+            } else {
+              console.log("OK: opening/transition/closing all present");
+            }
+
+            // content の narr に改行が無いものを警告（読みのリズム向上）
+            const bad = [];
+            for (const s of j.scenes || []) {
+              if (s.type === "content" && typeof s.narr === "string" && !/\n/.test(s.narr)) bad.push(s.page);
+            }
+            if (bad.length) {
+              console.warn("WARN: content narr without newline at page(s): " + bad.join(", "));
+            }
+          '

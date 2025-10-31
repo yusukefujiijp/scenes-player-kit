@@ -337,13 +337,13 @@ async function speakOrWait(text, rate = rateFor('narr'), role='narr'){
  }
 }
 
-/* =========== TTS sanitize bridge（narrTTS優先） ============== */
-let __ttsSanModule = null;
-async function __getNarrForTTS(scene){
- try{ __ttsSanModule = __ttsSanModule || await import('./tts-sanitize.js'); if(__ttsSanModule && typeof __ttsSanModule.getTtsText==='function') return __ttsSanModule.getTtsText(scene); }catch(_){}
- const _fallbackBasic = s => String(s||'').replace(/[\u2300-\u23FF\uFE0F]|[\uD83C-\uDBFF][\uDC00-\uDFFF]/g,'').replace(/[⏱⏲⏰⌛️]/g,'');
- return _fallbackBasic(scene && (scene.narrTTS || scene.narr));
-}
+/* =========== TTS sanitize bridge（[v9.1] Roleベースへ移行） ============== */
+// import { getTtsText } from './tts-sanitize.js';
+
+// TTS sanitize（ロール別）: titleKey/title/narr の全経路で共通整形
+import { getTtsForRole } from './tts-sanitize.js';
+
+// speakScene は本コアでは使用しない（runContentSpeech を正経路として維持）
 
 /* ========================= Renderers ========================= */
 function removeAllPlayButtons(){ try{ document.querySelectorAll('#playBtn, .playBtn').forEach(b=>b.remove()); }catch(_){} }
@@ -444,7 +444,8 @@ function getSceneType(scene){ if(!scene) return 'unknown'; if(typeof scene.type=
 async function runContentSpeech(scene){
  const f = (window.__ttsFlags || { readTag:true, readTitleKey:true, readTitle:true, readNarr:true });
  const muted = !TTS_ENABLED;
- // タグ読み上げ：sectionTags の先頭 3 個を連結 1 発話（自然で安定）
+ 
+ // タグ読み上げ（先頭3つ）
  if(!muted && f.readTag){
   const tags = Array.isArray(scene.sectionTags) ? scene.sectionTags : [];
   const spoken = tags.slice(0,3)
@@ -452,15 +453,17 @@ async function runContentSpeech(scene){
    .filter(Boolean)
    .join('、');
   if (spoken) { await speakOrWait(spoken, rateFor('tag'), 'tag'); }
- }
- // === title_key を *_TTS 優先で ===
- const tkRead = (scene && (scene.titleKeyTTS ?? scene.title_key)) || '';
+ } // ← ここで確実にタグ読みブロックを閉じる
+
+ // === ロール別読み上げを常に適用（titleKey → title → narr） ===
+ const tkRead = getTtsForRole(scene, 'titleKey');
  if(!muted && f.readTitleKey && tkRead){ await speakOrWait(tkRead, rateFor('titleKey'), 'titleKey'); }
- // === title を *_TTS 優先で ===
- const tiRead = (scene && (scene.titleTTS ?? scene.title)) || '';
+ const tiRead = getTtsForRole(scene, 'title');
  if(!muted && f.readTitle && tiRead){ await speakOrWait(tiRead, rateFor('title'), 'title'); }
- // === 本文は narrTTS 優先（現状の挙動を維持） ===
- if(f.readNarr && scene.narr){ const narrSafe = await __getNarrForTTS(scene); await speakOrWait(narrSafe, rateFor('narr'), 'narr'); }
+ if(f.readNarr){
+   const narrSafe = getTtsForRole(scene, 'narr');
+   if (!muted && narrSafe) { await speakOrWait(narrSafe, rateFor('narr'), 'narr'); }
+ }
 }
 
 async function playScene(scene){
@@ -521,8 +524,16 @@ async function playScene(scene){
    break;
   default:
    if(State.playingLock) break; State.playingLock = true;
-   try{ renderContent(scene); await primeTTS(); await runContentSpeech(scene); } finally { State.playingLock = false; }
-   emit('player:scene-didrender', { index: State.idx, kind:'content' });
+   try{
+     emitPlaying(true);
+     renderContent(scene);
+     emit('player:scene-didrender', { index: State.idx, kind:'content' });
+     await primeTTS();
+     await runContentSpeech(scene);
+   } finally {
+     State.playingLock = false;
+     emitPlaying(false);
+   }
    emit('player:scene-didfinish', { index: State.idx, kind:'content' });
    if(Ctrl.stopRequested){ finalizeStopIfNeeded('content'); break; }
    if(!Ctrl.stopped && typeof gotoNext==='function') await gotoNext();

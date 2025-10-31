@@ -1,31 +1,49 @@
 {
-  "videoMeta": {
-    "dossierId": "creation-test-title-yoon-variants-v1",
-    "creationTimestamp": "2025-10-23T02:00:00Z",
-    "theme": "就寝前の深い祈りへの誘導（タイトル拗音テスト）",
-    "thumbnailText": "タイトル拗音ABCDテスト",
-    "bannerText": "拗音＋長音化タイトル検証",
+  "doc": {
+    "version": "1.0.0",
+    "lastUpdated": "2025-10-31T17:05:50+09:00",
+    "rulesMd": [
+      "# 台本運用ルール（要点）",
+      "- 二層TTS: 表示と読みは意味一致（mirror）。",
+      "- 拗音(yoon): *TTSでは例外なくカタカナ化（ニュー, シャ, ショー等）。",
+      "- 記号: ()「」等は*TTSでもそのまま保持（「カッコ」と読まない）。",
+      "- 休止: 読点→半角2空白、句点直後→必要時のみ全角空白。",
+      "- page1(Gate): 視覚のみ。CI規約により title/narr/TTS は空文字(\"\")固定。",
+      "- V4.6(魂): 創造性を解放。ただしP-6/10/11/12(痛み)領域は厳禁。"
+    ],
+    "checklist": [
+      "[ ] p1音声空 (title/narr も \"\")",
+      "[ ] 各contentに *TTS 完備",
+      "[ ] 句読点規約適用",
+      "[ ] yoon=katakana (V3.7)",
+      "[ ] symbol=()「」保持 (V3.8)",
+      "[ ] opening/transition/closing 各≥1",
+      "[ ] version更新理由を記録"
+    ],
     "meta": {
-      "subTheme": "拗音（にゅ）音声挙動テスト",
-      "testPlan": {
-        "titlePatterns": [
-          "A: どうにゅう",
-          "B: どうニュウ",
-          "C: どうニュー",
-          "D: どうニュう"
-        ],
-        "rates": [
-          1.4,
-          1.2
-        ],
-        "notes": "各タイトルを rate=1.4 / rate=1.2 で手動比較してください（合計 4 patterns × 2 rates = 8 実験）。"
-      }
+      "manifestoMd": [
+        "# This Script Remembers When AI Forgets",
+        "- 仕様を単一ファイル内に自己記述し、後続AIに意図を継承させる。"
+      ]
+    },
+    "oneShot": [
+      "Normalize themes→build id→p1(title=\"\")→p2→content×N→transition→closing→fill two-layer→apply yoon(C+V3.7)→apply pauses→sanitize→set v1.0.0"
+    ]
+  },
+  "videoMeta": {
+    "dossierId": "messianic-organizing-day1-v1",
+    "creationTimestamp": "2025-10-31T17:05:50+09:00",
+    "theme": "主イェシュアならば根本的に最大限どうするか？",
+    "thumbnailText": "整理整頓の極意",
+    "bannerText": "主ならどうするか？",
+    "meta": {
+      "subTheme": "部屋の整理整頓と信仰の最大化"
     },
     "contract": {
       "structure": {
         "requireOpeningEffect": true,
         "requireTransitionT": true,
-        "requireClosingEffect": false
+        "requireClosingEffect": true
       },
       "versionThemeMap": {
         "A": "dark",
@@ -35,44 +53,16 @@
     "advancePolicy": {
       "quietMs": 350,
       "postDelayMs": 300
-    },
-    "doc": {
-      "version": "1.0.0-test",
-      "lastUpdated": "2025-10-23T02:00:00Z",
-      "rulesMd": [
-        "# タイトル拗音テスト台本（簡易ルール）",
-        "",
-        "## 目的",
-        "- タイトルに含まれる拗音＋母音（例: にゅ + う）が TTS でどのように発音されるかを比較検証する。",
-        "",
-        "## パターン",
-        "- A: 平仮名連続（どうにゅう）",
-        "- B: カタカナ + 母音（どうニュウ）",
-        "- C: カタカナ + 長音（どうニュー）",
-        "- D: 混在表記（どうニュう）",
-        "",
-        "## 運用ルール（台本内記載）",
-        "- page1 は **視覚のみ**（音声無し）でアクティベーション用。録画版はカットして OK。",
-        "- `tts.policy.mode` は `mirror`（表示と読みを一致）でテストを行う。",
-        "- タイトル系の変換ルールは別途検討（今回はタイトルバリエーションを並べて比較）。",
-        "",
-        "## テスト実行方法（手順）",
-        "1. 各タイトルを rate=1.4 で再生して結果を記録。",
-        "2. 各タイトルを rate=1.2 で再生して比較。",
-        "3. 成功/失敗/小ザップ/違和感などをページ毎にメモ（A/B/C/D をラベルに使う）。",
-        "",
-        "— End of Test Manifesto —"
-      ]
     }
   },
   "tts": {
-    "filter": {
-      "jaOnly": true
-    },
+    "lang": "",
+    "rate": 1.15,
     "policy": {
       "mode": "mirror",
       "commaPause": "space2",
       "periodPause": "zspaceIfNeeded",
+      "yoon": "katakana",
       "activation": {
         "page1": "visualOnly"
       }
@@ -82,7 +72,7 @@
     {
       "page": "1",
       "type": "placeholder",
-      "title": "Tap to Start",
+      "title": "",
       "titleTTS": "",
       "narr": "",
       "narrTTS": ""
@@ -100,144 +90,106 @@
       "type": "content",
       "version": "A",
       "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#導入"
+        "#整理",
+        "#導入",
+        "#問題提起"
       ],
-      "title_key": "【導入-A】",
-      "titleKeyTTS": "どうにゅう（A）",
-      "title": "導入パターン A",
-      "titleTTS": "どうにゅう",
-      "symbol": "🅰️",
-      "base": "#0b0f13",
-      "narr": "短い導入文です。タイトル A の読みを検証します。",
-      "narrTTS": "みじかい どうにゅう の どうにゅう タイトル を けんしょう します。"
+      "title_key": "【導入】",
+      "titleKeyTTS": "【どう ニュー】",
+      "title": "散らかった部屋",
+      "titleTTS": "ちらかった へや",
+      "symbol": "🤔🤖👋",
+      "base": "#10131d",
+      "narr": "部屋の整理整頓、\nどこから手をつけるべきか。\n悩ましい問題です。",
+      "narrTTS": "へや の せいり せいとん、  どこ から て を つける べき か。  なやましい もんだい です。"
     },
     {
       "page": "4",
       "type": "content",
       "version": "A",
       "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#導入"
+        "#イェシュア",
+        "#Messianic",
+        "#根本"
       ],
-      "title_key": "【導入-B】",
-      "titleKeyTTS": "どうニュウ（B）",
-      "title": "導入パターン B",
-      "titleTTS": "どうニュウ",
-      "symbol": "🅱️",
+      "title_key": "【問い】",
+      "titleKeyTTS": "【とい】",
+      "title": "イェシュアの視点",
+      "titleTTS": "イェシュア の してん",
+      "symbol": "✝️🧑‍🏫✍️",
       "base": "#10131d",
-      "narr": "短い導入文です。タイトル B の読みを検証します。",
-      "narrTTS": "みじかい どうにゅう の どうニュウ タイトル を けんしょう します。"
+      "narr": "ここで、主イェシュア（Yeshua）ならばどうするか、\n根本的に考えてみましょう。",
+      "narrTTS": "ここ で、  シュー イェシュア （Yeshua） ならば どう する か、  こんぽんてき に かんがえて みまショー。"
     },
     {
       "page": "5",
       "type": "content",
       "version": "A",
       "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#導入"
+        "#目的",
+        "#最大化",
+        "#問いかけ"
       ],
-      "title_key": "【導入-C】",
-      "titleKeyTTS": "どうニュー（C）",
-      "title": "導入パターン C",
-      "titleTTS": "どうニュー",
-      "symbol": "🅲️",
-      "base": "#151325",
-      "narr": "短い導入文です。タイトル C の読みを検証します。",
-      "narrTTS": "みじかい どうにゅう の どうニュー タイトル を けんしょう します。"
+      "title_key": "【基本】",
+      "titleKeyTTS": "【きほん】",
+      "title": "「なぜ」から始める",
+      "titleTTS": "「なぜ」 から はじめる",
+      "symbol": "💡🤔👍",
+      "base": "#10131d",
+      "narr": "主はまず、その部屋の「目的」を最大化されます。\nそれは安らぎのためか、創造のためか。",
+      "narrTTS": "シュー は まず、  その へや の 「もくてき」 を さいだいか されます。  それ は やすらぎ の ため か、  そうぞう の ため か。"
     },
     {
       "page": "6",
-      "type": "content",
-      "version": "A",
-      "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#導入"
-      ],
-      "title_key": "【導入-D】",
-      "titleKeyTTS": "どうニュう（D）",
-      "title": "導入パターン D",
-      "titleTTS": "どうニュう",
-      "symbol": "🅳️",
-      "base": "#11131a",
-      "narr": "短い導入文です。タイトル D の読みを検証します。",
-      "narrTTS": "みじかい どうにゅう の どうニュう タイトル を けんしょう します。"
+      "type": "effect",
+      "effectRole": "transition",
+      "effect": "fade-through",
+      "base": "#0e111a",
+      "effectDuration": 800
     },
     {
       "page": "7",
       "type": "content",
       "version": "A",
       "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#祈り"
+        "#聖別",
+        "#行動",
+        "#Judaism"
       ],
-      "title_key": "【祈り-A】",
-      "titleKeyTTS": "どうにゅう（A）",
-      "title": "祈りパターン A",
-      "titleTTS": "どうにゅう",
-      "symbol": "🙏A",
-      "base": "#0e111a",
-      "narr": "祈りパターン A。導入以外の位置での発音を確認します。",
-      "narrTTS": "いのり ぱたーん A。どうにゅう の はつおん を かくにん します。"
+      "title_key": "【行動】",
+      "titleKeyTTS": "【こうどう】",
+      "title": "空間の聖別",
+      "titleTTS": "くうかん の せいべつ",
+      "symbol": "✨😇🙏",
+      "base": "#10131d",
+      "narr": "根本的な整理とは、不要な物を捨てること以上に、\n空間を「聖別」し、その目的のために捧げることです。",
+      "narrTTS": "こんぽんてき な せいり と は、  ふヨー な もの を すてる こと いジョー に、  くうかん を 「せいべつ」 し、  その もくてき の ため に ささげる こと です。"
     },
     {
       "page": "8",
       "type": "content",
       "version": "A",
       "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#祈り"
+        "#シャローム",
+        "#平和",
+        "#結論"
       ],
-      "title_key": "【祈り-B】",
-      "titleKeyTTS": "どうニュウ（B）",
-      "title": "祈りパターン B",
-      "titleTTS": "どうニュウ",
-      "symbol": "🙏B",
-      "base": "#0f1322",
-      "narr": "祈りパターン B。導入以外の位置での発音を確認します。",
-      "narrTTS": "いのり ぱたーん B。どうニュウ の はつおん を かくにん します。"
+      "title_key": "【結論】",
+      "titleKeyTTS": "【けつろん】",
+      "title": "秩序の回復",
+      "titleTTS": "ちつじょ の かいふく",
+      "symbol": "🕊️😌🙌",
+      "base": "#10131d",
+      "narr": "最大化された秩序とは、主のシャローム（平和）が満ちる場所。\nそこから始めましょう。",
+      "narrTTS": "さいだいか された ちつじょ と は、  シュー の シャローム （へいわ） が みちる ばショ。  そこ から はじめまショー。"
     },
     {
       "page": "9",
-      "type": "content",
-      "version": "A",
-      "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#祈り"
-      ],
-      "title_key": "【祈り-C】",
-      "titleKeyTTS": "どうニュー（C）",
-      "title": "祈りパターン C",
-      "titleTTS": "どうニュー",
-      "symbol": "🙏C",
-      "base": "#0f1216",
-      "narr": "祈りパターン C。導入以外の位置での発音を確認します。",
-      "narrTTS": "いのり ぱたーん C。どうニュー の はつおん を かくにん します。"
-    },
-    {
-      "page": "10",
-      "type": "content",
-      "version": "A",
-      "sectionTags": [
-        "#Test",
-        "#TitlePattern",
-        "#祈り"
-      ],
-      "title_key": "【祈り-D】",
-      "titleKeyTTS": "どうニュう（D）",
-      "title": "祈りパターン D",
-      "titleTTS": "どうニュう",
-      "symbol": "🙏D",
-      "base": "#11121a",
-      "narr": "祈りパターン D。導入以外の位置での発音を確認します。",
-      "narrTTS": "いのり ぱたーん D。どうニュう の はつおん を かくにん します。"
+      "type": "effect",
+      "effectRole": "closing",
+      "effect": "light-out",
+      "base": "#000000",
+      "effectDuration": 900
     }
   ]
 }
