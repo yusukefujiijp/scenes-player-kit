@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://scenes-player/schema/v6.0.0",
-  "title": "Scenes Player Script Schema v6.0.0 (Master Prompt V3.9 Soul Compliant)",
-  "description": "V3.9 の「魂」に準拠。tags=3個固定, symbol=3個固定, yoon=katakana-plus-choon（ショー）, kakko-bug=禁止, narr-newline=推奨（必須ではない）。",
+  "$id": "https://scenes-player/schema/v6.1.0",
+  "title": "Scenes Player Script Schema v6.1.0 (Gate NG Fix / Master Prompt V3.9 Soul Compliant)",
+  "description": "V6.1.0: Gate NG (scene[0] text) 修正。scene[0] (placeholder) の title/narr/TTSを「空文字必須」に。V3.9 の「魂」に準拠。tags=3個固定, symbol=3個固定, yoon=katakana-plus-choon（ショー）, kakko-bug=禁止。",
   "type": "object",
 
   "properties": {
@@ -299,17 +299,17 @@
 
     "placeholderScene": {
       "type": "object",
-      "description": "Page-1 のアクティベーション・ゲート（音声なし・表示のみ）。録画ではカット推奨。Symbol は不要・任意。",
+      "description": "Page-1 のアクティベーション・ゲート（音声なし・表示のみ）。V6.1.0: Gate NG回避のため、title/narr/TTSは全て空文字（\"\"）固定。",
       "properties": {
         "page": { "$ref": "#/$defs/pageId" },
         "type": { "type": "string", "const": "placeholder" },
-        "title": { "type": "string" },
+        "title": { "type": "string", "maxLength": 0, "default": "" },
         "titleTTS": { "type": "string", "maxLength": 0, "default": "" },
         "narr": { "type": "string", "maxLength": 0, "default": "" },
         "narrTTS": { "type": "string", "maxLength": 0, "default": "" },
         "base": { "$ref": "#/$defs/hexColor" }
       },
-      "required": ["page", "type"],
+      "required": ["page", "type", "title", "titleTTS", "narr", "narrTTS"],
       "additionalProperties": false
     },
 
