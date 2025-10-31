@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://scenes-player/schema/v5.0.0",
-  "title": "Scenes Player Script Schema v5.0.0 (iPhone-first / Two-layer TTS / Symbol-emoji safe)",
-  "description": "本スキーマは、表示（narr / title / title_key）と読み（narrTTS / titleTTS / titleKeyTTS）の二層構成を前提にします。page1 はアクティベーション・ゲート（音声なし）を固定。TTS 整形ポリシは top-level tts.policy に記述し、js/tts-sanitize.js と連動します。特に symbol 要素（絵文字・顔文字・象徴記号）は UI 表現の要であり、必ず保持します（TTS ではサニタイズにより無音化しても、表示は消さない）。",
+  "$id": "https://scenes-player/schema/v6.0.0",
+  "title": "Scenes Player Script Schema v6.0.0 (Master Prompt V3.9 Soul Compliant)",
+  "description": "V3.9 の「魂」に準拠。tags=3個固定, symbol=3個固定, yoon=katakana-plus-choon（ショー）, kakko-bug=禁止, narr-newline=推奨（必須ではない）。",
   "type": "object",
 
   "properties": {
@@ -48,7 +48,7 @@
             "subTheme": { "type": "string" },
             "tts": {
               "type": "object",
-              "description": "後方互換のため残置。推奨は top-level tts に一本化。",
+              "description": "(Legacy) 後方互換のため残置。推奨は top-level tts に一本化。",
               "properties": {
                 "filter": {
                   "type": "object",
@@ -64,7 +64,7 @@
 
         "tts": {
           "type": "object",
-          "description": "後方互換（推奨は top-level tts）。",
+          "description": "(Legacy) 後方互換（推奨は top-level tts）。",
           "properties": {
             "lang": { "type": "string" },
             "voicePreferences": { "type": "array", "items": { "type": "string" } },
@@ -95,8 +95,8 @@
           "description": "グローバル既定。mode=auto/manual、quietMs は読了後の無音監視、postDelayMs は余韻。",
           "properties": {
             "mode": { "type": "string", "enum": ["auto", "manual"], "default": "auto" },
-            "quietMs": { "type": "integer", "minimum": 0, "default": 300 },
-            "postDelayMs": { "type": "integer", "minimum": 0, "default": 250 }
+            "quietMs": { "type": "integer", "minimum": 0, "default": 350 },
+            "postDelayMs": { "type": "integer", "minimum": 0, "default": 300 }
           },
           "additionalProperties": false
         },
@@ -119,7 +119,7 @@
             "versionThemeMap": {
               "type": "object",
               "properties": {
-                "A": { "type": "string", "enum": ["light", "dark"], "default": "light" },
+                "A": { "type": "string", "enum": ["light", "dark"], "default": "dark" },
                 "B": { "type": "string", "enum": ["light", "dark"], "default": "dark" },
                 "T": { "type": "string", "enum": ["light", "dark"], "default": "dark" }
               },
@@ -147,12 +147,12 @@
         },
         "policy": {
           "type": "object",
-          "description": "TTS 整形ポリシ。mirror=表示と読みの意味一致。句読点休止と拗音変換を制御。",
+          "description": "TTS 整形ポリシ。mirror=表示と読みの意味一致。句読点休止と拗音変換を制御 (V3.9 準拠)。",
           "properties": {
             "mode": { "type": "string", "enum": ["mirror", "free"], "default": "mirror" },
             "commaPause": { "type": "string", "enum": ["space2", "none"], "default": "space2" },
             "periodPause": { "type": "string", "enum": ["zspaceIfNeeded", "none"], "default": "zspaceIfNeeded" },
-            "yoon": { "type": "string", "enum": ["katakana", "none"], "default": "katakana" },
+            "yoon": { "type": "string", "enum": ["katakana", "katakana-plus-choon", "none"], "default": "katakana-plus-choon" },
             "activation": {
               "type": "object",
               "properties": {
@@ -292,9 +292,9 @@
       "type": "array",
       "items": { "$ref": "#/$defs/sectionTagTokenAny" },
       "uniqueItems": true,
-      "minItems": 1,
-      "maxItems": 7,
-      "description": "推奨3個。順序は表示順。"
+      "minItems": 3,
+      "maxItems": 3,
+      "description": "V3.9 規則: 3個固定（1.1.11）"
     },
 
     "placeholderScene": {
@@ -324,24 +324,34 @@
         "sectionTags": { "$ref": "#/$defs/sectionTags" },
 
         "title_key": { "type": "string", "pattern": "^\\u3010.+\\u3011$", "minLength": 2, "maxLength": 20 },
-        "titleKeyTTS": { "type": "string", "minLength": 0, "description": "タイトル鍵の読み（例：『導入』→『どうニュー』等）。" },
+        "titleKeyTTS": { 
+          "type": "string", 
+          "minLength": 0, 
+          "description": "タイトル鍵の読み（V3.8: カッコ禁止）。",
+          "not": { "pattern": "カッコ" }
+        },
 
         "title": { "type": "string", "minLength": 1, "maxLength": 28 },
-        "titleTTS": { "type": "string", "minLength": 1 },
+        "titleTTS": { 
+          "type": "string", 
+          "minLength": 1,
+          "not": { "pattern": "カッコ" }
+        },
 
         "symbol": {
           "type": "string",
-          "minLength": 1,
-          "maxLength": 24,
-          "description": "画面象徴（絵文字/顔文字/記号）。TTS では読ませないが、UI 表示では消さない。"
+          "minLength": 3,
+          "maxLength": 3,
+          "description": "V3.9 規則: [AI][Face][Hand] 絵文字3個固定（1.4.3）。"
         },
 
         "base": { "$ref": "#/$defs/hexColor" },
 
-        "narr": { "type": "string", "maxLength": 280, "description": "表示用本文。原則1箇所以上の改行（\\n）。" },
+        "narr": { "type": "string", "maxLength": 280, "description": "表示用本文。改行（\\n）を推奨（V3.9: 必須ではない）。" },
         "narrTTS": {
           "type": "string",
-          "description": "読み用本文（mirror）。句読点の休止は policy に従い自動整形。"
+          "description": "読み用本文（mirror）。V3.8: カッコ禁止。",
+          "not": { "pattern": "カッコ" }
         },
 
         "effect": { "type": "string", "enum": ["light-in", "fade-in", "slide-up", "zoom-in"] },
@@ -374,11 +384,6 @@
       ],
       "additionalProperties": false,
       "allOf": [
-        {
-          "description": "最低1改行（聖なるリズム）",
-          "properties": { "narr": { "pattern": ".*\\n.*" } },
-          "required": ["narr"]
-        },
         {
           "description": "長文>=80では段落推奨（\\n\\n）",
           "if": { "properties": { "narr": { "minLength": 80 } }, "required": ["narr"] },
