@@ -1,26 +1,24 @@
 {
   "doc": {
-    "version": "1.0.1",
-    "lastUpdated": "2025-10-31T16:35:00+09:00",
+    "version": "1.0.0",
+    "lastUpdated": "2025-10-31T17:05:50+09:00",
     "rulesMd": [
       "# 台本運用ルール（要点）",
       "- 二層TTS: 表示と読みは意味一致（mirror）。",
       "- 拗音(yoon): *TTSでは例外なくカタカナ化（ニュー, シャ, ショー等）。",
       "- 記号: ()「」等は*TTSでもそのまま保持（「カッコ」と読まない）。",
       "- 休止: 読点→半角2空白、句点直後→必要時のみ全角空白。",
-      "- page1は視覚のみ、録画時はカット可。",
-      "# 更新履歴",
-      "- V1.0.0 (2025-10-31): 「レフ・レハ」のテーマで新規作成。",
-      "- V1.0.1 (2025-10-31): [FIX] scene[0].title を Gate NG 規約 (V6.1) に準拠させ空文字に変更。"
+      "- page1(Gate): 視覚のみ。CI規約により title/narr/TTS は空文字(\"\")固定。",
+      "- V4.6(魂): 創造性を解放。ただしP-6/10/11/12(痛み)領域は厳禁。"
     ],
     "checklist": [
-      "[x] p1音声空",
-      "[x] 各contentに *TTS 完備",
-      "[x] 句読点規約適用",
-      "[x] yoon=katakana (V3.7)",
-      "[x] symbol=()「」保持 (V3.8)",
-      "[x] opening/transition/closing 各≥1",
-      "[x] version更新理由を記録"
+      "[ ] p1音声空 (title/narr も \"\")",
+      "[ ] 各contentに *TTS 完備",
+      "[ ] 句読点規約適用",
+      "[ ] yoon=katakana (V3.7)",
+      "[ ] symbol=()「」保持 (V3.8)",
+      "[ ] opening/transition/closing 各≥1",
+      "[ ] version更新理由を記録"
     ],
     "meta": {
       "manifestoMd": [
@@ -29,17 +27,17 @@
       ]
     },
     "oneShot": [
-      "Normalize themes→build id→p1→p2→content×N→transition→closing→fill two-layer→apply yoon(C+V3.7)→apply pauses→sanitize→set v1.0.0"
+      "Normalize themes→build id→p1(title=\"\")→p2→content×N→transition→closing→fill two-layer→apply yoon(C+V3.7)→apply pauses→sanitize→set v1.0.0"
     ]
   },
   "videoMeta": {
-    "dossierId": "lech-lecha-10-31-v1",
-    "creationTimestamp": "2025-10-31T15:52:08+09:00",
-    "theme": "主イェシュアならばどうするか？（メシアニック・ジューダイズムの信仰）",
-    "thumbnailText": "パラシャ：レフ・レハ",
-    "bannerText": "主イェシュアならばどうするか？",
+    "dossierId": "messianic-organizing-day1-v1",
+    "creationTimestamp": "2025-10-31T17:05:50+09:00",
+    "theme": "主イェシュアならば根本的に最大限どうするか？",
+    "thumbnailText": "整理整頓の極意",
+    "bannerText": "主ならどうするか？",
     "meta": {
-      "subTheme": "週のトーラー（パラシャ）：レフ・レハ"
+      "subTheme": "部屋の整理整頓と信仰の最大化"
     },
     "contract": {
       "structure": {
@@ -58,7 +56,7 @@
     }
   },
   "tts": {
-    "lang": "ja-JP",
+    "lang": "",
     "rate": 1.15,
     "policy": {
       "mode": "mirror",
@@ -92,44 +90,54 @@
       "type": "content",
       "version": "A",
       "sectionTags": [
-        "#Parasha",
-        "#LechLecha",
-        "#Intro"
+        "#整理",
+        "#導入",
+        "#問題提起"
       ],
       "title_key": "【導入】",
       "titleKeyTTS": "【どう ニュー】",
-      "title": "パラシャ「レフ・レハ」",
-      "titleTTS": "パラシャ 「レフ・レハ」",
-      "symbol": "📜🤔👋",
+      "title": "散らかった部屋",
+      "titleTTS": "ちらかった へや",
+      "symbol": "🤔🤖👋",
       "base": "#10131d",
-      "narr": "今週のトーラー（創世記 12章〜）、「レフ・レハ」の学びです。\n「あなた行け」という意味です。",
-      "narrTTS": "こんシュー の トーラー （そうせいき  ジューに ショー〜）、  「レフ・レハ」 の まなび です。  「あなた いけ」 と いう いみ です。"
+      "narr": "部屋の整理整頓、\nどこから手をつけるべきか。\n悩ましい問題です。",
+      "narrTTS": "へや の せいり せいとん、  どこ から て を つける べき か。  なやましい もんだい です。"
     },
     {
       "page": "4",
-      "type": "effect",
-      "effectRole": "transition",
-      "effect": "fade-through",
-      "base": "#0e111a",
-      "effectDuration": 800
+      "type": "content",
+      "version": "A",
+      "sectionTags": [
+        "#イェシュア",
+        "#Messianic",
+        "#根本"
+      ],
+      "title_key": "【問い】",
+      "titleKeyTTS": "【とい】",
+      "title": "イェシュアの視点",
+      "titleTTS": "イェシュア の してん",
+      "symbol": "✝️🧑‍🏫✍️",
+      "base": "#10131d",
+      "narr": "ここで、主イェシュア（Yeshua）ならばどうするか、\n根本的に考えてみましょう。",
+      "narrTTS": "ここ で、  シュー イェシュア （Yeshua） ならば どう する か、  こんぽんてき に かんがえて みまショー。"
     },
     {
       "page": "5",
       "type": "content",
       "version": "A",
       "sectionTags": [
-        "#Abraham",
-        "#Calling",
-        "#Genesis12"
+        "#目的",
+        "#最大化",
+        "#問いかけ"
       ],
-      "title_key": "【召命】",
-      "titleKeyTTS": "【ショーめい】",
-      "title": "アブラハムへの召し",
-      "titleTTS": "アブラハム へ の めし",
-      "symbol": "🌌🚶‍♂️✍️",
+      "title_key": "【基本】",
+      "titleKeyTTS": "【きほん】",
+      "title": "「なぜ」から始める",
+      "titleTTS": "「なぜ」 から はじめる",
+      "symbol": "💡🤔👍",
       "base": "#10131d",
-      "narr": "主はアブラム（後のアブラハム）に、「あなたの地を離れよ」と命じました。\n未知の土地への旅立ちです。",
-      "narrTTS": "シュ は アブラム （あと の アブラハム） に、  「あなた の ち を はなれよ」 と めいじました。  みち の とち へ の たびだち です。"
+      "narr": "主はまず、その部屋の「目的」を最大化されます。\nそれは安らぎのためか、創造のためか。",
+      "narrTTS": "シュー は まず、  その へや の 「もくてき」 を さいだいか されます。  それ は やすらぎ の ため か、  そうぞう の ため か。"
     },
     {
       "page": "6",
@@ -144,47 +152,39 @@
       "type": "content",
       "version": "A",
       "sectionTags": [
-        "#Faith",
-        "#Obedience",
-        "#DailyLife"
+        "#聖別",
+        "#行動",
+        "#Judaism"
       ],
-      "title_key": "【信仰】",
-      "titleKeyTTS": "【しんこう】",
-      "title": "信仰による歩み",
-      "titleTTS": "しんこう に よる あゆみ",
-      "symbol": "🧭💖👍",
+      "title_key": "【行動】",
+      "titleKeyTTS": "【こうどう】",
+      "title": "空間の聖別",
+      "titleTTS": "くうかん の せいべつ",
+      "symbol": "✨😇🙏",
       "base": "#10131d",
-      "narr": "彼は信仰によって従いました。\n私たちも、日々の選択において信仰が問われます。",
-      "narrTTS": "かれ は しんこう に よって したがいました。  わたしたち も、  ひび の せんたく において しんこう が とわれます。"
+      "narr": "根本的な整理とは、不要な物を捨てること以上に、\n空間を「聖別」し、その目的のために捧げることです。",
+      "narrTTS": "こんぽんてき な せいり と は、  ふヨー な もの を すてる こと いジョー に、  くうかん を 「せいべつ」 し、  その もくてき の ため に ささげる こと です。"
     },
     {
       "page": "8",
-      "type": "effect",
-      "effectRole": "transition",
-      "effect": "fade-through",
-      "base": "#0e111a",
-      "effectDuration": 800
-    },
-    {
-      "page": "9",
       "type": "content",
       "version": "A",
       "sectionTags": [
-        "#Yeshua",
-        "#WWJD",
-        "#MessianicJudaism"
+        "#シャローム",
+        "#平和",
+        "#結論"
       ],
-      "title_key": "【適用】",
-      "titleKeyTTS": "【てきよう】",
-      "title": "主イェシュアならば",
-      "titleTTS": "シュ イェシュア ならば",
-      "symbol": "✝️👑🙏",
+      "title_key": "【結論】",
+      "titleKeyTTS": "【けつろん】",
+      "title": "秩序の回復",
+      "titleTTS": "ちつじょ の かいふく",
+      "symbol": "🕊️😌🙌",
       "base": "#10131d",
-      "narr": "この状況で、主イェシュア（イエス）ならばどうするでしょうか？\n主の御心を求めて歩みましょう。",
-      "narrTTS": "この ジョーキョー で、  シュ イェシュア （イエス） ならば どう する でショーか？  シュ の みこころ を もとめて あゆみまショー。"
+      "narr": "最大化された秩序とは、主のシャローム（平和）が満ちる場所。\nそこから始めましょう。",
+      "narrTTS": "さいだいか された ちつじょ と は、  シュー の シャローム （へいわ） が みちる ばショ。  そこ から はじめまショー。"
     },
     {
-      "page": "10",
+      "page": "9",
       "type": "effect",
       "effectRole": "closing",
       "effect": "light-out",
