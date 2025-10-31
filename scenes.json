@@ -1,241 +1,357 @@
 {
   "doc": {
-    "version": "5.0.1",
-    "lastUpdated": "2025-10-26T00:00:00Z",
+    "version": "1.0.0",
+    "lastUpdated": "2025-10-31T08:06:21+09:00",
     "rulesMd": [
-      "先頭は必ず page=1 placeholder（無音・無テキスト）。録画では page1 をカット。",
-      "TTS は二層：表示（narr / title / title_key）と読み（narrTTS / titleTTS / titleKeyTTS）。policy.mode は mirror。",
-      "CI smoke は schema v5 仕様に更新済み（Gate 検査は placeholder 無文字＋tts.policy.activation.page1=visualOnly）。",
-      "運用：main を SSOT とし、dev 常設は廃止。大粒は短命 feat/*（48h）で隔離。保存点はタグ rYYMMDD-n。",
-      "変更履歴は videoMeta.doc.changes に1行要約で残す。台本の最小ページ数は schema 側で 12 に固定。"
+      "# 台本運用ルール（要点）",
+      "- v1.0.0: Git全体像マップ（@YusukeJP様向け）の初回生成。",
+      "- 二層TTS: 表示と読みは意味一致（mirror）。",
+      "- にゅ対策: 既定C案＝「ニュー」。",
+      "- 休止: 読点→半角2空白、句点直後→必要時のみ全角空白。",
+      "- page1は視覚のみ、録画時はカット可。"
     ],
     "checklist": [
-      "scenes[0] が placeholder（title/narr absent）であること",
-      "top-level tts.policy.activation.page1 === 'visualOnly' であること",
-      "opening/transition/closing が各1枚以上存在すること",
-      "scenes 数が最低 12 件以上であること"
+      "[ ] p1音声空",
+      "[ ] 各contentに *TTS 完備",
+      "[ ] 句読点規約適用",
+      "[ ] yoon=katakana (C案)",
+      "[ ] opening/transition/closing 各≥1",
+      "[ ] version更新理由を記録"
     ],
     "meta": {
       "manifestoMd": [
-        "我々は学びを“毎日30秒の勝ち筋”に変える。",
-        "GitHub 運用は単純化し、タグで安全性を確保する。"
+        "# This Script Remembers When AI Forgets",
+        "- 仕様を単一ファイル内に自己記述し、後続AIに意図を継承させる。"
       ]
     },
     "oneShot": [
-      "あなたは scenes-player 用台本AI。最新のリポ整流状況（smoke.yml の refactor 適用、dev 廃止、schema minPages=12）を台本へ反映し、表示と読みを分離して出力せよ。"
+      "Normalize themes→build id→p1→p2→content×N→transition→closing→fill two-layer→apply yoon(C)→apply pauses→sanitize→bump version"
     ]
   },
-
   "videoMeta": {
-    "dossierId": "github-learning-live-20251026",
-    "creationTimestamp": "2025-10-26T00:00:00Z",
-    "theme": "GitHub学習",
-    "thumbnailText": "GitHub学習",
-    "bannerText": "整流済：main=SSOT",
+    "dossierId": "git-map-for-yusukejp-v1",
+    "creationTimestamp": "2025-10-31T08:06:21+09:00",
+    "theme": "Git×GitHubの全体像を一望できる「1枚マップ」",
+    "thumbnailText": "Git: 1枚マップ",
+    "bannerText": "Git全体像マップ for @YusukeJP",
     "meta": {
-      "subTheme": "我々(私とAI)の悩みにリアルタイムで的を射た内容",
-      "tts": { "filter": { "jaOnly": true } }
+      "subTheme": "感受性の強い天才的Programming教師による解説"
     },
-    "ui": {
-      "a11y": { "prefersReducedMotion": false }
-    },
-    "advancePolicy": { "mode": "auto", "quietMs": 300, "postDelayMs": 250 },
     "contract": {
       "structure": {
         "requireOpeningEffect": true,
         "requireTransitionT": true,
-        "requireClosingEffect": true,
-        "minA": 1,
-        "minB": 0,
-        "scripturePrologueIntro": false
+        "requireClosingEffect": true
       },
-      "versionThemeMap": { "A": "dark", "B": "light", "T": "dark" }
+      "versionThemeMap": {
+        "A": "dark",
+        "T": "dark"
+      }
+    },
+    "advancePolicy": {
+      "quietMs": 350,
+      "postDelayMs": 300
     }
   },
-
   "tts": {
     "lang": "ja-JP",
-    "rate": 1.12,
-    "filter": { "jaOnly": true },
+    "rate": 1.15,
     "policy": {
       "mode": "mirror",
       "commaPause": "space2",
       "periodPause": "zspaceIfNeeded",
       "yoon": "katakana",
-      "activation": { "page1": "visualOnly" }
+      "activation": {
+        "page1": "visualOnly"
+      }
     }
   },
-
   "scenes": [
     {
       "page": "1",
-      "type": "placeholder"
+      "type": "placeholder",
+      "title": "Tap to Start",
+      "titleTTS": "",
+      "narr": "",
+      "narrTTS": ""
     },
-
     {
       "page": "2",
       "type": "effect",
-      "effect": "light-in",
       "effectRole": "opening",
-      "uiVersion": "A",
-      "base": "#0B3D91",
-      "durationMs": 900
+      "effect": "light-in",
+      "base": "#000000",
+      "effectDuration": 1200
     },
-
     {
       "page": "3",
       "type": "content",
       "version": "A",
-      "sectionTags": ["#Intro"],
+      "sectionTags": [
+        "#Intro",
+        "#GitMap"
+      ],
       "title_key": "【導入】",
-      "titleKeyTTS": "どうニュー",
-      "title": "今の状況：整流と安全化",
-      "titleTTS": "いま の じょうきょう： せいりゅう と あんぜんか",
-      "symbol": "🛠️✨",
-      "base": "#102A43",
-      "narr": "現在、smoke.yml を refactor し、Gate 検査を schema v5 仕様へ更新しました。\nこれにより CI の判定がスキーマと一致します。",
-      "narrTTS": "げんざい、  smoke.yml を りふぁくたー し、  Gate けんさ を すきーま v5 しよう へ こうしん しました。　これにより  CI の はんてい が すきーま と いっち します。",
-      "effect": "fade-in",
-      "durationHintMs": 2600
+      "titleKeyTTS": "どう ニュー",
+      "title": "Gitマップへようこそ",
+      "titleTTS": "ギット マップ へ ようこそ",
+      "symbol": "🗺️",
+      "base": "#10131d",
+      "narr": "@YusukeJPさん、  あなたのためのGit全体像マップです。  まず、地図の「凡例」となる用語から確認しましょう。",
+      "narrTTS": "アット ユースケ ジェイ ピー さん、  あなた の ため の ギット ぜんたいぞう マップ です。  まず、ちず の はんれい と なる ようご から かくにん しましょう。"
     },
-
     {
       "page": "4",
       "type": "content",
       "version": "A",
-      "sectionTags": ["#CI","#Gate"],
-      "title_key": "【CIの現状】",
-      "titleKeyTTS": "シーアイ の げんじょう",
-      "title": "smoke.yml の改良点",
-      "titleTTS": "smoke.yml の かいりょうてん",
-      "symbol": "🔍✅",
-      "base": "#0D3B66",
-      "narr": "refactor の主な変更：ブロック文字列化、Gateの schema 準拠、最小権限、並列 cancel を導入。\n再現性と可読性を高めました。",
-      "narrTTS": "refactor の  おもな へんこう： ブロック もじれつか、 Gate の schema じゅんきょ、 さいしょう けんげん、 へいれつ cancel を どうにゅう。　さいげんせい と かどくせい を たかめました。",
-      "effect": "slide-up",
-      "durationHintMs": 2800
+      "sectionTags": [
+        "#Defs",
+        "#Req1"
+      ],
+      "title_key": "【用語 1/4】",
+      "titleKeyTTS": "ようご いち",
+      "title": "リポ / コミット / ブランチ",
+      "titleTTS": "リポ、コミット、ブランチ",
+      "symbol": "📦",
+      "base": "#10131d",
+      "narr": "リポジトリは「プロジェクト全体を保存する箱」、コミットは「変更履歴の1スナップショット」、ブランチは「履歴を分岐させる流れ」です。",
+      "narrTTS": "リポジトリ わ プロジェクト ぜんたい を ほぞん する はこ、コミット わ へんこう りれき の いち スナップショット、ブランチ わ りれき を ぶんき させる ながれ です。"
     },
-
     {
       "page": "5",
       "type": "content",
       "version": "A",
-      "sectionTags": ["#Branch"],
-      "title_key": "【ブランチ方針】",
-      "titleKeyTTS": "ぶらんち ほうしん",
-      "title": "main=SSOT、dev常設廃止、短命feat運用",
-      "titleTTS": "メイン イコール エスエスオーティー、デブ じょうせつ はいし、 タイミン フィーチ 運用",
-      "symbol": "🌿🔖",
-      "base": "#1B2A41",
-      "narr": "我々は main を Single Source of Truth に固定しました。\ndev は廃止または短命化し、保存点はタグ rYYMMDD-n を用います。",
-      "narrTTS": "われわれ は メイン を シングル ソース オブ トゥルース に こてい しました。　デブ は はいし または たんめい か し、 ほぞんてん は タグ rYYMMDD-n を もちいます。",
-      "effect": "fade-in",
-      "durationHintMs": 2600
+      "sectionTags": [
+        "#Defs",
+        "#Req1"
+      ],
+      "title_key": "【用語 2/4】",
+      "titleKeyTTS": "ようご に",
+      "title": "HEAD / リモート / origin",
+      "titleTTS": "ヘッド、リモート、オリジン",
+      "symbol": "📍",
+      "base": "#10131d",
+      "narr": "HEADは「今あなたがいる場所」を指す目印、リモートは「GitHubなど遠隔地にあるリポジトリ」、originは「その主な接続先（デフォルト名）」です。",
+      "narrTTS": "ヘッド わ いま あなた が いる ばしょ を さす めじるし、リモート わ ギットハブ など えんかくち に ある リポジトリ、オリジン わ その おもな せつぞくさき デフォルトめい です。"
     },
-
     {
       "page": "6",
       "type": "content",
       "version": "A",
-      "sectionTags": ["#WorkingCopy"],
-      "title_key": "【iPhone操作】",
-      "titleKeyTTS": "アイフォーン そうさ",
-      "title": "Working Copy での小さな儀式",
-      "titleTTS": "Working Copy で の ちいさな ぎしき",
-      "symbol": "📱⚙️",
-      "base": "#0B132B",
-      "narr": "推奨ルーチン：mainへCheckout→Pull(Rebase)→編集→Commit→Push→タグ発行。\n不要リモート（例：scenes-player）は削除済みです。",
-      "narrTTS": "すいしょう ルーチン： メイン へ Checkout→ Pull リベース→ へんしゅう→ コミット→ プッシュ→ タグ はっこう。　ふよう リモート（れい：scenes-player） は さくじょ ずみ です。",
-      "effect": "slide-up",
-      "durationHintMs": 2600
+      "sectionTags": [
+        "#Defs",
+        "#Req1"
+      ],
+      "title_key": "【用語 3/4】",
+      "titleKeyTTS": "ようご さん",
+      "title": "PR (プルリクエスト)",
+      "titleTTS": "ピーアール、プルリクエスト",
+      "symbol": "📬",
+      "base": "#10131d",
+      "narr": "PRは「この変更をレビューして、良ければmainに合流させてね」という「依頼状」です。",
+      "narrTTS": "ピーアール わ この へんこう を レビュー して、よければ メイン に ごうりゅう させて ね と いう いらいじょう です。"
     },
-
     {
       "page": "7",
       "type": "content",
       "version": "A",
-      "sectionTags": ["#Tags","#Rollback"],
-      "title_key": "【保存点と復旧】",
-      "titleKeyTTS": "ほぞんてん と ふっきゅう",
-      "title": "タグで戻す：Revert-first の原則",
-      "titleTTS": "タグ で もどす： リバート ファースト の げんそく",
-      "symbol": "🔖⛑️",
-      "base": "#102A43",
-      "narr": "録画OKは保存点タグを打ちます。\n問題時は PR の Revert、または該当コミットの Revert で前進型に戻します。",
-      "narrTTS": "ろくが OK は ほぞんてん タグ を うちます。　もんだいじ は PR の Revert、 または がいとう コミット の Revert で ぜんしんがた に もどします。",
-      "effect": "fade-in",
-      "durationHintMs": 2600
+      "sectionTags": [
+        "#Defs",
+        "#Req1"
+      ],
+      "title_key": "【用語 4/4】",
+      "titleKeyTTS": "ようご よん",
+      "title": "CI (継続的インテグレーション)",
+      "titleTTS": "シーアイ、けいぞく てき インテグレーション",
+      "symbol": "🤖",
+      "base": "#10131d",
+      "narr": "CIは「PRが出された時、その変更が安全か（テストが通るか）を自動で検査する仕組み」です。",
+      "narrTTS": "シーアイ わ ピーアール が だされた とき、その へんこう が あんぜん か テスト が とおる か を じどう で けんさ する しくみ です。"
     },
-
     {
       "page": "8",
       "type": "effect",
-      "effect": "veil-sweep",
       "effectRole": "transition",
-      "uiVersion": "A",
-      "base": "#112D4E",
-      "durationMs": 700
+      "effect": "fade-through",
+      "base": "#0e111a",
+      "effectDuration": 800
     },
-
     {
       "page": "9",
       "type": "content",
       "version": "A",
-      "sectionTags": ["#Schema","#Pages"],
-      "title_key": "【台本仕様】",
-      "titleKeyTTS": "だいほん しき",
-      "title": "schema を 12 ページ最小に強化",
-      "titleTTS": "すきーま を じゅうに ページ さいしょう に きょうか",
-      "symbol": "📚🔧",
-      "base": "#0D3B66",
-      "narr": "本スキーマは最低ページ数を 12 に設定しました。\nこれは台本の充実が肝であるためです。将来は参照差し替えで閾値を変更できます。",
-      "narrTTS": "ほん すきーま は さいてい ページすう を じゅうに に せってい しました。　これは だいほん の じゅうじつ が きも で ある ため です。　しょうらい は さんしょう さしかえ で しきいち を へんこう できます。",
-      "effect": "slide-up",
-      "durationHintMs": 2800
+      "sectionTags": [
+        "#Workflow",
+        "#Req2"
+      ],
+      "title_key": "【地図: 1-3】",
+      "titleKeyTTS": "ちず いち から さん",
+      "title": "フロー: ローカル作業",
+      "titleTTS": "フロー、ローカル さぎょう",
+      "symbol": "💻",
+      "base": "#10131d",
+      "narr": "① (まず `pull` して最新化)、② ローカルで編集し、③ `git add` で変更をカゴに入れ、④ `git commit` で履歴に刻みます。",
+      "narrTTS": "まるいち、まず プル して さいしんか、まるに、ローカル で へんしゅう し、まるさん、ギット アッド で へんこう を カゴ に いれ、まるよん、ギット コミット で りれき に きざみます。"
     },
-
     {
       "page": "10",
       "type": "content",
       "version": "A",
-      "sectionTags": ["#Refactor","#Why"],
-      "title_key": "【Refactorの意味】",
-      "titleKeyTTS": "りふぁくたー の いみ",
-      "title": "smoke.yml の改善はなぜ安全か",
-      "titleTTS": "smoke.yml の かいぜん は なぜ あんぜん か",
-      "symbol": "🧭🛡️",
-      "base": "#1B2A41",
-      "narr": "今回のリファクタは『壊れにくさ』を目標にしました。\nブロック化で YAML エラーを防ぎ、警告は WARN に留めることで赤の誤爆を避けます。",
-      "narrTTS": "こんかい の りふぁくたー は『 こわれ にくさ 』 を もくひょう に しました。　ブロックか で YAML エラー を ふせぎ、 けいこく は WARN に とどめる ことで あか の ごばく を さけます。",
-      "effect": "fade-in",
-      "durationHintMs": 2600
+      "sectionTags": [
+        "#Workflow",
+        "#Req2"
+      ],
+      "title_key": "【地図: 4-7】",
+      "titleKeyTTS": "ちず よん から なな",
+      "title": "フロー: リモート反映",
+      "titleTTS": "フロー、リモート はんえい",
+      "symbol": "🌐",
+      "base": "#10131d",
+      "narr": "⑤ `git push` でリモートに送信し、⑥ GitHub上でPRを作成。⑦ レビューを経て `main` にマージ（合流）されます。",
+      "narrTTS": "まるご、ギット プッシュ で リモート に そうしん し、まるろく、ギットハブ じょう で ピーアール を さくせい。まるなな、レビュー を へて メイン に マージ ごうりゅう されます。"
     },
-
     {
       "page": "11",
-      "type": "content",
-      "version": "A",
-      "sectionTags": ["#Next","#Plan"],
-      "title_key": "【次の手】",
-      "titleKeyTTS": "つぎ の て",
-      "title": "Branch Protection と自動タグ運用へ",
-      "titleTTS": "Branch Protection と じどう タグ うんよう へ",
-      "symbol": "🚦🗂️",
-      "base": "#0B132B",
-      "narr": "次は main に対して Branch Protection を設定します。\nRequire linear history と smoke を必須化し、Auto-merge の運用を整えます。",
-      "narrTTS": "つぎ は メイン に たいして Branch Protection を せってい します。　Require linear history と smoke を ひっす か し、 Auto-merge の うんよう を ととのえます。",
-      "effect": "slide-up",
-      "durationHintMs": 2800
+      "type": "effect",
+      "effectRole": "transition",
+      "effect": "fade-through",
+      "base": "#0e111a",
+      "effectDuration": 800
     },
-
     {
       "page": "12",
+      "type": "content",
+      "version": "A",
+      "sectionTags": [
+        "#Pitfall",
+        "#Req3"
+      ],
+      "title_key": "【赤印 1: 分岐】",
+      "titleKeyTTS": "あかじるし いち、ぶんき",
+      "title": "🚩 Merge vs Rebase",
+      "titleTTS": "マージ、バーサス、リベース",
+      "symbol": "🔱",
+      "base": "#10131d",
+      "narr": "Mergeは「合流させた履歴」を残し、Rebaseは「履歴を一直線に」整えます。どちらも Conflict (競合) の可能性があります。",
+      "narrTTS": "マージ わ ごうりゅう させた りれき を のこし、リベース わ りれき を いっちょくせん に ととのえます。どちら も コンフリクト、きょうごう、の かのうせい が あります。"
+    },
+    {
+      "page": "13",
+      "type": "content",
+      "version": "A",
+      "sectionTags": [
+        "#Pitfall",
+        "#Req3"
+      ],
+      "title_key": "【赤印 2: 危険】",
+      "titleKeyTTS": "あかじるし に、きけん",
+      "title": "🚩 Force Pushの危険",
+      "titleTTS": "フォース プッシュ の きけん",
+      "symbol": "💥",
+      "base": "#10131d",
+      "narr": "`force-push`はリモート履歴を「強制的に上書き」します。他人の作業を消す危険があり、`main`での使用は原則厳禁です。",
+      "narrTTS": "フォース プッシュ わ リモート りれき を きょうせい てき に うわがき します。たにん の さぎょう を けす きけん が あり、メイン で の しよう わ げんそく げんきん です。"
+    },
+    {
+      "page": "14",
+      "type": "content",
+      "version": "A",
+      "sectionTags": [
+        "#RootCause",
+        "#Req4"
+      ],
+      "title_key": "【分析: 過去の痛点】",
+      "titleKeyTTS": "ぶんせき、かこ の つうてん",
+      "title": "「赤いPR」の根はどこか？",
+      "titleTTS": "あかい ピーアール の ね わ どこ か",
+      "symbol": "💔",
+      "base": "#10131d",
+      "narr": "過去の「devとmainの乖離」や「赤いPR（競合発生）」、、その根は、多くの場合「地図のステップ①」を飛ばしたことです。",
+      "narrTTS": "かこ の デブ と メイン の かいり や あかい ピーアール きょうごう はっせい、その ね わ、おおく の ばあい ちず の ステップ いち を とばした こと です。"
+    },
+    {
+      "page": "15",
+      "type": "content",
+      "version": "A",
+      "sectionTags": [
+        "#Solution",
+        "#Req4"
+      ],
+      "title_key": "【処方箋】",
+      "titleKeyTTS": "しょほうせん",
+      "title": "「ここが根」→最新化の欠如",
+      "titleTTS": "ここ が ね、さいしんか の けつじょ",
+      "symbol": "💡",
+      "base": "#10131d",
+      "narr": "大丈夫。作業開始前に必ず `git pull origin main` (またはRebase) する癖をつければ、乖離と競合は激減します。これが地図の中心です。",
+      "narrTTS": "だいじょうぶ。さぎょう かいし まえ に かならず ギット プル オリジン メイン、または リベース、する くせ を つければ、かいり と きょうごう わ げきげん します。これ が ちず の ちゅうしん です。"
+    },
+    {
+      "page": "16",
       "type": "effect",
-      "effect": "fade-to-black",
+      "effectRole": "transition",
+      "effect": "fade-through",
+      "base": "#0e111a",
+      "effectDuration": 800
+    },
+    {
+      "page": "17",
+      "type": "content",
+      "version": "A",
+      "sectionTags": [
+        "#NextStep",
+        "#Req5"
+      ],
+      "title_key": "【次のStep 1】",
+      "titleKeyTTS": "つぎ の ステップ いち",
+      "title": "Rebaseの習得",
+      "titleTTS": "リベース の しゅうとく",
+      "symbol": "🧹",
+      "base": "#10131d",
+      "narr": "なぜなら、`main`へのマージ前に履歴を綺麗に「整頓」でき、レビューが容易になるからです。",
+      "narrTTS": "なぜなら、メイン へ の マージ まえ に りれき を きれい に せいとん でき、レビュー が ようい に なる から です。"
+    },
+    {
+      "page": "18",
+      "type": "content",
+      "version": "A",
+      "sectionTags": [
+        "#NextStep",
+        "#Req5"
+      ],
+      "title_key": "【次のStep 2】",
+      "titleKeyTTS": "つぎ の ステップ に",
+      "title": "GitHub Actions (CI) の導入",
+      "titleTTS": "ギットハブ アクションズ、シーアイ、の どう ニュー",
+      "symbol": "🛡️",
+      "base": "#10131d",
+      "narr": "`scenes-player-kit`ですね。PR時に自動テスト(CI)を動かせば、「赤いPR」をマージ前に防ぐ「門番」になります。",
+      "narrTTS": "シーンズ プレイヤー キット です ね。ピーアール じ に じどう テスト シーアイ を うごかせば、あかい ピーアール を マージ まえ に ふせぐ もんばん に なります。"
+    },
+    {
+      "page": "19",
+      "type": "content",
+      "version": "A",
+      "sectionTags": [
+        "#NextStep",
+        "#Req5"
+      ],
+      "title_key": "【次のStep 3】",
+      "titleKeyTTS": "つぎ の ステップ さん",
+      "title": "Issue駆動開発",
+      "titleTTS": "イシュー くどう かいはつ",
+      "symbol": "🎫",
+      "base": "#10131d",
+      "narr": "なぜなら、「何のための変更か」をIssueに紐づけることで、PRのレビューと未来の履歴追跡が格段に楽になるからです。",
+      "narrTTS": "なぜなら、なん の ため の へんこう か を イシュー に ひもづける こと で、ピーアール の レビュー と みらい の りれき ついせき が かくだん に らく に なる から です。"
+    },
+    {
+      "page": "20",
+      "type": "effect",
       "effectRole": "closing",
-      "uiVersion": "A",
+      "effect": "light-out",
       "base": "#000000",
-      "durationMs": 850
+      "effectDuration": 900
     }
   ]
 }
