@@ -1,0 +1,186 @@
+{
+  "format": "ai-handshake/2.0",
+  "project": "shorts-player-kit",
+  "projectId": "shorts-player-kit",
+  "version": "2.0.0",
+  "updatedAt": "2025-08-21T20:10:00+09:00",
+
+  "meta": {
+    "frontMatterInChanges": true,
+    "defaultLocale": "ja-JP",
+    "thread": {
+      "role": "bridge",
+      "allowChain": true,
+      "parentThreadId": null,
+      "labels": ["runtime", "debug_panel", "tts", "shortcuts", "docs"]
+    }
+  },
+
+  "references": {
+    "readme": "./docs/README.md",
+    "changesLong": "./docs/CHANGES.md",
+    "changesMini": "./docs/CHANGES.min.md",
+    "schema": "./schema.json",
+    "scriptActive": "./scenes.json"
+  },
+
+  "nsProfile": {
+    "label": "NS-Core+Joy",
+    "core": ["Propose", "Justify", "Min-Execute", "Verify", "Record"],
+    "extensions": ["Joy", "Repentance"]
+  },
+
+  "runtimeContract": {
+    "loadOrder": ["./style.css", "./debug_panel.js", "./player-core.js"],
+    "noESModules": true,
+    "backgroundAuthority": "player-core.js",
+    "forbid": { "cssImportantOnBgColor": true, "cssBackgroundOverrides": true },
+    "dom": {
+      "banner": "#banner", "bgColor": "#bgColor", "bgBreath": "#bgBreath",
+      "content": "#content", "playBtn": "#playBtn", "debugPanel": "#debug-panel"
+    },
+    "themeClasses": ["version-A", "version-B", "version-T"],
+    "safeArea": {
+      "requiresViewportFitCover": true,
+      "applyEnvPaddingOnBody": true,
+      "panelPaddingBottomEnv": true,
+      "visualViewportFollow": true,
+      "additionalBottomOffsetPx": 80,
+      "notes": "Safari では下端が数 px 持ち上がる場合あり（許容）。Textastic では env + visualViewport の併用が必須。"
+    },
+    "uiPolicy": {
+      "debugPanel": {
+        "collapsible": false,
+        "mustNotBlockPlayButton": true,
+        "dock": "bottom",
+        "noBackgroundOrLoadOrderImpact": true
+      }
+    }
+  },
+
+  "visualModel": {
+    "principle": "baseDecidesBackground",
+    "veils": { "A": "light", "B": "dark", "T": "dark" },
+    "symbolBandCssVar": "--symbol-bg-color",
+    "fallbackBase": { "A": "#f9f9f7", "B": "#1c1c1e", "T": "#1c1c1e" }
+  },
+
+  "capabilities": {
+    "tts": true,
+    "ttsNoteFieldKey": "AI_Comment",
+    "effects": ["light-in", "flame-out", "fade-to-black"],
+    "sacredRhythm": ["off", "light", "standard", "strict"],
+    "locales": ["ja-JP"],
+    "export": {
+      "m4aViaShortcuts": true,
+      "shortcutNameDefault": "Make Spoken Audio from Text",
+      "foregroundSwitchExpected": true,
+      "mp3ViaAShellLAME": "experimental",
+      "downloadMimeMajor": ["audio/m4a", "audio/x-caf", "audio/mp4"]
+    }
+  },
+
+  "ttsProfile": {
+    "webSpeechAPI": true,
+    "langDefault": "ja-JP",
+    "rateDefault": 1.2,
+    "roleEnableFlagsDefault": { "tag": true, "titleKey": true, "title": true, "narr": true, "note": false },
+    "voicePreferencesDefault": ["Kyoko", "Otoya", "ja-JP"],
+    "voiceExposurePolicy": "webSpeechOnly",
+    "aliases": {}
+  },
+
+  "controlsAPI": {
+    "__player": [
+      "play","stop","next","prev","goto","restart","info","getScene",
+      "collectCurrentText","collectAllText","runShortcutForText"
+    ],
+    "__ttsFlags": ["readTag","readTitleKey","readTitle","readNarr","readNote","shortcutName"],
+    "debugPanelActions": ["prev","next","restart","play","stop","goto","m4a-scene","m4a-all"]
+  },
+
+  "aiBridge": {
+    "messageBus": "file",
+    "channels": ["plan","status","risk","measure","repentance","handoff"],
+    "handoffOrder": ["ai_handshake.json","docs/CHANGES.min.md","docs/CHANGES.md"],
+    "repentance": {
+      "R1": "エディタWebViewとSafari実機を即切り分け",
+      "R2": "30分停滞で外部知見探索を発動",
+      "R3": "最小HTMLで env/visualViewport/transform を単独検証→本体反映",
+      "R4": "調査は2時間上限→分岐または一時撤退",
+      "R5": "ブロック置換優先＋3Step＋直前/直後行付き完全体",
+      "R6": "外部助言・実測(+80px)・不採用案の記録を義務化",
+      "R7": "実験改変は別フォルダ、本線は最小差分"
+    }
+  },
+
+  "instructionTemplates": {
+    "replaceBlock": {
+      "steps": [
+        "1) 操作: 置換（ブロックごと）",
+        "2) ファイル名: ${file}",
+        "3) 検索ワード: ${pattern}（該当ブロック全選択→置換）"
+      ]
+    },
+    "insertAfter": {
+      "steps": [
+        "1) 操作: 挿入（直後）",
+        "2) ファイル名: ${file}",
+        "3) 検索ワード: ${pattern}（一致行の直後に以下を挿入）",
+        "   ├ 直前一行: ${beforeLine}",
+        "   └ 直後一行: ${afterLine}"
+      ]
+    }
+  },
+
+  "integrityChecks": {
+    "onBoot": [
+      "scenes.json fetch returns OK",
+      "first render shows non-transparent background",
+      "debug panel is present and status text updates"
+    ],
+    "afterPlay": [
+      "TTS speaks or sim-waits; no JS error",
+      "Stop removes effects and restores play button if first scene"
+    ],
+    "afterExport": [
+      "collect*Text returns non-empty when flags enable content",
+      "runShortcutForText invoked (text length <= 100k chars)",
+      "UI status shows 'Export: ...' in debug panel"
+    ]
+  },
+
+  "knownPitfalls": [
+    "Do NOT use !important on #bgColor background-color (causes transparent bug)",
+    "Do NOT change the load order (style.css → debug_panel.js → player-core.js)",
+    "Avoid background shorthand that overrides color on #bgColor",
+    "Hard-reload after CSS/JS edits to avoid stale cache",
+    "Shortcuts opens in foreground; not suitable during screen recording",
+    "Safari may render the bottom panel a few px above the physical bottom",
+    "Siri/Hattori voices are not exposed via Web Speech; cannot be enumerated",
+    "Audio may be saved as .m4a or .caf depending on engine; both acceptable"
+  ],
+
+  "acknowledgements": {
+    "externalAssist": true,
+    "notes": "safe-area(env) + visualViewport + 実測+80px の複合策は外部助言を検証・昇華して確立。"
+  },
+
+  "deviceMatrix": {
+    "tested": [
+      { "device": "iPhone 16 Pro Max", "context": ["Textastic","Safari"], "safeAreaOffsetPx": 80 }
+    ]
+  },
+
+  "handoffNotes": {
+    "status": "stable",
+    "next": [
+      "Add optional ?script=URL query override in player-core.js (keep current default)",
+      "Map videoMeta.tts.roleVoiceHints at runtime with graceful fallback",
+      "Consider lightweight smoke tests once a CLI/toolchain exists"
+    ],
+    "minChangelogPolicy": "Append-only bullets (3–10 per day), newest at bottom",
+    "yamlFrontMatter": true,
+    "rationale": "Machine-to-machine contract for cross-thread/agent continuity."
+  }
+}
