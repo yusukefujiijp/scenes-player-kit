@@ -1,4 +1,5 @@
 scenes-player-kit（iOS-first）
+https://yusukefujiijp.github.io/scenes-player-kit/
 
 作成: 2025/10/19 → 最終更新: 2025/10/22
 対象: iPhoneオンリー開発（Textastic / Working Copy / a-Shell など）
