@@ -1,6 +1,6 @@
 /*!
     Project:  shorts-player-kit
-    File:     js/viewport_handler.js
+    File:     js/viewport-handler.js
     Role:     Handles visualViewport API to adapt layout for on-screen keyboards.
     */
 (function() {

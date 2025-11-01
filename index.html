@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta id="vp" name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1">
-  <meta name="generator" content="NS-Core (Propose/Justify/Min-Execute/Verify/Record)" />
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#000000">
 
-  <!-- Project -->
+  <meta name="generator" content="NS-Core (Propose/Justify/Min-Execute/Verify/Record)" />
   <meta name="description" content="scenes-player-kit のデモ。iOSでも軽快に動作するシーン型プレイヤーの実験プロジェクト。" />
   <title>scenes-player-kit | シーン型プレイヤーのデモ</title>
   <link rel="canonical" href="https://yusukefujiijp.github.io/scenes-player-kit/" />
 
-  <!-- OGP -->
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="ja_JP" />
   <meta property="og:site_name" content="scenes-player-kit" />
@@ -21,68 +20,60 @@
   <meta property="og:url" content="https://yusukefujiijp.github.io/scenes-player-kit/" />
   <meta property="og:image" content="./assets/ogp.png" />
 
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="scenes-player-kit | シーン型プレイヤーのデモ" />
   <meta name="twitter:description" content="scenes-player-kit のデモ。iOSでも軽快に動作するシーン型プレイヤーの実験プロジェクト。" />
   <meta name="twitter:image" content="./assets/ogp.png" />
 
-  <!-- Icons -->
   <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
   <link rel="icon" type="image/x-icon" href="./assets/favicon.ico" />
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Shippori+Mincho:wght@700&display=swap" rel="stylesheet" />
 
-  <!-- CSS -->
   <link rel="stylesheet" href="./style.css" />
 
-  <!-- Module preload (辞書: player-core.js が import するが先読みで高速化) -->
   <link rel="modulepreload" href="./js/tts-kv-simple.js" />
+
+  <link rel="preload" as="script" href="./js/exporter.js" />
 </head>
 
 <body>
-  <!-- バナー（動的にテキスト適用） -->
   <header id="banner" role="banner" aria-live="polite"></header>
 
-  <!-- 背景レイヤ -->
   <div id="bgColor"></div>
   <div id="bgBreath"></div>
 
-  <!-- メイン -->
   <div id="wrapper">
     <main id="content" role="main" aria-live="polite"></main>
   </div>
 
-  <!-- 既存のデバッグパネル（debug_panel.js が制御） -->
   <div id="debug-panel"></div>
 
-  <!-- Utility / Effects / Viewport（defer: 解析後に順番通り実行） -->
+  <!-- utilities: must be first among non-module scripts -->
+  <script src="./js/utils/utils.js" defer></script>
+
+  <!-- other classic scripts that may rely on utils -->
   <script src="./js/tts-voice-utils.js" defer></script>
   <script src="./js/scene-effects.js" defer></script>
-  <script src="./js/viewport_handler.js" defer></script>
-  <script src="./js/debug_config.js" defer></script>
+  <script src="./js/viewport-handler.js" defer></script>
 
-  <!-- Core（ESM） -->
+  <!-- exporter (preload kept in head) -->
+  <script src="./js/exporter.js" defer></script>
+
+  <!-- module scripts (player & debug-panel) -->
   <script type="module" src="./js/player-core.js"></script>
-  <script type="module" src="./js/debug_panel.js"></script>
+	<!-- debug panel: moved to folder entry -->
+  <script type="module" src="./js/debug-panel/index.js"></script>
 
-  <!-- noscript fallback -->
+  <!-- global helpers -->
+  <script defer src="./js/global-zoom-guard.js"></script>
+	
   <noscript>
     <style>
-      #wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100dvh;
-      }
-      #content {
-        max-width: 640px;
-        padding: 1rem;
-        font-family: system-ui, sans-serif;
-      }
+      #wrapper { display: flex; align-items: center; justify-content: center; height: 100dvh; }
+      #content { max-width: 640px; padding: 1rem; font-family: system-ui, sans-serif; }
     </style>
     <main id="content">
       <h1>JavaScript がオフになっています</h1>
@@ -90,7 +81,6 @@
     </main>
   </noscript>
 
-  <!-- iOS ピンチズーム保護（既存） -->
   <script defer src="./js/global-zoom-guard.js"></script>
 </body>
 </html>

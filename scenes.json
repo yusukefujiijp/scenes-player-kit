@@ -1,7 +1,7 @@
 {
   "doc": {
-    "version": "1.0.0",
-    "lastUpdated": "2025-10-31T17:05:50+09:00",
+    "version": "1.1.0",
+    "lastUpdated": "2025-10-31T22:15:00+09:00",
     "rulesMd": [
       "# 台本運用ルール（要点）",
       "- 二層TTS: 表示と読みは意味一致（mirror）。",
@@ -27,7 +27,7 @@
       ]
     },
     "oneShot": [
-      "Normalize themes→build id→p1(title=\"\")→p2→content×N→transition→closing→fill two-layer→apply yoon(C+V3.7)→apply pauses→sanitize→set v1.0.0"
+      "Normalize themes→build id→p1(title=\"\")→p2→content×N→transition→closing→fill two-layer→apply yoon(C+V3.7)→apply pauses→sanitize→set v1.1.0"
     ]
   },
   "videoMeta": {
@@ -51,12 +51,14 @@
       }
     },
     "advancePolicy": {
+      "fps": 30,
+      "perSceneMs": 2200,
       "quietMs": 350,
       "postDelayMs": 300
     }
   },
   "tts": {
-    "lang": "",
+    "lang": "ja-JP",
     "rate": 1.15,
     "policy": {
       "mode": "mirror",
@@ -66,6 +68,22 @@
       "activation": {
         "page1": "visualOnly"
       }
+    }
+  },
+  "audio": {
+    "policy": {
+      "defaultGain": 0.85,
+      "duckOnEffect": true
+    },
+    "library": {
+      "sfx.lightIn": "./assets/audio/sfx-light-in.mp3",
+      "sfx.fadeThrough": "./assets/audio/sfx-whoosh.mp3",
+      "sfx.lightOut": "./assets/audio/sfx-light-out.mp3",
+      "narr.01": "./assets/audio/demo-narr-01.mp3",
+      "narr.02": "./assets/audio/demo-narr-02.mp3",
+      "narr.03": "./assets/audio/demo-narr-03.mp3",
+      "narr.04": "./assets/audio/demo-narr-04.mp3",
+      "narr.05": "./assets/audio/demo-narr-05.mp3"
     }
   },
   "scenes": [
@@ -83,17 +101,16 @@
       "effectRole": "opening",
       "effect": "light-in",
       "base": "#000000",
-      "effectDuration": 1200
+      "effectDuration": 1200,
+      "audioKey": "sfx.lightIn",
+      "audioUrl": "./assets/audio/sfx-light-in.mp3",
+      "audioGain": 0.8
     },
     {
       "page": "3",
       "type": "content",
       "version": "A",
-      "sectionTags": [
-        "#整理",
-        "#導入",
-        "#問題提起"
-      ],
+      "sectionTags": ["#整理", "#導入", "#問題提起"],
       "title_key": "【導入】",
       "titleKeyTTS": "【どう ニュー】",
       "title": "散らかった部屋",
@@ -101,17 +118,16 @@
       "symbol": "🤔🤖👋",
       "base": "#10131d",
       "narr": "部屋の整理整頓、\nどこから手をつけるべきか。\n悩ましい問題です。",
-      "narrTTS": "へや の せいり せいとん、  どこ から て を つける べき か。  なやましい もんだい です。"
+      "narrTTS": "へや の せいり せいとん、  どこ から て を つける べき か。  なやましい もんだい です。",
+      "audioKey": "narr.01",
+      "audioUrl": "./assets/audio/demo-narr-01.mp3",
+      "audioGain": 0.9
     },
     {
       "page": "4",
       "type": "content",
       "version": "A",
-      "sectionTags": [
-        "#イェシュア",
-        "#Messianic",
-        "#根本"
-      ],
+      "sectionTags": ["#イェシュア", "#Messianic", "#根本"],
       "title_key": "【問い】",
       "titleKeyTTS": "【とい】",
       "title": "イェシュアの視点",
@@ -119,17 +135,16 @@
       "symbol": "✝️🧑‍🏫✍️",
       "base": "#10131d",
       "narr": "ここで、主イェシュア（Yeshua）ならばどうするか、\n根本的に考えてみましょう。",
-      "narrTTS": "ここ で、  シュー イェシュア （Yeshua） ならば どう する か、  こんぽんてき に かんがえて みまショー。"
+      "narrTTS": "ここ で、  シュー イェシュア （Yeshua） ならば どう する か、  こんぽんてき に かんがえて みまショー。",
+      "audioKey": "narr.02",
+      "audioUrl": "./assets/audio/demo-narr-02.mp3",
+      "audioGain": 0.9
     },
     {
       "page": "5",
       "type": "content",
       "version": "A",
-      "sectionTags": [
-        "#目的",
-        "#最大化",
-        "#問いかけ"
-      ],
+      "sectionTags": ["#目的", "#最大化", "#問いかけ"],
       "title_key": "【基本】",
       "titleKeyTTS": "【きほん】",
       "title": "「なぜ」から始める",
@@ -137,7 +152,10 @@
       "symbol": "💡🤔👍",
       "base": "#10131d",
       "narr": "主はまず、その部屋の「目的」を最大化されます。\nそれは安らぎのためか、創造のためか。",
-      "narrTTS": "シュー は まず、  その へや の 「もくてき」 を さいだいか されます。  それ は やすらぎ の ため か、  そうぞう の ため か。"
+      "narrTTS": "シュー は まず、  その へや の 「もくてき」 を さいだいか されます。  それ は やすらぎ の ため か、  そうぞう の ため か。",
+      "audioKey": "narr.03",
+      "audioUrl": "./assets/audio/demo-narr-03.mp3",
+      "audioGain": 0.9
     },
     {
       "page": "6",
@@ -145,17 +163,16 @@
       "effectRole": "transition",
       "effect": "fade-through",
       "base": "#0e111a",
-      "effectDuration": 800
+      "effectDuration": 800,
+      "audioKey": "sfx.fadeThrough",
+      "audioUrl": "./assets/audio/sfx-whoosh.mp3",
+      "audioGain": 0.7
     },
     {
       "page": "7",
       "type": "content",
       "version": "A",
-      "sectionTags": [
-        "#聖別",
-        "#行動",
-        "#Judaism"
-      ],
+      "sectionTags": ["#聖別", "#行動", "#Judaism"],
       "title_key": "【行動】",
       "titleKeyTTS": "【こうどう】",
       "title": "空間の聖別",
@@ -163,17 +180,16 @@
       "symbol": "✨😇🙏",
       "base": "#10131d",
       "narr": "根本的な整理とは、不要な物を捨てること以上に、\n空間を「聖別」し、その目的のために捧げることです。",
-      "narrTTS": "こんぽんてき な せいり と は、  ふヨー な もの を すてる こと いジョー に、  くうかん を 「せいべつ」 し、  その もくてき の ため に ささげる こと です。"
+      "narrTTS": "こんぽんてき な せいり と は、  ふよう な もの を すてる こと いじょう に、  くうかん を 「せいべつ」 し、  その もくてき の ため に ささげる こと です。",
+      "audioKey": "narr.04",
+      "audioUrl": "./assets/audio/demo-narr-04.mp3",
+      "audioGain": 0.9
     },
     {
       "page": "8",
       "type": "content",
       "version": "A",
-      "sectionTags": [
-        "#シャローム",
-        "#平和",
-        "#結論"
-      ],
+      "sectionTags": ["#シャローム", "#平和", "#結論"],
       "title_key": "【結論】",
       "titleKeyTTS": "【けつろん】",
       "title": "秩序の回復",
@@ -181,7 +197,10 @@
       "symbol": "🕊️😌🙌",
       "base": "#10131d",
       "narr": "最大化された秩序とは、主のシャローム（平和）が満ちる場所。\nそこから始めましょう。",
-      "narrTTS": "さいだいか された ちつじょ と は、  シュー の シャローム （へいわ） が みちる ばショ。  そこ から はじめまショー。"
+      "narrTTS": "さいだいか された ちつじょ と は、  シュー の シャローム （へいわ） が みちる ばしょ。  そこ から はじめまショー。",
+      "audioKey": "narr.05",
+      "audioUrl": "./assets/audio/demo-narr-05.mp3",
+      "audioGain": 0.9
     },
     {
       "page": "9",
@@ -189,7 +208,10 @@
       "effectRole": "closing",
       "effect": "light-out",
       "base": "#000000",
-      "effectDuration": 900
+      "effectDuration": 900,
+      "audioKey": "sfx.lightOut",
+      "audioUrl": "./assets/audio/sfx-light-out.mp3",
+      "audioGain": 0.8
     }
   ]
 }

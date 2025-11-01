@@ -111,8 +111,8 @@ iOS ファーストで、**表示契約（Render Contract）v1.1**／起動ゲ�
 - `js/player-core.js`：状態機械・シーン描画・TTS・遷移。  
 - `js/tts-voice-utils.js`：声カタログ・役割別レート。  
 - `js/scene-effects.js`：軽量エフェクトの登録・実行。  
-- `js/debug_panel.js`：UI 状態・Stop ACK・テレメトリ。  
-- `js/viewport_handler.js`：`visualViewport` 監視と CSS 変数供給。
+- `js/debug-panel.js`：UI 状態・Stop ACK・テレメトリ。  
+- `js/viewport-handler.js`：`visualViewport` 監視と CSS 変数供給。
 
 ---
 

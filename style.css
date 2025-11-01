@@ -4,472 +4,1142 @@
   Role:     Visual-only (veils/band/typography/effects + Debug UI scoped)
   Notes:
     - Debug UIは本CSSが唯一の見た目ソース。JSは状態（data属性/クラス/変数）だけ切替。
-    - デバッグUIは #debugPanel / #debug-panel の両IDをサポート。
+    - デバッグUIは #debug-panel ID に統一 (旧 #debugPanel は廃止)。
 */
 
 /* ================== Root tokens ================== */
 :root {
-  /* Text & shadow (A=light / B=dark) */
-  --txt-A: #2c2c2c;
-  --bg-A: #f9f9f7;
-  --shadow-A: 1px 1px 3px rgba(0, 0, 0, .25);
-  --txt-B: #eaeaec;
-  --bg-B: #1c1c1e;
-  --shadow-B: 0 0 8px rgba(255, 255, 255, .25);
+	/* Text & shadow (A=light / B=dark) */
+	--txt-A: #2c2c2c;
+	--bg-A: #f9f9f7;
+	--shadow-A: 1px 1px 3px rgba(0, 0, 0, .25);
+	--txt-B: #eaeaec;
+	--bg-B: #1c1c1e;
+	--shadow-B: 0 0 8px rgba(255, 255, 255, .25);
 
-  /* App theme base（JS が documentElement の --bg-color を更新） */
-  --bg-color: var(--bg-A);
+	/* App theme base（JS が documentElement の --bg-color を更新） */
+	--bg-color: var(--bg-A);
 
-  /* DebugPanel の実高 → 本文下マージンに反映（JSが更新想定） */
-  --debug-panel-h: 0px;
-  --content-pad-bottom: 0px; /* legacy fallback */
+	/* DebugPanel 高さ（JS更新） */
+	--debug-panel-h: 0px;
+	--content-pad-bottom: 0px;
+	/* legacy fallback */
 
-  /* Safe-Area / host-bias（JS が visualViewport から供給） */
-  --sa-bottom: env(safe-area-inset-bottom, 0px);
-  --host-bias-bottom: 0px;
+	/* Safe-Area / host-bias */
+	--sa-bottom: env(safe-area-inset-bottom, 0px);
+	--host-bias-bottom: 0px;
 
-  /* Band color (JS supplies) */
-  --symbol-bg-color: transparent;
+	/* === Section tag Y position === */
+	/* Canvas描画とDOMレイアウトのY座標を同期 (重なり解消のため 8vh に設定) */
+	--section-tags-y: 8vh;
 
-  /* Band tone tweak */
-  --band-brightness: .92;
-  --band-sat: 1.06;
+	/* === Symbol band === */
+	/* JSが必ず上書き。未設定でも見えるよう濃いめの初期値に変更 */
+	--symbol-bg-color: rgba(255, 255, 255, .08);
 
-  /* Hairlines (上下1px) */
-  --band-line-width: 1px;
-  --band-line-alpha-A: .06;
-  --band-line-alpha-B: .12;
+	/* Band tone tweak */
+	--band-brightness: .98;
+	/* ほんのり明るめにして可視性UP */
+	--band-sat: 1.06;
 
-  /* Section tag */
-  --section-tag-gap-bottom: .5rem;
-  --section-tag-min: .8rem;
-  --section-tag-fluid: 2.2vw;
-  --section-tag-max: 1.0rem;
-  --tag-radius: 999px;
-  --tag-bg-alpha: .14;
-  --tag-border-alpha-A: .10;
-  --tag-border-alpha-B: .18;
-  --tag-shadow-alpha: .12;
+	/* Hairlines (上下1px) */
+	--band-line-width: 1px;
+	--band-line-alpha-A: .06;
+	--band-line-alpha-B: .12;
 
-  /* ===== Tag (Chip) Contrast Tokens =====
-     1) Fallback（HSL近似）
-     2) @supports で OKLCH + color-mix に上書き
-     3) JS が --tagchip-fg-auto に白/黒を供給（未設定なら #fff） */
-  --tagchip-fg: var(--tagchip-fg-auto, #fff);
-  /* Fallback: HSL */
-  --tagchip-bg: hsl(210 16% 72%);
-  --tagchip-stroke: hsl(210 12% 82%);
+	/* Section tag（サイズUP） */
+	--section-tag-gap-bottom: .65rem;
+	--section-tag-min: .95rem;
+	/* up */
+	--section-tag-fluid: 3.2vw;
+	/* up */
+	--section-tag-max: 1.20rem;
+	/* up */
+	--tag-radius: 999px;
+	--tag-bg-alpha: .14;
+	--tag-border-alpha-A: .10;
+	--tag-border-alpha-B: .18;
+	--tag-shadow-alpha: .12;
 
-  /* Band paddings */
-  --symbol-outer-gap-y: 1rem;
-  --symbol-inner-gap-y: .30rem;
+	/* Tag (Chip) contrast tokens */
+	--tagchip-fg: var(--tagchip-fg-auto, #fff);
+	--tagchip-bg: hsl(210 16% 72%);
+	--tagchip-stroke: hsl(210 12% 82%);
 
-  /* Veils */
-  --veilA-top: .12;
-  --veilA-bottom: .06;
-  --veilB-top: .32;
-  --veilB-bottom: .18;
+	/* Symbol spacing（絵文字を“少し下”に） */
+	--symbol-outer-gap-y: 1.9rem;
+	/* up */
+	--symbol-inner-gap-y: .55rem;
+	/* up */
+	--symbol-after-gap: 1.15rem;
+	/* 新設：絵文字→本文の間隔 */
 
-  /* ==== Debug tokens (scoped) ==== */
-  --chip-fg: #ffffff;
-  --dbg-panel-bg: rgba(0, 0, 0, .82);
-  --chip-gap: 8px;
-  --chip-pad-y: .28rem;
-  --chip-pad-x: .6rem;
-  --chip-radius: 999px;
-  --chip-weight: 700;
-  --chip-shadow: 0 0 0 rgba(0, 0, 0, 0);
+	/* Veils */
+	--veilA-top: .12;
+	--veilA-bottom: .06;
+	--veilB-top: .32;
+	--veilB-bottom: .18;
 
-  /* speaking / paused / pending colors */
-  --chip-speaking-bg: #15803d;
-  --chip-speaking-bd: #065f46;
-  --chip-speaking-fg: #ffffff;
-  --chip-paused-bg: #b45309;
-  --chip-paused-bd: #92400e;
-  --chip-paused-fg: #ffffff;
-  --chip-pending-bg: #1d4ed8;
-  --chip-pending-bd: #1e40af;
-  --chip-pending-fg: #ffffff;
+	/* ==== Debug tokens ==== */
+	--chip-fg: #ffffff;
+	--dbg-panel-bg: rgba(0, 0, 0, .82);
+	--chip-gap: 8px;
+	--chip-pad-y: .28rem;
+	--chip-pad-x: .6rem;
+	--chip-radius: 999px;
+	--chip-weight: 700;
+	--chip-shadow: 0 0 0 rgba(0, 0, 0, 0);
 
-  /* QuickBar layout */
-  --qb-row-h: 48px;
-  --qb-gap-x: 8px;
-  --qb-gap-y: 6px;
+	/* speaking / paused / pending colors */
+	--chip-speaking-bg: #15803d;
+	--chip-speaking-bd: #065f46;
+	--chip-speaking-fg: #ffffff;
+	--chip-paused-bg: #b45309;
+	--chip-paused-bd: #92400e;
+	--chip-paused-fg: #ffffff;
+	--chip-pending-bg: #1d4ed8;
+	--chip-pending-bd: #1e40af;
+	--chip-pending-fg: #ffffff;
 
-  /* === Flags buttons (TTS) tokens === */
-  /* ON側は“speaking”系に寄せ、意味色の統一感を保つ */
-  --flag-on-bg: var(--chip-speaking-bg);
-  --flag-on-bd: var(--chip-speaking-bd);
-  --flag-on-fg: var(--chip-speaking-fg);
-  /* OFF側は半透明ホワイト系で控えめに */
-  --flag-off-bg: rgba(255, 255, 255, .08);
-  --flag-off-bd: rgba(255, 255, 255, .28);
-  --flag-off-fg: #ffffff;
+	/* QuickBar */
+	--qb-row-h: 50px;
+	/* iOS安定値 */
+	--qb-gap-y: 6px;
+	/* 行間は従来のままでOK */
+	--qb-gap-x: 8px;
+
+	/* Flags */
+	--flag-on-bg: var(--chip-speaking-bg);
+	--flag-on-bd: var(--chip-speaking-bd);
+	--flag-on-fg: var(--chip-speaking-fg);
+	--flag-off-bg: rgba(255, 255, 255, .08);
+	--flag-off-bd: rgba(255, 255, 255, .28);
+	--flag-off-fg: #ffffff;
+
+	/* QuickBar padding tokens（微調整用） */
+	--qb-pad-top: 10px;
+	/* ←ここを増減して“ボタンの上”の余白を調整 */
+	--qb-pad-x: 8px;
+	--qb-pad-b: 6px;
 }
 
 /* ========== Reset ========== */
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
 
 /* ========== Root ========== */
-html, body {
-  width: 100%;
-  overflow: hidden; /* 短編＝1画面想定 */
-  font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  transition: color .8s, background-color 1.2s;
-  touch-action: manipulation;
+html,
+body {
+	width: 100%;
+	overflow: hidden;
+	font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+	transition: color .8s, background-color 1.2s;
+	touch-action: manipulation;
 }
 
-/* 背景は --bg-color に統一（JSと矛盾しない） */
-body { background-color: var(--bg-color); color: var(--txt-A); }
-
-/* アプリ未有効化時：デバッグUI不可視（両ID対応） */
-body.app-unactivated :is(#debug-panel, #debugPanel) {
-  visibility: hidden;
-  pointer-events: none;
+body {
+	background-color: var(--bg-color);
+	color: var(--txt-A);
 }
 
-/* Contrast hint（JSが text-on-dark/light を付与） */
-body.text-on-dark { color: var(--txt-B); }
-body.text-on-light { color: var(--txt-A); }
+body.app-unactivated #debug-panel {
+	visibility: hidden;
+	pointer-events: none;
+}
+
+body.text-on-dark {
+	color: var(--txt-B);
+}
+
+body.text-on-light {
+	color: var(--txt-A);
+}
 
 /* ========== Layout ========== */
 #wrapper {
-  position: relative; z-index: 1; width: 100%;
-  height: var(--visual-viewport-h, 100vh);
-  display: flex; flex-direction: column; justify-content: center; align-items: center;
-  padding-bottom: var(--debug-panel-h, var(--content-pad-bottom, 0px));
-  transition: height 0.2s ease-out;
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	height: var(--visual-viewport-h, 100vh);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	padding-bottom: var(--debug-panel-h, var(--content-pad-bottom, 0px));
+	transition: height 0.2s ease-out;
 }
-@supports (height: 100dvh){ #wrapper { height: var(--visual-viewport-h, 100dvh); } }
+
+@supports (height: 100dvh) {
+	#wrapper {
+		height: var(--visual-viewport-h, 100dvh);
+	}
+}
 
 /* Banner */
 #banner {
-  position: fixed; top: 0; left: 0; right: 0; width: 100%;
-  padding: calc(.5rem + env(safe-area-inset-top, 0px)) .5rem .5rem;
-  background: rgba(0, 0, 0, .30); color: #fff; text-align: center; font-size: .9rem;
-  z-index: 1000; backdrop-filter: blur(4px);
-  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-  border-bottom: 1px solid rgba(255, 255, 255, .25);
-  pointer-events: none; min-height: 2.25rem;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	width: 100%;
+	padding: calc(.5rem + env(safe-area-inset-top, 0px)) .5rem .5rem;
+	background: rgba(0, 0, 0, .30);
+	color: #fff;
+	text-align: center;
+	font-size: .9rem;
+	z-index: 1000;
+	backdrop-filter: blur(4px);
+	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+	border-bottom: 1px solid rgba(255, 255, 255, .25);
+	pointer-events: none;
+	min-height: 2.25rem;
 }
 
 /* ========== Background Layers ========== */
-#bgColor, #bgBreath {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+#bgColor,
+#bgBreath {
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
 }
-#bgColor { transition: background-color 1.2s ease; background-color: var(--bg-color); }
-#bgColor::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+
+#bgColor {
+	transition: background-color 1.2s ease;
+	background-color: var(--bg-color);
+}
+
+#bgColor::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+}
+
 body.version-A #bgColor::after {
-  background: linear-gradient(to bottom, rgba(255,255,255,var(--veilA-top)), rgba(255,255,255,var(--veilA-bottom)));
+	background: linear-gradient(to bottom, rgba(255, 255, 255, var(--veilA-top)), rgba(255, 255, 255, var(--veilA-bottom)));
 }
+
 body.version-B #bgColor::after,
 body.version-T #bgColor::after {
-  background: linear-gradient(to bottom, rgba(0,0,0,var(--veilB-top)), rgba(0,0,0,var(--veilB-bottom)));
+	background: linear-gradient(to bottom, rgba(0, 0, 0, var(--veilB-top)), rgba(0, 0, 0, var(--veilB-bottom)));
 }
+
 #bgBreath {
-  background: radial-gradient(ellipse at center, rgba(255, 225, 170, .9) 0%, transparent 70%);
-  animation: breath 12s ease-in-out infinite; opacity: 0; transition: opacity 1.5s; animation-play-state: paused;
+	background: radial-gradient(ellipse at center, rgba(255, 225, 170, .9) 0%, transparent 70%);
+	animation: breath 12s ease-in-out infinite;
+	opacity: 0;
+	transition: opacity 1.5s;
+	animation-play-state: paused;
 }
-#bgBreath.active { animation-play-state: running; opacity: .2; }
-@keyframes breath { 50% { transform: scale(1.05); } }
-@supports(width:100dvw){ #bgColor, #bgBreath { width: 100dvw; height: 100dvh; } }
-@supports not (width:100dvw){ #bgColor, #bgBreath { width: 100vw; height: 100vh; } }
+
+#bgBreath.active {
+	animation-play-state: running;
+	opacity: .2;
+}
+
+@keyframes breath {
+	50% {
+		transform: scale(1.05);
+	}
+}
+
+@supports(width:100dvw) {
+
+	#bgColor,
+	#bgBreath {
+		width: 100dvw;
+		height: 100dvh;
+	}
+}
+
+@supports not (width:100dvw) {
+
+	#bgColor,
+	#bgBreath {
+		width: 100vw;
+		height: 100vh;
+	}
+}
 
 /* ========== Content (scene surface) ========== */
 #content {
-  position: relative; z-index: 1; width: 100%; max-width: 600px; margin: 0 auto; text-align: center;
-  min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: calc(env(safe-area-inset-top, 0px) + 0px) 0 calc(env(safe-area-inset-bottom, 0px) + 0px);
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	max-width: 600px;
+	margin: 0 auto;
+	text-align: center;
+	min-height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	/* Y座標を変数で制御するため、上揃えに変更 */
+	justify-content: flex-start;
+	/* 上パディングを --section-tags-y で指定 */
+	padding: calc(env(safe-area-inset-top, 0px) + var(--section-tags-y)) 0 calc(env(safe-area-inset-bottom, 0px) + 0px);
 }
-@supports (height: 100dvh){ #content { min-height: 100%; } }
+
+@supports (height: 100dvh) {
+	#content {
+		min-height: 100%;
+	}
+}
 
 /* Theme shadows */
-.title, .title_key, .section-tag, .symbol, .narr { transition: text-shadow .8s; }
-body.version-A .title, body.version-A .title_key, body.version-A .section-tag, body.version-A .symbol, body.version-A .narr { text-shadow: var(--shadow-A); }
-body.version-B .title, body.version-B .title_key, body.version-B .section-tag, body.version-B .symbol, body.version-B .narr,
-body.version-T .title, body.version-T .title_key, body.version-T .section-tag, body.version-T .symbol, body.version-T .narr { text-shadow: var(--shadow-B); }
+.title,
+.title_key,
+.section-tag,
+.symbol,
+.narr {
+	transition: text-shadow .8s;
+}
+
+body.version-A .title,
+body.version-A .title_key,
+body.version-A .section-tag,
+body.version-A .symbol,
+body.version-A .narr {
+	text-shadow: var(--shadow-A);
+}
+
+body.version-B .title,
+body.version-B .title_key,
+body.version-B .section-tag,
+body.version-B .symbol,
+body.version-B .narr,
+body.version-T .title,
+body.version-T .title_key,
+body.version-T .section-tag,
+body.version-T .symbol,
+body.version-T .narr {
+	text-shadow: var(--shadow-B);
+}
 
 /* Scene block */
-.scene { width: 90%; margin: 0 auto; animation: fadeIn 700ms ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(20px);} to { opacity: 1; transform: translateY(0);} }
+.scene {
+	width: 90%;
+	margin: 0 auto;
+	animation: fadeIn 700ms ease-out;
+}
 
-/* Section Tags (1行固定・チップ単位) */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Section Tags（サイズUP & 1行維持） */
 .section-tags {
-  display: flex; flex-wrap: nowrap; align-items: center; justify-content: center; gap: .35em;
-  margin-bottom: var(--section-tag-gap-bottom);
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: center;
+	justify-content: center;
+	gap: .45em;
+	margin-bottom: var(--section-tag-gap-bottom);
 }
-/* 単一タグ：中央寄せ・ellipsis */
+
 .section-tags.single .section-tag {
-  flex: 0 1 auto; min-width: 0;
-  max-inline-size: clamp(10ch, 80vw, 28ch);
-  overflow: hidden; text-overflow: ellipsis;
+	flex: 0 1 auto;
+	min-width: 0;
+	max-inline-size: clamp(10ch, 80vw, 30ch);
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
-/* Section Tag (chip) */
+
 .section-tag {
-  display: inline-flex; align-items: center; gap: .35em;
-  padding: .2rem .6rem; margin: 0; font-weight: 700; letter-spacing: .02em; line-height: 1.1;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: clamp(var(--section-tag-min), var(--section-tag-fluid), var(--section-tag-max));
-  border-radius: var(--tag-radius);
-  background: var(--tagchip-bg); border: 1px solid var(--tagchip-stroke); color: var(--tagchip-fg);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, var(--tag-shadow-alpha));
-  flex: none; white-space: nowrap; text-align: center; max-width: 100%;
+	display: inline-flex;
+	align-items: center;
+	gap: .35em;
+	padding: .26rem .72rem;
+	margin: 0;
+	font-weight: 700;
+	letter-spacing: .02em;
+	line-height: 1.1;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: clamp(var(--section-tag-min), var(--section-tag-fluid), var(--section-tag-max));
+	border-radius: var(--tag-radius);
+	background: var(--tagchip-bg);
+	border: 1px solid var(--tagchip-stroke);
+	color: var(--tagchip-fg);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, var(--tag-shadow-alpha));
+	flex: none;
+	white-space: nowrap;
+	text-align: center;
+	max-width: 100%;
 }
+
 @supports not (color: color-mix(in srgb, red, blue)) {
-  .section-tag { background: rgba(0, 0, 0, .06); }
+	.section-tag {
+		background: rgba(0, 0, 0, .06);
+	}
 }
-/* OKLCH + color-mix が使える環境では“知覚明度”で安全側へ再定義 */
+
 @supports (color: oklch(60% 0 0)) and (color: color-mix(in oklch, white, black)) {
-  :root{
-    --tagchip-bg:     color-mix(in oklch, var(--bg-color) 65%, white);
-    --tagchip-stroke: color-mix(in oklch, var(--bg-color) 45%, white);
-  }
+	:root {
+		--tagchip-bg: color-mix(in oklch, var(--bg-color) 65%, white);
+		--tagchip-stroke: color-mix(in oklch, var(--bg-color) 45%, white);
+	}
 }
-/* 高コントラスト希望環境で押し上げ */
-@media (prefers-contrast: more){
-  @supports (color: color-mix(in oklch, white, black)){
-    :root{
-      --tagchip-bg:     color-mix(in oklch, var(--bg-color) 55%, white);
-      --tagchip-stroke: color-mix(in oklch, var(--bg-color) 35%, white);
-    }
-  }
+
+@media (prefers-contrast: more) {
+	@supports (color: color-mix(in oklch, white, black)) {
+		:root {
+			--tagchip-bg: color-mix(in oklch, var(--bg-color) 55%, white);
+			--tagchip-stroke: color-mix(in oklch, var(--bg-color) 35%, white);
+		}
+	}
 }
 
 /* Titles & Narration */
 .title_key {
-  font-family: 'Shippori Mincho', serif; font-weight: 700; letter-spacing: .08em;
-  margin-bottom: var(--title-key-gap-bottom, .5rem);
-  font-size: clamp(1.25rem, 3.8vw, 1.8rem);
+	font-family: 'Shippori Mincho', serif;
+	font-weight: 700;
+	letter-spacing: .08em;
+	margin-bottom: var(--title-key-gap-bottom, .55rem);
+	font-size: clamp(1.25rem, 3.8vw, 1.8rem);
 }
+
 .title {
-  font-family: 'Shippori Mincho', serif; font-weight: 700; letter-spacing: .08em;
-  margin-bottom: var(--title-gap-bottom, 1rem);
-  font-size: clamp(1.6rem, 5vw, 2.4rem);
+	font-family: 'Shippori Mincho', serif;
+	font-weight: 700;
+	letter-spacing: .08em;
+	margin-bottom: var(--title-gap-bottom, .8rem);
+	font-size: clamp(1.6rem, 5vw, 2.4rem);
 }
+
 .narr {
-  font-size: clamp(1rem, 2.2vw, 1.15rem); line-height: 1.8; white-space: pre-line; margin-bottom: 1rem;
+	font-size: clamp(1rem, 2.2vw, 1.15rem);
+	line-height: 1.8;
+	white-space: pre-line;
+	margin-top: var(--symbol-after-gap);
+	margin-bottom: 1rem;
 }
 
 /* ========== Symbol Band (full-bleed) ========== */
 .symbol-bg {
-  position: relative; z-index: 0; width: 100%;
-  margin-block: var(--symbol-outer-gap-y);
-  padding: calc(1.5rem + var(--symbol-inner-gap-y)) 0;
-  display: flex; justify-content: center; align-items: center; text-align: center;
+	position: relative;
+	z-index: 0;
+	width: 100%;
+	margin-block: var(--symbol-outer-gap-y);
+	padding: calc(1.2rem + var(--symbol-inner-gap-y)) 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
 }
+
 .symbol-bg::before {
-  content: ""; position: absolute; inset: 0; left: 50%; transform: translateX(-50%); width: 100vw;
-  background-color: var(--symbol-bg-color);
-  filter: brightness(var(--band-brightness)) saturate(var(--band-sat));
-  transition: background-color 1.2s ease, filter 1.2s ease;
-  z-index: -1; pointer-events: none;
+	content: "";
+	position: absolute;
+	inset: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 100vw;
+	background-color: var(--symbol-bg-color);
+	/* ここが“帯” */
+	filter: brightness(var(--band-brightness)) saturate(var(--band-sat));
+	transition: background-color 0.6s ease, filter 1.2s ease;
+	z-index: -1;
+	pointer-events: none;
 }
-@supports(width:100dvw){ .symbol-bg::before { width: 100dvw; } }
+
+@supports(width:100dvw) {
+	.symbol-bg::before {
+		width: 100dvw;
+	}
+}
+
 .symbol-bg::after {
-  content: ""; position: absolute; inset: 0; left: 50%; transform: translateX(-50%); width: 100vw;
-  pointer-events: none; z-index: -1; background-repeat: no-repeat; background-position: top left, bottom left;
-  background-size: 100% var(--band-line-width), 100% var(--band-line-width);
+	content: "";
+	position: absolute;
+	inset: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 100vw;
+	pointer-events: none;
+	z-index: -1;
+	background-repeat: no-repeat;
+	background-position: top left, bottom left;
+	background-size: 100% var(--band-line-width), 100% var(--band-line-width);
 }
-@supports(width:100dvw){ .symbol-bg::after { width: 100dvw; } }
+
+@supports(width:100dvw) {
+	.symbol-bg::after {
+		width: 100dvw;
+	}
+}
+
 body.version-A .symbol-bg::after {
-  background-image:
-    linear-gradient(to bottom, rgba(0,0,0,var(--band-line-alpha-A)), rgba(0,0,0,var(--band-line-alpha-A))),
-    linear-gradient(to top,    rgba(0,0,0,var(--band-line-alpha-A)), rgba(0,0,0,var(--band-line-alpha-A)));
+	background-image:
+		linear-gradient(to bottom, rgba(0, 0, 0, var(--band-line-alpha-A)), rgba(0, 0, 0, var(--band-line-alpha-A))),
+		linear-gradient(to top, rgba(0, 0, 0, var(--band-line-alpha-A)), rgba(0, 0, 0, var(--band-line-alpha-A)));
 }
+
 body.version-B .symbol-bg::after,
 body.version-T .symbol-bg::after {
-  background-image:
-    linear-gradient(to bottom, rgba(255,255,255,var(--band-line-alpha-B)), rgba(255,255,255,var(--band-line-alpha-B))),
-    linear-gradient(to top,    rgba(255,255,255,var(--band-line-alpha-B)), rgba(255,255,255,var(--band-line-alpha-B)));
+	background-image:
+		linear-gradient(to bottom, rgba(255, 255, 255, var(--band-line-alpha-B)), rgba(255, 255, 255, var(--band-line-alpha-B))),
+		linear-gradient(to top, rgba(255, 255, 255, var(--band-line-alpha-B)), rgba(255, 255, 255, var(--band-line-alpha-B)));
 }
+
 /* Emoji */
-.symbol { font-size: clamp(4rem, 20vw, 8rem); line-height: 1.05; white-space: nowrap; display: inline-block; padding-bottom: .08em; }
+.symbol {
+	font-size: clamp(4rem, 20vw, 8rem);
+	line-height: 1.05;
+	white-space: nowrap;
+	display: inline-block;
+	padding-bottom: .08em;
+}
 
 /* ========== Activation Gate (Overlay) ========== */
 #activation-gate {
-  position: fixed; inset: 0; z-index: 2147483647; /* Debugより上 */
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
-  cursor: pointer; transition: opacity .4s ease, visibility .4s;
+	position: fixed;
+	inset: 0;
+	z-index: 2147483647;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.6);
+	backdrop-filter: blur(4px);
+	cursor: pointer;
+	transition: opacity .4s ease, visibility .4s;
 }
-#activation-gate.is-closing { opacity: 0; visibility: hidden; pointer-events: none; }
-.gate-icon { color: #fff; font-size: 4rem; text-shadow: 0 0 15px rgba(0,0,0,.7); }
 
-/* ========== Effects (overlay) ========== */
-.effect-container { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
-@keyframes sk-light-in { 0%{opacity:1;background:radial-gradient(circle at center,white 0%,black 100%);} 100%{opacity:0;background:radial-gradient(circle at center,white 200%,black 300%);} }
-.light-in { animation: sk-light-in 1.5s ease-out forwards; }
-@keyframes sk-flame-out { 0%{opacity:0;} 50%{opacity:1;} 100%{opacity:0;} }
-.flame-out, .burn-out { background: radial-gradient(circle at bottom, #ff4800 0%, #ff7400 30%, #ffb300 60%, transparent 100%); animation: sk-flame-out 1.5s ease-in forwards; }
-@keyframes flash { 0%{opacity:.9;} 100%{opacity:0;} }
-.flash { background: #fff; animation: flash .4s ease-out; }
+#activation-gate.is-closing {
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+}
+
+.gate-icon {
+	color: #fff;
+	font-size: 4rem;
+	text-shadow: 0 0 15px rgba(0, 0, 0, .7);
+}
+
+/* ========== Effects (overlay) */
+.effect-container {
+	position: fixed;
+	inset: 0;
+	z-index: 3;
+	pointer-events: none;
+}
+
+@keyframes sk-light-in {
+	0% {
+		opacity: 1;
+		background: radial-gradient(circle at center, white 0%, black 100%);
+	}
+
+	100% {
+		opacity: 0;
+		background: radial-gradient(circle at center, white 200%, black 300%);
+	}
+}
+
+.light-in {
+	animation: sk-light-in 1.5s ease-out forwards;
+}
+
+@keyframes sk-flame-out {
+	0% {
+		opacity: 0;
+	}
+
+	50% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+	}
+}
+
+.flame-out,
+.burn-out {
+	background: radial-gradient(circle at bottom, #ff4800 0%, #ff7400 30%, #ffb300 60%, transparent 100%);
+	animation: sk-flame-out 1.5s ease-in forwards;
+}
+
+@keyframes flash {
+	0% {
+		opacity: .9;
+	}
+
+	100% {
+		opacity: 0;
+	}
+}
+
+.flash {
+	background: #fff;
+	animation: flash .4s ease-out;
+}
 
 /* =========================================================
-   Debug UI (SCOPED) —— QuickBar(2 rows) & Expanded panel
-   ========================================================= */
-
-/* Host（両ID対応。JSは style を付けない前提でもOK） */
-:is(#debug-panel, #debugPanel) {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 2147483646; color: #fff;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
-  padding-bottom: calc(8px + max(var(--sa-bottom), var(--host-bias-bottom)));
-  will-change: transform; width: 100%; box-sizing: border-box; pointer-events: auto;
-  background: var(--dbg-panel-bg);
+    Debug UI（以降は前回のまま：一部省略なし）
+    ========================================================= */
+#debug-panel {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 2147483646;
+	color: #fff;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	padding-left: env(safe-area-inset-left, 0px);
+	padding-right: env(safe-area-inset-right, 0px);
+	padding-bottom: calc(8px + max(var(--sa-bottom), var(--host-bias-bottom)));
+	will-change: transform;
+	width: 100%;
+	box-sizing: border-box;
+	pointer-events: auto;
+	background: var(--dbg-panel-bg);
 }
 
-/* QuickBar (2 rows) */
-:is(#debug-panel, #debugPanel) .qb-bar {
-  display: grid; grid-template-rows: var(--qb-row-h) var(--qb-row-h);
-  row-gap: var(--qb-gap-y); column-gap: var(--qb-gap-x);
-  padding: 6px 8px; background: transparent; border-top: 1px solid rgba(255,255,255,.15);
-  backdrop-filter: blur(4px);
-}
-:is(#debug-panel, #debugPanel) .qb-row { min-height: var(--qb-row-h); display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
-:is(#debug-panel, #debugPanel) .qb-row.row2 { justify-content: flex-start; }
-
-/* Toggle */
-:is(#debug-panel, #debugPanel) .dbg-toggle {
-  display: inline-flex; align-items: center; gap: .35em;
-  padding: .5rem .8rem; border-radius: 16px; border: 1px solid rgba(255,255,255,.35);
-  background: rgba(255,255,255,.08); color: #fff; font-size: 16px; line-height: 1; cursor: pointer;
-}
-:is(#debug-panel, #debugPanel) .dbg-toggle:focus-visible,
-:is(#debug-panel, #debugPanel) .qb-btn:focus-visible,
-:is(#debug-panel, #debugPanel) .dbg-controls button:focus-visible,
-:is(#debug-panel, #debugPanel) .goto input:focus-visible {
-  outline: 2px solid rgba(255,255,255,.9); outline-offset: 2px;
+#debug-panel .qb-bar {
+	display: grid;
+	grid-template-rows: var(--qb-row-h) var(--qb-row-h);
+	row-gap: var(--qb-gap-y);
+	column-gap: var(--qb-gap-x);
+	padding: var(--qb-pad-top) var(--qb-pad-x) var(--qb-pad-b);
+	background: transparent;
+	border-top: 1px solid rgba(255, 255, 255, .15);
+	backdrop-filter: blur(4px);
 }
 
-/* Square buttons */
-:is(#debug-panel, #debugPanel) .qb-btn {
-  width: 44px; height: 44px; border-radius: 10px;
-  display: inline-flex; align-items: center; justify-content: center;
-  border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.08); color: #fff; font-size: 20px; cursor: pointer;
-}
-:is(#debug-panel, #debugPanel) .qb-btn.play { border-color: rgba(0,200,255,.55); background: rgba(0,200,255,.15); }
-:is(#debug-panel, #debugPanel) .qb-btn.stop { border-color: rgba(255,120,120,.55); background: rgba(255,120,120,.15); }
-:is(#debug-panel, #debugPanel) .qb-btn.next { border-color: rgba(160,120,255,.55); background: rgba(160,120,255,.15); }
-
-/* Row2 status text */
-:is(#debug-panel, #debugPanel) .dbg-status {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; color: #fff; opacity: .95;
-  min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+#debug-panel .qb-row {
+	min-height: var(--qb-row-h);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: nowrap;
 }
 
-/* ------- Expanded body ------- */
-:is(#debug-panel, #debugPanel) .dbg-body {
-  max-height: 44vh; overflow: auto; padding: 8px;
-  background: rgba(0, 0, 0, .70); border-top: 1px solid rgba(255, 255, 255, .15);
-}
-:is(#debug-panel, #debugPanel)[data-collapsed="true"] .dbg-body { display: none; }
-
-/* Lab badges */
-:is(#debug-panel, #debugPanel) .lab-badges {
-  display: flex; align-items: center; gap: var(--chip-gap); flex-wrap: wrap; margin: 2px 0 8px 0;
-}
-:is(#debug-panel, #debugPanel) .lab-badge {
-  display: inline-flex; align-items: center; gap: .5em;
-  padding: var(--chip-pad-y) var(--chip-pad-x); border-radius: var(--chip-radius);
-  font-weight: var(--chip-weight); font-size: 12px; line-height: 1; letter-spacing: .02em;
-  border: 1px solid transparent; color: var(--chip-fg); text-shadow: none; white-space: nowrap; box-shadow: var(--chip-shadow);
-  opacity: .65;
-}
-:is(#debug-panel, #debugPanel) .lab-badge.on { opacity: 1; }
-:is(#debug-panel, #debugPanel) .lab-badge.lab-badge--speaking { background: var(--chip-speaking-bg); border-color: var(--chip-speaking-bd); color: var(--chip-speaking-fg); }
-:is(#debug-panel, #debugPanel) .lab-badge.lab-badge--paused   { background: var(--chip-paused-bg);   border-color: var(--chip-paused-bd);   color: var(--chip-paused-fg); }
-:is(#debug-panel, #debugPanel) .lab-badge.lab-badge--pending  { background: var(--chip-pending-bg);  border-color: var(--chip-pending-bd);  color: var(--chip-pending-fg); }
-
-/* Pulse animation */
-:is(#debug-panel, #debugPanel) .lab-badge.on.pulse { animation: labPulse 1.2s ease-in-out infinite; }
-@keyframes labPulse { 0%{ box-shadow:0 0 0 0 rgba(255,255,255,.45);} 70%{ box-shadow:0 0 0 6px rgba(255,255,255,0);} 100%{ box-shadow:0 0 0 0 rgba(255,255,255,0);} }
-@media (prefers-reduced-motion: reduce) { :is(#debug-panel, #debugPanel) .lab-badge.on.pulse { animation: none; } }
-
-/* QuickBar ACK */
-:is(#debug-panel, #debugPanel) .qb-ack {
-  display: inline-flex; align-items: center; gap: .5em; padding: .5rem .9rem;
-  border-radius: 999px; font-weight: 700; font-size: 14px; line-height: 1;
-  background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.22); color: #fff;
-}
-:is(#debug-panel, #debugPanel) .qb-ack.is-pending { background:#7c2d12; border-color:#b45309; }
-:is(#debug-panel, #debugPanel) .qb-ack.is-stopped { background:#14532d; border-color:#15803d; }
-:is(#debug-panel, #debugPanel) .qb-ack .qb-dot { width:.62em; height:.62em; border-radius:50%; background: currentColor; opacity:.95; }
-
-/* Controls row in expanded panel */
-:is(#debug-panel, #debugPanel) .dbg-controls {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0;
-}
-:is(#debug-panel, #debugPanel) .dbg-controls button {
-  appearance: none; border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.08); color: #fff;
-  padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; line-height: 1;
-}
-:is(#debug-panel, #debugPanel) .dbg-controls button.warn {
-  background: #fff5f5; border-color: #ffd5d5; color: #b00020;
-}
-:is(#debug-panel, #debugPanel) .goto { display: inline-flex; align-items: center; gap: 6px; margin-left: 4px; color: #fff; }
-:is(#debug-panel, #debugPanel) .goto input {
-  width: 72px; padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,.25);
-  background: rgba(0,0,0,.2); color: #fff; font-size: 14px;
+#debug-panel .qb-row.row2 {
+	justify-content: flex-start;
 }
 
-/* ===== Voices section ===== */
-:is(#debug-panel, #debugPanel) .sec h3 { margin: 6px 0 4px 0; font-size: 12px; opacity: .75; color: #fff; }
-/* ▼ 汎用 .sec .dbg-row の縦マージンを Voices 限定へ変更（回帰防止の要） */
-:is(#debug-panel, #debugPanel) #dbg-voices .dbg-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; color: #fff; }
-:is(#debug-panel, #debugPanel) .sec .dbg-row-label { opacity: .7; min-width: 72px; }
-:is(#debug-panel, #debugPanel) .voices-note { opacity: .7; font-size: 12px; color: #fff; }
-:is(#debug-panel, #debugPanel) .sec h3 .voices-note { margin-left: .4em; font-weight: 400; }
-
-/* ===== TTS flags section (NEW) ===== */
-:is(#debug-panel, #debugPanel) #dbg-flags h3 {
-  margin: 6px 0 4px 0; font-size: 12px; opacity: .75; color: #fff;
-}
-/* 行間は gap で管理。縦マージンは最小限（外側のみ） */
-:is(#debug-panel, #debugPanel) #dbg-flags .flag-row {
-  display: flex; align-items: center; flex-wrap: wrap;
-  gap: var(--chip-gap); margin: 4px 0 6px;
-}
-/* 念のため将来の回帰を抑止（.dbg-row が紛れ込んでも余白ゼロ） */
-:is(#debug-panel, #debugPanel) #dbg-flags .dbg-row { margin: 0; }
-/* ピル型ボタン */
-:is(#debug-panel, #debugPanel) #dbg-flags .flag {
-  appearance: none;
-  border: 1px solid var(--flag-off-bd);
-  background: var(--flag-off-bg);
-  color: var(--flag-off-fg);
-  padding: .38rem .8rem; border-radius: 999px;
-  font-weight: 700; font-size: 13px; line-height: 1; letter-spacing: .02em;
-  cursor: pointer; transition: transform .05s ease;
-}
-:is(#debug-panel, #debugPanel) #dbg-flags .flag:hover { filter: brightness(1.1); }
-:is(#debug-panel, #debugPanel) #dbg-flags .flag:active { transform: translateY(1px); }
-:is(#debug-panel, #debugPanel) #dbg-flags .flag.on {
-  background: var(--flag-on-bg);
-  border-color: var(--flag-on-bd);
-  color: var(--flag-on-fg);
-  box-shadow: 0 0 0 2px rgba(255,255,255,.08) inset;
-}
-:is(#debug-panel, #debugPanel) #dbg-flags .flag:focus-visible {
-  outline: 2px solid rgba(255,255,255,.9); outline-offset: 2px;
+#debug-panel .dbg-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: .35em;
+	padding: .5rem .8rem;
+	border-radius: 16px;
+	border: 1px solid rgba(255, 255, 255, .35);
+	background: rgba(255, 255, 255, .08);
+	color: #fff;
+	font-size: 16px;
+	line-height: 1;
+	cursor: pointer;
 }
 
-/* 折り畳み時：バー以外クリック透過（Playボタン保護） */
-:is(#debug-panel, #debugPanel).collapsed { pointer-events: none; }
-:is(#debug-panel, #debugPanel).collapsed .qb-bar { pointer-events: auto; }
+#debug-panel .dbg-toggle:focus-visible,
+#debug-panel .qb-btn:focus-visible,
+#debug-panel .dbg-controls button:focus-visible,
+#debug-panel .goto input:focus-visible {
+	outline: 2px solid rgba(255, 255, 255, .9);
+	outline-offset: 2px;
+}
 
-/* High contrast emphasis */
+#debug-panel .qb-btn {
+	width: 44px;
+	height: 44px;
+	border-radius: 10px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid rgba(255, 255, 255, .35);
+	background: rgba(255, 255, 255, .08);
+	color: #fff;
+	font-size: 20px;
+	cursor: pointer;
+}
+
+#debug-panel .qb-btn.play {
+	border-color: rgba(0, 200, 255, .55);
+	background: rgba(0, 200, 255, .15);
+}
+
+#debug-panel .qb-btn.stop {
+	border-color: rgba(255, 120, 120, .55);
+	background: rgba(255, 120, 120, .15);
+}
+
+#debug-panel .qb-btn.next {
+	border-color: rgba(160, 120, 255, .55);
+	background: rgba(160, 120, 255, .15);
+}
+
+/* ▼ [機能追加] QuickBar の Hard Reload ボタンに警告色を適用 */
+#debug-panel .qb-btn.hardreload {
+	border-color: rgba(255, 120, 120, .55);
+	background: rgba(255, 120, 120, .15);
+}
+
+#debug-panel .dbg-status {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 14px;
+	color: #fff;
+	opacity: .95;
+	min-width: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#debug-panel .dbg-body {
+	max-height: 44vh;
+	overflow: auto;
+	padding: 8px;
+	background: rgba(0, 0, 0, .70);
+	border-top: 1px solid rgba(255, 255, 255, .15);
+}
+
+#debug-panel[data-collapsed="true"] .dbg-body {
+	display: none;
+}
+
+#debug-panel .lab-badges {
+	display: flex;
+	align-items: center;
+	gap: var(--chip-gap);
+	flex-wrap: wrap;
+	margin: 2px 0 8px 0;
+}
+
+#debug-panel .lab-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: .5em;
+	padding: var(--chip-pad-y) var(--chip-pad-x);
+	border-radius: var(--chip-radius);
+	font-weight: var(--chip-weight);
+	font-size: 12px;
+	line-height: 1;
+	letter-spacing: .02em;
+	border: 1px solid transparent;
+	color: var(--chip-fg);
+	text-shadow: none;
+	white-space: nowrap;
+	box-shadow: var(--chip-shadow);
+	opacity: .65;
+}
+
+#debug-panel .lab-badge.on {
+	opacity: 1;
+}
+
+#debug-panel .lab-badge.lab-badge--speaking {
+	background: var(--chip-speaking-bg);
+	border-color: var(--chip-speaking-bd);
+	color: var(--chip-speaking-fg);
+}
+
+#debug-panel .lab-badge.lab-badge--paused {
+	background: var(--chip-paused-bg);
+	border-color: var(--chip-paused-bd);
+	color: var(--chip-paused-fg);
+}
+
+#debug-panel .lab-badge.lab-badge--pending {
+	background: var(--chip-pending-bg);
+	border-color: var(--chip-pending-bd);
+	color: var(--chip-pending-fg);
+}
+
+#debug-panel .lab-badge.on.pulse {
+	animation: labPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes labPulse {
+	0% {
+		box-shadow: 0 0 0 0 rgba(255, 255, 255, .45);
+	}
+
+	70% {
+		box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
+	}
+
+	100% {
+		box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#debug-panel .lab-badge.on.pulse {
+		animation: none;
+	}
+}
+
+#debug-panel .qb-ack {
+	display: inline-flex;
+	align-items: center;
+	gap: .5em;
+	padding: .5rem .9rem;
+	border-radius: 999px;
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1;
+	background: rgba(255, 255, 255, .10);
+	border: 1px solid rgba(255, 255, 255, .22);
+	color: #fff;
+}
+
+#debug-panel .qb-ack.is-pending {
+	background: #7c2d12;
+	border-color: #b45309;
+}
+
+#debug-panel .qb-ack.is-stopped {
+	background: #14532d;
+	border-color: #15803d;
+}
+
+#debug-panel .qb-ack .qb-dot {
+	width: .62em;
+	height: .62em;
+	border-radius: 50%;
+	background: currentColor;
+	opacity: .95;
+}
+
+#debug-panel .dbg-controls {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 6px 0;
+}
+
+#debug-panel .dbg-controls button {
+	appearance: none;
+	border: 1px solid rgba(255, 255, 255, .35);
+	background: rgba(255, 255, 255, .08);
+	color: #fff;
+	padding: 6px 12px;
+	border-radius: 8px;
+	cursor: pointer;
+	font-size: 14px;
+	line-height: 1;
+}
+
+#debug-panel .dbg-controls button.warn {
+	background: #fff5f5;
+	border-color: #ffd5d5;
+	color: #b00020;
+}
+
+#debug-panel .goto {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-left: 4px;
+	color: #fff;
+}
+
+#debug-panel .goto input {
+	width: 72px;
+	padding: 6px 8px;
+	border-radius: 6px;
+	border: 1px solid rgba(255, 255, 255, .25);
+	background: rgba(0, 0, 0, .2);
+	color: #fff;
+	font-size: 14px;
+}
+
+#debug-panel .sec h3 {
+	margin: 6px 0 4px 0;
+	font-size: 12px;
+	opacity: .75;
+	color: #fff;
+}
+
+#debug-panel #dbg-voices .dbg-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 4px 0;
+	color: #fff;
+}
+
+#debug-panel .sec .dbg-row-label {
+	opacity: .7;
+	min-width: 72px;
+}
+
+#debug-panel .voices-note {
+	opacity: .7;
+	font-size: 12px;
+	color: #fff;
+}
+
+#debug-panel .sec h3 .voices-note {
+	margin-left: .4em;
+	font-weight: 400;
+}
+
+#debug-panel #dbg-flags h3 {
+	margin: 6px 0 4px 0;
+	font-size: 12px;
+	opacity: .75;
+	color: #fff;
+}
+
+#debug-panel #dbg-flags .flag-row {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--chip-gap);
+	margin: 4px 0 6px;
+}
+
+#debug-panel #dbg-flags .dbg-row {
+	margin: 0;
+}
+
+#debug-panel #dbg-flags .flag {
+	appearance: none;
+	border: 1px solid var(--flag-off-bd);
+	background: var(--flag-off-bg);
+	color: var(--flag-off-fg);
+	padding: .38rem .8rem;
+	border-radius: 999px;
+	font-weight: 700;
+	font-size: 13px;
+	line-height: 1;
+	letter-spacing: .02em;
+	cursor: pointer;
+	transition: transform .05s ease;
+}
+
+#debug-panel #dbg-flags .flag:hover {
+	filter: brightness(1.1);
+}
+
+#debug-panel #dbg-flags .flag:active {
+	transform: translateY(1px);
+}
+
+#debug-panel #dbg-flags .flag.on {
+	background: var(--flag-on-bg);
+	border-color: var(--flag-on-bd);
+	color: var(--flag-on-fg);
+	box-shadow: 0 0 0 2px rgba(255, 255, 255, .08) inset;
+}
+
+#debug-panel #dbg-flags .flag:focus-visible {
+	outline: 2px solid rgba(255, 255, 255, .9);
+	outline-offset: 2px;
+}
+
+#debug-panel.collapsed {
+	pointer-events: none;
+}
+
+#debug-panel.collapsed .qb-bar {
+	pointer-events: auto;
+}
+
 @media (prefers-contrast: more) {
-  :is(#debug-panel, #debugPanel) .lab-badge { box-shadow: 0 0 0 2px rgba(0,0,0,.35) inset; }
-  :is(#debug-panel, #debugPanel) .lab-badge.lab-badge--speaking { background: #166534; border-color:#065f46; }
-  :is(#debug-panel, #debugPanel) .lab-badge.lab-badge--paused   { background: #92400e; border-color:#7c2d12; }
-  :is(#debug-panel, #debugPanel) .lab-badge.lab-badge--pending  { background: #1e40af; border-color:#1e3a8a; }
+	#debug-panel .lab-badge {
+		box-shadow: 0 0 0 2px rgba(0, 0, 0, .35) inset;
+	}
+
+	#debug-panel .lab-badge.lab-badge--speaking {
+		background: #166534;
+		border-color: #065f46;
+	}
+
+	#debug-panel .lab-badge.lab-badge--paused {
+		background: #92400e;
+		border-color: #7c2d12;
+	}
+
+	#debug-panel .lab-badge.lab-badge--pending {
+		background: #1e40af;
+		border-color: #1e3a8a;
+	}
 }
 
 /* ========== Optional FX Canvas ========== */
-#bgFX { position: fixed; inset: 0; z-index: 0; pointer-events: none; mix-blend-mode: screen; opacity: .9; }
-@media (prefers-reduced-motion:reduce){ #bgFX { display: none; } }
-body.version-B #bgFX, body.version-T #bgFX { mix-blend-mode: lighten; opacity: .7; }
+#bgFX {
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+	mix-blend-mode: screen;
+	opacity: .9;
+}
+
+@media (prefers-reduced-motion:reduce) {
+	#bgFX {
+		display: none;
+	}
+}
+
+body.version-B #bgFX,
+body.version-T #bgFX {
+	mix-blend-mode: lighten;
+	opacity: .7;
+}
 
 /* ========== Mobile-friendly input sizing ========== */
-input, select, textarea, button { font-size: 16px; min-height: 44px; }
+input,
+select,
+textarea,
+button {
+	font-size: 16px;
+	min-height: 44px;
+}
+
+/* exporter 実行中だけ DOMアニメを完全停止 */
+.exporting * {
+	animation: none !important;
+	transition: none !important;
+}
+
+/* ============ Debug Panel: Compact Toggle (Refactored) ============ */
+
+/* 1. 閉じた時、.label を隠す */
+/* (js/debug-panel.js 側で .label span の追加が前提) */
+#debug-panel[data-collapsed="true"] #dbg-toggle .label {
+	display: none;
+}
+
+/* 2. 閉じた時、トグルボタン自体の余白を詰める */
+#debug-panel[data-collapsed="true"] #dbg-toggle {
+	min-width: 0;
+	padding-left: 8px;
+	padding-right: 8px;
+}
+
+/* ============ Debug Panel: Download Animation (v9.4) - ALIGNMENT FIX ============ */
+
+/* 1. スピナー（回転）アニメーションの定義 */
+@keyframes dbgSpin {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* 2. QuickBarの [⬇︎] ボタン (.qb-btn) が .is-exporting の時 (中央揃え修正) */
+#debug-panel .qb-btn.download.is-exporting {
+	/* アイコン ⬇︎ を非表示にする */
+	font-size: 0;
+	position: relative;
+	pointer-events: none;
+	/* Flexboxで中央揃えを確実に適用 */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* 疑似要素でスピナーを描画 */
+#debug-panel .qb-btn.download.is-exporting::after {
+	content: '';
+	position: static;
+	/* position: relative から static に変更し、Flexboxに任せる */
+	/* スピナーのサイズと形状 */
+	width: 20px;
+	height: 20px;
+	/* top/left による位置決めを削除 */
+	border: 4px solid rgba(255, 255, 255, .2);
+	/* 軌道 */
+	border-top-color: #fff;
+	/* 回転部分 */
+	border-radius: 50%;
+	/* アニメーションを適用 */
+	animation: dbgSpin 1s linear infinite;
+}
+
+/* 3. 展開パネルの [⬇︎ Download] ボタン (.dbg-controls) が .is-exporting の時 ( QuickBar版に統一) */
+#debug-panel .dbg-controls button[data-act="export"].is-exporting {
+	/* QuickBarと同じようにアイコン化 */
+	font-size: 0;
+	opacity: 0.8;
+	/* 透明度を少し下げる */
+	pointer-events: none;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* 疑似要素でスピナーを描画 (QuickBar版を流用) */
+#debug-panel .dbg-controls button[data-act="export"].is-exporting::after {
+	content: '';
+	position: static;
+	width: 20px;
+	height: 20px;
+	border: 4px solid rgba(255, 255, 255, .2);
+	border-top-color: #fff;
+	border-radius: 50%;
+	animation: dbgSpin 1s linear infinite;
+}
+
+/* QuickBar 横スクロール対応（style.css へ追加） */
+#debug-panel .qb-row.row1 {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+	gap: 8px;
+	padding-bottom: 6px;
+	/* 見た目余白 */
+}
+
+#debug-panel .qb-row.row1::-webkit-scrollbar {
+	height: 8px;
+}
+
+#debug-panel .qb-row.row1::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.08);
+	border-radius: 999px;
+}
+
+/* --- debug toggle: icon-only & compact --- */
+#debug-panel .dbg-toggle {
+	width: 44px;
+	/* iPhone親指で押しやすい最小 */
+	height: 44px;
+	padding: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 8px;
+	line-height: 1;
+	font-size: 18px;
+	/* 🐞の見やすさ */
+	gap: 0;
+}
+
+#debug-panel .dbg-toggle .label {
+	display: none !important;
+}
+
+/* 保険：古いHTMLでも隠す */
+/* #debug-panel #dbg-arrow{ display:none; } ←矢印も不要なら有効のままでOK */
+
+/* 開閉でサイズが変わらないようフォーカス/アクティブ時も同寸 */
+#debug-panel .dbg-toggle:focus,
+#debug-panel .dbg-toggle:active {
+	outline: none;
+}
+
+/* トグル周りの並びを詰める（任意。行の高さが増えないように） */
+#debug-panel .qb-row.row1 {
+	gap: 8px;
+}
