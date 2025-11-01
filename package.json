@@ -1,0 +1,14 @@
+{
+  "name": "root",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "generate:tts": "node scenes-player-kit/tools/generate-tts-json.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
