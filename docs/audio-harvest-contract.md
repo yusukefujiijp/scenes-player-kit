@@ -129,6 +129,32 @@ demote_to_preview_if:
   - Human Final Seal is missing
 ```
 
+## 5.1 Final Declaration Checkpoint
+
+`audioStatus: "final"` is not a normal editable status.
+
+It is a Human Final Seal declaration.
+
+AI agents, automation, draft tools, and schema helpers must not self-declare `audioStatus: "final"`.
+
+However, after the human explicitly verifies the evidence and gives a clear Human Final Seal / GitHub execution instruction, an AI agent may write `audioStatus: "final"` as a delegated scribe/operator.
+
+The authority belongs to the human.
+The write action may be delegated to AI.
+
+Before `audioStatus: "final"` is written, the human must explicitly verify:
+
+1. `audioUrl` resolves to a real audio file.
+2. `audioDurationMs` is measured from that real file.
+3. Human Final Seal is explicitly given.
+
+Any consumer encountering `audioStatus: "final"` without valid evidence must:
+
+1. treat the scene as `preview`, and
+2. surface a visible violation.
+
+Silent fallback is prohibited.
+
 ## 6. Responsibility Split
 
 ### App Responsibility
