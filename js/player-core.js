@@ -90,6 +90,146 @@ function emitPlaying(on){
 }
 const setPending = (p)=> emitTtsState({ pending: !!p });
 
+/* ======================= Final Audio (MP3) Layer ============== */
+let currentAudio = null;
+
+function emitAudioEvent(name, detail){ try{ window.dispatchEvent(new CustomEvent(name, { detail })); }catch(_){ } }
+function hasFinalAudio(scene){
+  try{
+    return (String(scene && scene.audioStatus || '').toLowerCase() === 'final')
+      && (typeof scene.audioUrl === 'string')
+      && (String(scene.audioUrl || '').trim().length > 0);
+  }catch(_){ return false; }
+}
+function stopFinalAudio(reason){
+  try{
+    if(!currentAudio) return;
+    currentAudio.abortedByControl = true;
+    const { el, scene, finish } = currentAudio;
+    try{
+      if(el){
+        try{ el.pause(); }catch(_){}
+        try{ el.src = ''; el.load(); }catch(_){}
+        el.onplaying = el.onplay = el.onended = el.onerror = el.ontimeupdate = null;
+        try{ el.remove(); }catch(_){}
+      }
+    }catch(_){}
+    try{ emitAudioEvent('player:audio-interrupted', { scene, url: (scene && scene.audioUrl), reason: String(reason || 'stopped') }); }catch(_){}
+    try{ if(typeof finish === 'function') finish({ kind:'stopped', reason:String(reason || 'stopped') }); }catch(_){}
+  }catch(_){}
+  currentAudio = null;
+}
+function playFinalAudio(scene, navTokenAtStart){
+  return new Promise((resolve)=>{
+    if(!hasFinalAudio(scene)) return resolve({ kind:'fallback' });
+    try{
+      if(currentAudio) stopFinalAudio('interrupted-by-new-audio');
+      const el = document.createElement('audio');
+      el.preload = 'auto';
+      el.src = String(scene.audioUrl || '');
+      el.crossOrigin = 'anonymous';
+      el.style.display = 'none';
+      try{
+        const g = Number(scene && scene.audioGain);
+        el.volume = Number.isFinite(g) ? Math.max(0, Math.min(1, g)) : 1.0;
+      }catch(_){ try{ el.volume = 1.0; }catch(__){} }
+      el.setAttribute('playsinline', 'true');
+      el.setAttribute('webkit-playsinline', 'true');
+      document.body.appendChild(el);
+
+      let settled = false;
+      const meta = { el, scene, navTokenAtStart, started:false, abortedByControl:false, finish:null };
+      currentAudio = meta;
+      const cleanup = ()=>{
+        try{
+          el.onplaying = el.onplay = el.onended = el.onerror = el.ontimeupdate = null;
+          try{ el.remove(); }catch(_){}
+        }catch(_){}
+      };
+      const finish = (res)=>{
+        if(settled) return;
+        settled = true;
+        try{ cleanup(); }catch(_){}
+        try{ if(currentAudio === meta) currentAudio = null; }catch(_){}
+        try{ resolve(res || { kind:'stopped' }); }catch(_){}
+      };
+      meta.finish = finish;
+      const markStartedIfProgress = ()=>{ try{ if(el.currentTime && el.currentTime > 0) meta.started = true; }catch(_){} };
+      el.onplaying = ()=>{ meta.started = true; };
+      el.onplay = ()=>{ meta.started = true; };
+      el.ontimeupdate = ()=>{
+        try{
+          if(Ctrl.navToken !== navTokenAtStart){
+            meta.abortedByControl = true;
+            stopFinalAudio('stale-navigation');
+            return;
+          }
+        }catch(_){}
+        markStartedIfProgress();
+      };
+      el.onended = ()=>{
+        if(settled) return;
+        try{
+          if(Ctrl.navToken !== navTokenAtStart || meta.abortedByControl){
+            stopFinalAudio('stale-or-aborted-on-ended');
+            return;
+          }
+        }catch(_){}
+        try{ emitAudioEvent('player:audio-end', { scene, url: scene.audioUrl, reason:'ended' }); }catch(_){}
+        return finish({ kind:'ended' });
+      };
+      el.onerror = (ev)=>{
+        if(settled) return;
+        const navMismatch = (Ctrl.navToken !== navTokenAtStart);
+        if(meta.abortedByControl || navMismatch){
+          return finish({ kind:'stopped', reason:'stale-audio-error' });
+        }
+        const started = !!meta.started;
+        try{ emitAudioEvent('player:audio-error', { scene, url: scene.audioUrl, err:(ev && (ev.message || ev.type)) || 'error' }); }catch(_){}
+        if(started) return finish({ kind:'error-mid' });
+        return finish({ kind:'fallback' });
+      };
+      if(Ctrl.navToken !== navTokenAtStart){
+        stopFinalAudio('stale-navigation-before-play');
+        return finish({ kind:'stopped', reason:'stale-navigation-before-play' });
+      }
+      (async ()=>{
+        try{
+          emitAudioEvent('player:audio-start', { scene, url: scene.audioUrl });
+          const p = el.play();
+          if(p && typeof p.then === 'function'){
+            await p.catch((err)=>{
+              markStartedIfProgress();
+              const started = !!meta.started;
+              const navMismatch = (Ctrl.navToken !== navTokenAtStart);
+              if(settled || meta.abortedByControl || navMismatch){
+                return finish({ kind:'stopped', reason:'stale-play-rejection' });
+              }
+              try{ emitAudioEvent('player:audio-error', { scene, url: scene.audioUrl, err:String(err) }); }catch(_){}
+              if(started) finish({ kind:'error-mid' });
+              else finish({ kind:'fallback' });
+            });
+          }
+        }catch(err){
+          markStartedIfProgress();
+          const started = !!meta.started;
+          const navMismatch = (Ctrl.navToken !== navTokenAtStart);
+          if(settled || meta.abortedByControl || navMismatch){
+            return finish({ kind:'stopped', reason:'stale-play-rejection' });
+          }
+          try{ emitAudioEvent('player:audio-error', { scene, url: scene.audioUrl, err:String(err) }); }catch(_){}
+          if(started) finish({ kind:'error-mid' });
+          else finish({ kind:'fallback' });
+        }
+      })();
+    }catch(_){
+      try{ if(currentAudio && currentAudio.finish) currentAudio.finish({ kind:'fallback' }); }catch(__){}
+      currentAudio = null;
+      return resolve({ kind:'fallback' });
+    }
+  });
+}
+
 /* ======================= Utils =============================== */
 const nowMs = () => (window.performance && performance.now ? performance.now() : Date.now());
 const sleep = (ms) => new Promise(r => setTimeout(r, Math.max(0, ms|0)));
@@ -139,6 +279,7 @@ function setBg(c){
     document.documentElement.style.setProperty('--bg-color', String(c));
   }catch(_){}
 }
+
 function applyVersionToBody(scene){
   const v=(scene&&(scene.version||scene.uiVersion))||'A';
   const b=document.body;
@@ -300,6 +441,7 @@ function requestSoftStop(){
     Ctrl.stopRequested = true; Ctrl.stopReqAt = nowMs();
     try{ window.dispatchEvent(new CustomEvent('player:stop-ack', { detail:{ ts: Ctrl.stopReqAt } })); }catch(_){}
   }
+  try{ stopFinalAudio('stop-pressed'); }catch(_){}
 }
 function finalizeStopIfNeeded(context){
   if(Ctrl.stopRequested && !Ctrl.stopped){
@@ -552,7 +694,14 @@ async function playScene(scene){
         renderContent(scene);
         emit('player:scene-didrender', { index: State.idx, kind });
         await primeTTS();
-        await runContentSpeech(scene);
+        if(hasFinalAudio(scene)){
+          const res = await playFinalAudio(scene, myTok);
+          if(res && res.kind === 'fallback'){
+            await runContentSpeech(scene);
+          }
+        } else {
+          await runContentSpeech(scene);
+        }
       } finally {
         State.playingLock = false;
         emitPlaying(false);
@@ -608,16 +757,19 @@ async function playScene(scene){
 async function gotoPage(i){
   if(!Array.isArray(State.scenes)) return;
   if(i<0||i>=State.scenes.length) return;
+  Ctrl.navToken++;
+  try{ stopFinalAudio('nav-goto'); }catch(_){}
   await ensureResumed();
   emit('player:navigation-queued', { from: State.idx, to: i });
   try{ if('speechSynthesis' in window){ speechSynthesis.cancel(); Ctrl.lastCancelAt=nowMs(); } }catch(_){}
-  Ctrl.navToken++; // 以降の待機を中断
   State.idx=i;
   try{ window.dispatchEvent(new CustomEvent('player:page', { detail:{ index:i, total:(State.scenes||[]).length, scene: State.scenes[i] } })); }catch(_){}
   emit('player:navigation-applied', { index: i, total:(State.scenes||[]).length });
   await playScene(State.scenes[i]);
 }
 async function gotoNext(){
+  Ctrl.navToken++;
+  try{ stopFinalAudio('nav-next'); }catch(_){}
   await ensureResumed();
   const N=(State.scenes||[]).length;
   if(State.idx + 1 >= N){ try{ window.dispatchEvent(new CustomEvent('player:end')); }catch(_){ } return; }
@@ -625,6 +777,8 @@ async function gotoNext(){
   await gotoPage(State.idx + 1);
 }
 async function gotoPrev(){
+  Ctrl.navToken++;
+  try{ stopFinalAudio('nav-prev'); }catch(_){}
   await ensureResumed();
   if(State.idx - 1 < 0){ try{ window.dispatchEvent(new CustomEvent('player:begin')); }catch(_){ } return; }
   emit('player:navigation-queued', { from: State.idx, to: State.idx-1 });
@@ -673,6 +827,7 @@ async function boot(){
 async function hardStop(){
   requestSoftStop();
   setPending(true);
+  try{ stopFinalAudio('hard-stop'); }catch(_){}
   try{ if('speechSynthesis' in window){ speechSynthesis.cancel(); Ctrl.lastCancelAt=nowMs(); await sleep(280); } }catch(_){}
   Ctrl.stopped = true;
   finalizeStopIfNeeded('hard');
@@ -928,3 +1083,4 @@ try{ if('speechSynthesis' in window){ window.speechSynthesis.addEventListener('v
     }
   } catch (_) {}
 })();
+
