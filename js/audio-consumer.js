@@ -1,5 +1,5 @@
-function makeThing(){
+function makeThing(v){
   const el = document.createElement('div');
-  el.textContent = 'ok';
+  el.textContent = String(v || 'ok');
   return el;
 }
