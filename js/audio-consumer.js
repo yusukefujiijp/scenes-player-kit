@@ -1,5 +1,4 @@
-function makeThing(v){
-  const el = document.createElement('div');
-  el.textContent = String(v || 'ok');
+function makeThing(){
+  const el = document.getElementById('finalAudio');
   return el;
 }
