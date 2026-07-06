@@ -1,82 +1,207 @@
-scenes-player-kit（iOS-first）
-https://yusukefujiijp.github.io/scenes-player-kit/
+# scenes-player-kit
 
-作成: 2025/10/19 → 最終更新: 2025/10/22
-対象: iPhoneオンリー開発（Textastic / Working Copy / a-Shell など）
-目的: 「就寝前に深い祈りへ導く」短編シーン再生を、小粒に編集 → 即再生確認 → そのまま録画/投稿できる最小構成で提供。
+**iOS-first scene player kit for YusukeJP x AI-Collaborator.**
 
-この README は “次スレの AI への遺言状” でもあります。
-AI はスレッドごとに忘れても、台本とこの README が意図を保持し続けます。
+This repository is a small, scene-driven runtime for testing short visual/audio sequences on iPhone. It currently serves two different audio purposes:
 
-Audio Harvest Contract: exporter / final audio / `scenes.json` / schema validation を触る前に、必ず `docs/audio-harvest-contract.md` を先に読む。
+- **Live TTS preview** for drafting, checking, and quick iteration.
+- **Final MP3 harvest** for deterministic playback and production-like runtime checks.
 
-⸻
+Root rule:
 
-ハイライト（設計の柱）
-	•	Activation Gate = page1（無音）
-初回タップで音声権限を解錠。投稿用動画では page1 はカットし、実映像は page2 開始。
-	•	二層TTS（表示と読みの分離）
-表示: narr / 読み: narrTTS。タイトルも titleKeyTTS / titleTTS を採用。
-既定ポリシー mode: "mirror"（表示と読みの意味一致）。誘導文を“読みだけに追加”はしない。
-	•	句読点と拗音の最適化（iOS TTS 対策）
-	•	読点 、 → 半角スペース2個（クリック音/ノイズ回避 + 呼吸の間）
-	•	句点 。 → 必要時に全角スペースを後置し休止補強
-	•	拗音 “にゅ/しゅ/ちゅ …” → カタカナ化（例: にゅ→ニュ） で不安定発音を緩和
-これらは js/tts-sanitize.js が narr / titleKey / title 全ロールに適用
-	•	Render Contract（v1.1）
-HTML 構造は固定。見た目は style.css の単一起源。JS は状態遷移と属性付与のみ。
-	•	静寂ゲート
-文章を短チャンク化 → 読了後、静寂時間と余韻を待ってから進行（読飛び防止）。
+> **Final MP3 is harvest. Live TTS is preview.**
 
-⸻
+This README is the project-level entry gate for future humans and AI collaborators. Read this before changing branches, audio behavior, runtime links, or player internals.
 
-クイックスタート（iPhone / ローカル）
+---
 
-# a-Shell (iOS)
-cd ~/Documents/scenes-player-kit
-python3 -m http.server 8080
-# Safari → http://127.0.0.1:8080/
+## 1. Current operating branch
 
-1分チェック
-	1.	最初にタップしたか（無音の原因の9割は未解錠）
-	2.	見た目は style.css のみ（index.html に  を置かない）
-	3.	#content が min-height: 100dvh 相当を満たす（visualViewport 連携）
-	4.	読みが飛ぶ → チャンク化 & 静寂ゲートが効いているか
-	5.	誤読は *TTS 層で直す（辞書より最優先）
+- **Living branch:** `dev`
+- **Main branch:** stale / do not touch casually.
+- **PR #11:** unsafe / do not touch unless YusukeJP gives an explicit Human Seal.
 
-⸻
+When in doubt, work only on `dev` and touch only the file explicitly named by the current task.
 
-台本（scenes.json）ルール — 「スクリプトが覚えている」
+---
 
-仕様は台本に自己記述します。AI/人が交代しても意図が残ります。
+## 2. Live runtime links
 
-	•	videoMeta.doc.rulesMd（またはトップレベル doc.rulesMd）に運用ルールを保存
-	•	代表ルール（要約）:
-	•	二層TTS: narr と narrTTS を分離。タイトル系は titleKeyTTS / titleTTS
-	•	mirror 準拠: 読みは表示と意味一致（読みだけに文を足さない）
-	•	句読点: 、→スペース2個 / 。→必要時に全角スペース付加
-	•	拗音: “にゅ/しゅ/ちゅ …” を カタカナ拗音へ（例: どうにゅう→どうニュう）
-	•	page1: アクティベーション専用（音声なし）。録画時はカット
-	•	変更は *「まず rulesMd を更新 → TTS 修正 → どうしても必要ならコアに極小パッチ」
-	•	videoMeta.doc.version を MAJOR.MINOR.PATCH で更新。理由も rulesMd に明記
+Tap links:
 
-例（rulesMd 抜粋）:
-	•	“にゅ を ニュ へ内部変換（iOS TTS 安定化）”
-	•	“読点を半角2スペースに置換（クリック音回避）”
+- [GitHub Pages Runtime](https://yusukefujiijp.github.io/scenes-player-kit/)
+- [GitHub Pages Runtime Test](https://yusukefujiijp.github.io/scenes-player-kit/?v=hardstop-core1) — Trusted Tap URL candidate; direct-open was observed, but this is platform/session-controlled and not guaranteed.
+- [Page003 Final MP3](https://yusukefujiijp.github.io/scenes-player-kit/assets/audio/final/page-003-scattered-room-v001.mp3) — direct asset verification.
 
-⸻
+The runtime app link tests the app. The MP3 link only verifies the final audio asset.
 
-ファイル構成（抜粋）
+---
 
-.
-├── index.html
-├── style.css
-├── scenes.json                 # 台本（ルール自己記述）
-└── js/
-    ├── player-core.js          # 状態遷移 / 描画 / TTS / 自動進行
-    ├── tts-sanitize.js         # 句読点・絵文字・拗音の整形（全ロール対応）
-    ├── tts-voice-utils.js      # 音声選択・役割別レート
-    └── scene-effects.js        # 軽量エフェクト
+## 3. Current status
 
-命名方針（教訓）: ドットよりダッシュ連結を採用（例: player-core.js）。
-既存参照の置換は リポジトリ内検索で実施。
+- Page003 final MP3 route: **PASS**.
+- Page003 MP3 Stop / Hard Stop / Next kill path: **PASS**.
+- Live TTS Red Stop: **best-effort / browser-managed / mystery parked**.
+- Issue #13 should remain open until final human runtime seal.
+
+This project has already proven the important design boundary:
+
+> The app can own and kill a final MP3 Audio object deterministically. It cannot fully own browser-managed `speechSynthesis` in the same way.
+
+---
+
+## 4. Core doctrine
+
+- **The kill path is the patch.**
+- **Evidence or Demote.**
+- **Final MP3 is harvest.**
+- **Live TTS is preview.**
+- **Mystery Mode converts anomalies into design boundaries.**
+
+A runtime mystery is not noise. It is diagnostic evidence. Once the boundary is found, record it and move forward.
+
+---
+
+## 5. Audio policy
+
+### Final MP3
+
+Final MP3 is the harvest path.
+
+- It is an app-owned `Audio` object.
+- `Stop`, `Hard Stop`, `Next`, `Prev`, and stale navigation can directly interrupt it.
+- No Live TTS fallback should occur after mid-play interruption or user stop.
+- Page003 final MP3 is the current proof case.
+
+### Live TTS
+
+Live TTS is the preview path.
+
+- It is browser-managed through `speechSynthesis`.
+- It is useful for drafting, checking, and early iteration.
+- It is not the final deterministic audio path.
+- Red Stop behavior may remain probabilistic on iOS.
+
+Do not keep patching Live TTS Stop behavior unless a dedicated future issue makes it product-critical.
+
+---
+
+## 6. Runtime evidence
+
+Observed on iPhone / ChatGPT-led runtime testing:
+
+| Page | Audio mode | Stop observation | Interpretation |
+|---|---|---|---|
+| Page003 | Final MP3 | one tap | app-owned kill path |
+| Page004 | Live TTS | may require two taps | browser-owned producer depth |
+| Page005 | Live TTS | may require three taps | deeper TTS queue / role / watchdog state |
+
+Working model:
+
+> **Tap Count may reflect hidden browser-owned producer depth.**
+
+This remains an observation-based model, not a claim about browser internals.
+
+---
+
+## 7. Link policy
+
+A direct MP3 is a file, not a place.
+
+Direct media asset links may open more smoothly because they resolve to a passive file resource. Runtime app links, GitHub commits, issues, PRs, and docs are interactive destinations and may trigger platform confirmation. Ark does not attempt to bypass platform-controlled confirmation behavior.
+
+### Link classes
+
+| Class | Use | Expected behavior |
+|---|---|---|
+| Direct Asset Link | MP3 / media / asset delivery verification | may open smoothly |
+| Runtime App Link | actual GitHub Pages runtime testing | confirmation tap may appear |
+| Trusted Tap URL | exact runtime URL with observed direct-open behavior | useful, not guaranteed |
+| Code / Audit Link | commits / PRs / issues / file views | confirmation tap expected |
+| Documentation Link | README / docs | confirmation tap expected |
+| Copy-only URL | Full Rail / handoff blocks | copy target, not tap target |
+
+Trusted Tap URL rule:
+
+> A previously opened exact runtime URL may behave as a Trusted Tap URL in the current platform/session. This is useful for Tap & Open Rail, but it is platform-controlled and not guaranteed.
+
+For routine testing, reuse one stable tap link when possible. Use cache-busted or audit URLs when needed, but treat them as confirmation-expected or copy-only.
+
+---
+
+## 8. Mystery Mode findings
+
+### TTS Mystery
+
+Final MP3 and Live TTS are different ownership models.
+
+- Final MP3: app-owned, deterministic kill path.
+- Live TTS: browser-managed, best-effort cancellation.
+
+Conclusion:
+
+> **Final MP3 is harvest. Live TTS is preview.**
+
+### Link Mystery
+
+Direct MP3 was smooth because it is a file, not a place. A runtime URL may also become smooth if the exact href has already behaved as trusted/direct-open in the current platform session.
+
+Conclusion:
+
+> **Do not fake a file. Find the honest smooth rail.**
+
+---
+
+## 9. Branch / PR guard
+
+- `dev` is the current living branch.
+- `main` is not the operational truth right now.
+- PR #11 is not a safe target.
+- Do not merge, close, rewrite, or synchronize PR #11 unless YusukeJP explicitly says so.
+
+Branch confusion has already consumed time. The current project posture is survival-line discipline: stay on `dev` unless a task explicitly says otherwise.
+
+---
+
+## 10. Do not touch without Human Seal
+
+Do not change these unless the task explicitly says to do so:
+
+- `main`
+- PR #11
+- schema files
+- exporter pipeline
+- GitHub workflows
+- `scenes.json`
+- `player-core.js` refactor
+- TTS engine rewrite
+- new queue manager
+- broad architecture cleanup
+
+If a future AI wants to touch any of these, stop and ask for a Human Seal first.
+
+---
+
+## 11. Next gates
+
+Recommended order:
+
+1. Write / update `js/README.md` as the runtime internals map.
+2. Complete final human runtime evidence for Issue #13.
+3. Decide whether Issue #13 can close after human runtime seal.
+4. Only then consider broader cleanup.
+
+Do not reopen the TTS Stop mystery or Link mystery unless there is a new product-critical reason.
+
+---
+
+## 12. Older local-development notes
+
+Historical context from the earlier README remains useful but is no longer the top-level operating truth:
+
+- The project started as an iPhone-first scene playback workflow.
+- `scenes.json` carries scenario data and some self-documenting rules.
+- `js/tts-sanitize.js` and related TTS utilities still matter for Live TTS preview.
+- For local iPhone testing, a simple static server can still be used, for example `python3 -m http.server 8080`.
+
+For JS internals, read `js/README.md` after it is created or refreshed.
