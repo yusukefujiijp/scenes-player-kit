@@ -1,4 +1,4 @@
-function makeThing(){
-  const el = document.getElementById('finalAudio');
-  return el;
+async function makeThing(obj){
+  if (!obj) return;
+  await obj.play();
 }
