@@ -454,12 +454,19 @@ function finalizeStopIfNeeded(context){
 function clearStop(){ Ctrl.stopRequested = false; Ctrl.stopped = false; }
 
 /* ========================= TTS Core ========================== */
+
 function speakStrict(text, rate = rateFor('narr'), role='narr'){
+  const myTok = Ctrl.navToken;
+  const stoppedOrStale = () => (Ctrl.stopped || myTok !== Ctrl.navToken);
+
   return new Promise(async (resolve)=>{
     if(!TTS_ENABLED) return resolve();
+    if(stoppedOrStale()) return resolve();
+
     const cleaned = stripMarkdownLight(scrub(text)); if(!cleaned) return resolve();
 
     await ensureResumed();
+    if(stoppedOrStale()) return resolve();
 
     const fixes = getSpeechFixes();
     let speakText = cleaned;
@@ -468,8 +475,11 @@ function speakStrict(text, rate = rateFor('narr'), role='narr'){
       speakText = speakText.split(k).join(String(fixes[k]??''));
     }
     try { await loadTtsKvOptional(); } catch(_){}
+    if(stoppedOrStale()) return resolve();
+
     speakText = applyTtsKvIfAny(speakText);
     if(!speakText.trim()) return resolve();
+    if(stoppedOrStale()) return resolve();
 
     const u = new SpeechSynthesisUtterance(speakText);
     u.lang='ja-JP'; const v=chooseVoice(role)||jpVoice; if(v) u.voice=v; const eff=effRateFor(role, rate); u.rate=eff;
@@ -482,6 +492,7 @@ function speakStrict(text, rate = rateFor('narr'), role='narr'){
     u.onend=done;
     u.onerror=(ev)=>{ try{ emit('player:tts-error', { role, reason: (ev && ev.error) || 'error' }); }catch(_){ } done(); };
 
+    if(stoppedOrStale()) return done();
     try{ speechSynthesis.speak(u); }catch(_){ return done(); }
 
     // === 改良ウォッチドッグ ===
@@ -492,15 +503,26 @@ function speakStrict(text, rate = rateFor('narr'), role='narr'){
 
     // 2.0s 経っても start しない＆speaking=false の時だけ一度だけ再発話
     setTimeout(async ()=>{
+      if(stoppedOrStale()) return done();
+
       if(!started && !settled && !fallbackTried){
+        if(stoppedOrStale()) return done();
         try{ if('speechSynthesis' in window) speechSynthesis.resume(); }catch(_){ }
+
         await sleep(350);
+        if(stoppedOrStale()) return done();
+
         if(!started && !settled){
           if(('speechSynthesis' in window) && !speechSynthesis.speaking){
             fallbackTried=true;
             try{ speechSynthesis.cancel(); Ctrl.lastCancelAt = nowMs(); }catch(_){ }
+
             await sleep(280);
+            if(stoppedOrStale()) return done();
+
             const u2=new SpeechSynthesisUtterance(speakText); u2.lang='ja-JP'; if(v) u2.voice=v; u2.rate=eff; u2.onstart=()=>{ started=true; }; u2.onend=done; u2.onerror=done;
+
+            if(stoppedOrStale()) return done();
             try{ speechSynthesis.speak(u2); }catch(_){ return done(); }
           }
         }
