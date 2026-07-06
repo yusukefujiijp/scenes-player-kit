@@ -825,11 +825,15 @@ async function boot(){
 
 /* ========================= Public API ======================== */
 async function hardStop(){
+  Ctrl.navToken++;
+  Ctrl.stopped = true;
   requestSoftStop();
   setPending(true);
   try{ stopFinalAudio('hard-stop'); }catch(_){}
-  try{ if('speechSynthesis' in window){ speechSynthesis.cancel(); Ctrl.lastCancelAt=nowMs(); await sleep(280); } }catch(_){}
-  Ctrl.stopped = true;
+  try{ if('speechSynthesis' in window){ speechSynthesis.cancel(); Ctrl.lastCancelAt=nowMs(); } }catch(_){}
+  emitTtsState({ speaking:false, paused:false, pending:false });
+  try{ window.dispatchEvent(new CustomEvent('player:tts-stop', { detail:{ reason:'hard-stop' } })); }catch(_){}
+  await sleep(280);
   finalizeStopIfNeeded('hard');
 }
 
