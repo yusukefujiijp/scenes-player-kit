@@ -7,7 +7,7 @@
   function log(s){var x=el(); if(x) x.textContent='['+ts()+'] '+s}
   function on(n,f){try{w.addEventListener(n,f,{passive:true})}catch(e){w.addEventListener(n,f)}}
   function cancelOnce(){try{ if('speechSynthesis' in w) w.speechSynthesis.cancel() }catch(e){}}
-  function openGate(){gateUntil=Date.now()+1800}
+  function openGate(){gateUntil=Date.now()+4000}
   function closeGate(){gateUntil=0}
   function installSpeakGate(){
     try{
