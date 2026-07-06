@@ -119,8 +119,10 @@
       "base": "#10131d",
       "narr": "部屋の整理整頓、\nどこから手をつけるべきか。\n悩ましい問題です。",
       "narrTTS": "へや の せいり せいとん、  どこ から て を つける べき か。  なやましい もんだい です。",
-      "audioKey": "narr.01",
-      "audioUrl": "./assets/audio/demo-narr-01.mp3",
+      "audioKey": "page.003.final",
+      "audioUrl": "./assets/audio/final/page-003-scattered-room-v001.mp3",
+      "audioDurationMs": 9326,
+      "audioStatus": "final",
       "audioGain": 0.9
     },
     {
