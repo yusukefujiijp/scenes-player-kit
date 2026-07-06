@@ -22,6 +22,8 @@
     try{ w.dispatchEvent(new CustomEvent('player:tts-stop',{detail:{reason:reason||'hard-stop'}})) }catch(e){}
     setTimeout(cancelOnce,80)
     setTimeout(cancelOnce,240)
+    setTimeout(cancelOnce,600)
+    setTimeout(cancelOnce,1200)
   }
   function wrapPlayer(){
     var p=w.__player; if(!p||p.__audioLogWrapped) return;
