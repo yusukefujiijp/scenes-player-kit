@@ -2,6 +2,8 @@
 
 **iOS-first scene player kit for YusukeJP x AI-Collaborator.**
 
+Last verified: 2026-07-07 by YusukeJP.
+
 This repository is a small, scene-driven runtime for testing short visual/audio sequences on iPhone. It currently serves two different audio purposes:
 
 - **Live TTS preview** for drafting, checking, and quick iteration.
@@ -18,10 +20,10 @@ This README is the project-level entry gate for future humans and AI collaborato
 ## 1. Current operating branch
 
 - **Living branch:** `dev`
-- **Main branch:** stale / do not touch casually.
+- **Main branch:** stale / no write operations without explicit Human Seal.
 - **PR #11:** unsafe / do not touch unless YusukeJP gives an explicit Human Seal.
 
-When in doubt, work only on `dev` and touch only the file explicitly named by the current task.
+When in doubt, work only on `dev` and touch only the file explicitly named by the current task. Section 11 is a queue, not standing authorization.
 
 ---
 
@@ -39,14 +41,14 @@ The runtime app link tests the app. The MP3 link only verifies the final audio a
 
 ## 3. Current status
 
-- Page003 final MP3 route: **PASS**.
-- Page003 MP3 Stop / Hard Stop / Next kill path: **PASS**.
+- Page003 final MP3 route: **PASS** — AI-led iPhone runtime observation; human seal pending via Issue #13.
+- Page003 MP3 Stop / Hard Stop / Next kill path: **PASS** — AI-led iPhone runtime observation; human seal pending via Issue #13.
 - Live TTS Red Stop: **best-effort / browser-managed / mystery parked**.
-- Issue #13 should remain open until final human runtime seal.
+- Issue #13 must remain open unless YusukeJP gives a final human runtime seal.
 
-This project has already proven the important design boundary:
+This project has already proven the important design boundary on the Page003 tested path:
 
-> The app can own and kill a final MP3 Audio object deterministically. It cannot fully own browser-managed `speechSynthesis` in the same way.
+> The app can own and kill a final MP3 Audio object through a deterministic app-owned path. It cannot fully own browser-managed `speechSynthesis` in the same way.
 
 ---
 
@@ -70,7 +72,7 @@ Final MP3 is the harvest path.
 
 - It is an app-owned `Audio` object.
 - `Stop`, `Hard Stop`, `Next`, `Prev`, and stale navigation can directly interrupt it.
-- No Live TTS fallback should occur after mid-play interruption or user stop.
+- As a spec rule, no Live TTS fallback should occur after mid-play interruption or user stop.
 - Page003 final MP3 is the current proof case.
 
 ### Live TTS
@@ -157,7 +159,9 @@ Conclusion:
 - `dev` is the current living branch.
 - `main` is not the operational truth right now.
 - PR #11 is not a safe target.
-- Do not merge, close, rewrite, or synchronize PR #11 unless YusukeJP explicitly says so.
+- Do not merge, close, rewrite, synchronize, comment on, label, or rebase PR #11 unless YusukeJP explicitly says so.
+
+Any branch, PR, or issue not named in this README is read-only by default unless the current task explicitly names it.
 
 Branch confusion has already consumed time. The current project posture is survival-line discipline: stay on `dev` unless a task explicitly says otherwise.
 
@@ -167,6 +171,7 @@ Branch confusion has already consumed time. The current project posture is survi
 
 Do not change these unless the task explicitly says to do so:
 
+- this README / root guard document
 - `main`
 - PR #11
 - schema files
@@ -178,20 +183,22 @@ Do not change these unless the task explicitly says to do so:
 - new queue manager
 - broad architecture cleanup
 
-If a future AI wants to touch any of these, stop and ask for a Human Seal first.
+If a future AI wants to touch any of these, stop and ask for a Human Seal first. Repairs may be valid, but still require Human Seal when they touch guarded areas.
 
 ---
 
 ## 11. Next gates
 
-Recommended order:
+Gate queue:
 
 1. Write / update `js/README.md` as the runtime internals map.
 2. Complete final human runtime evidence for Issue #13.
 3. Decide whether Issue #13 can close after human runtime seal.
 4. Only then consider broader cleanup.
 
-Do not reopen the TTS Stop mystery or Link mystery unless there is a new product-critical reason.
+These are queued gates, not standing authorization. Each gate still requires the current task or explicit Human Seal.
+
+Do not reopen the TTS Stop mystery or Link mystery unless there is a new product-critical reason. New contradictory runtime evidence may always be recorded; reopening investigation requires Human Seal.
 
 ---
 
