@@ -1,3 +1,5 @@
-const a = document.createElement('audio');
-a.src = './x.mp3';
-console.log(a.src);
+function makeThing(){
+  const el = document.createElement('div');
+  el.textContent = 'ok';
+  return el;
+}
