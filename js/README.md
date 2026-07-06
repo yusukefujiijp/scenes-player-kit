@@ -1,147 +1,211 @@
----
-doc_id: js-readme
-doc_version: "2025-09-21.0"
-module: js
-render_contract: v1.1
-schema_min: v3.2
-tts_policy: "perRoleAbs: clamp 0.5–2.0, default 1.4"
-last_verified: "2025-09-21T00:00:00+09:00"
-verified_on:
- - device: "iPhone"
-   os: "iOS (Safari)"
-   workflow: ["Textastic", "Working Copy", "a-Shell http.server"]
-tags: ["iOS-first", "activation-gate", "visualViewport", "debug-panel", "rate-per-role", "effects", "readme"]
----
+# JS Runtime Notes
 
-# shorts-player-kit / js README (2025-09-21, latest)
+This document is the runtime-internals map for `js/`.
 
-この文書は `js/` 配下の**運用規範の単一ソース**です。  
-iOS ファーストで、**表示契約（Render Contract）v1.1**／起動ゲート（Activation Gate）／TTS 規範／visualViewport 連携／Debug UI の責務分離を定義します。
+Read the root [`README.md`](../README.md) first. The root README defines the project-level branch guard, audio policy, link policy, and Human Seal boundaries. This file only explains the JavaScript runtime layer.
+
+Root rule inherited from the root README:
+
+> **Final MP3 is harvest. Live TTS is preview.**
 
 ---
 
-## 0) TL;DR（重要ポイントだけ）
-- **アクティベーション・ゲート必須**：初回の明示的ユーザー操作で TTS/Audio を解錠。以後は自動遷移可。Safari の自動再生ポリシー準拠。 [oai_citation:0‡Stack Overflow](https://stackoverflow.com/questions/74986310/how-to-keep-header-at-top-of-visual-viewport-after-layout-visual-viewport-change?utm_source=chatgpt.com)
-- **レイアウトは `visualViewport`＋`dvh`＋`safe-area` の三点支持**：  
- `visualViewport.height` を CSS 変数で流し、平常時は `100dvh` を採用。下端は `env(safe-area-inset-bottom)` を加味。 [oai_citation:1‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/API/Visual_Viewport_API?utm_source=chatgpt.com)
-- **TTS は役割別・絶対レート**（0.5–2.0、既定 1.4）。断片再生＋静寂ゲートで読了保証。`speechSynthesis` の状態はイベント駆動で可視化。 [oai_citation:2‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_environment_variables/Using_environment_variables?utm_source=chatgpt.com)
-- **表示は“契約”駆動**：HTML 構造と CSS クラスで表層を固定。JS は**状態遷移**と**属性付与**のみ。`!important` 禁止。
-- **Debug Panel は見た目ゼロ**：JS は状態だけを切り替え、**見た目は style.css のみ**（スコープ済み）。
+## 1. Current scope
+
+`js/` contains the browser runtime for the scene player.
+
+Its job is to:
+
+- load scenes,
+- render the current scene,
+- run Live TTS preview,
+- play Final MP3 audio when available,
+- handle navigation,
+- expose runtime/debug events,
+- support exporter-facing canvas rendering.
+
+This document is intentionally not a rewrite plan. It is a map and guard.
 
 ---
 
-## 1) Render Contract v1.1（表示の“契約”）
+## 2. File map
 
-### レイヤ構造（固定）
-- 背景: `#bgColor` / `#bgBreath`（`position:fixed; z-index:0; pointer-events:none`）  
- ベール（A/B/T）は `body.version-*` の組合せで **CSS が担当**。
-- 舞台: `#wrapper > #content`（中央寄せ／1シーンぶんを内包）
+Important runtime files:
 
-### シーン DOM（1ページごと再構築）
-`#content > .scene` に、以下**クラス名を契約**として内包：
-- `.section-tags > .section-tag`（例：`#Trivia1`, `#Scripture` など複数。推奨 3 個）
-- `.title_key`（例：`【創世記1:9–10 抄】`）
-- `.title`
-- `.symbol-bg > .symbol`（帯色は CSS 変数 `--symbol-bg-color`）
-- `.narr`（`white-space:pre-line`）
+| File | Role |
+|---|---|
+| `player-core.js` | Central runtime: scene loading, render, navigation, Live TTS, Final MP3 playback, Stop / Hard Stop, canvas export hook |
+| `tts-sanitize.js` | Role-based TTS text extraction / sanitation boundary |
+| `tts-kv-simple.js` | Optional TTS key-value replacement layer |
+| `utils/color.js` | Readable color analysis and theme application |
+| `debug-panel/index.js` | Debug panel runtime wiring |
+| `debug-panel/state.js` | Debug panel state helpers |
+| `debug-panel/audio-log.js` | Audio/TTS event evidence helper and stop-gate support |
 
-> **禁止事項**：ID スロットへの直接描画を前提にしない（過渡アダプタは残すが非推奨）。  
-> **目標**：`.scene` クラス構造へ完全移行。
+If a file is not named by the current task, do not edit it.
 
 ---
 
-## 2) 起動と状態（Activation Gate / State）
+## 3. `player-core.js` responsibilities
 
-### Activation Gate
-- **目的**：Safari のユーザージェスチャー要件を**最初の 1 回**で満たし、TTS・Audio・Video を解錠。 [oai_citation:3‡Stack Overflow](https://stackoverflow.com/questions/74986310/how-to-keep-header-at-top-of-visual-viewport-after-layout-visual-viewport-change?utm_source=chatgpt.com)
-- **実装**：
- - `body.app-unactivated` を初期付与。ゲート UI はこの状態でのみ前面表示（`inert` で背面を無効化可）。 [oai_citation:4‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API?utm_source=chatgpt.com)
- - ゲートのクリックで `app-activated` へ遷移し、初期の「無音トークン」または「短チャンク再生」で `speechSynthesis` が動作可能化。
-- **UX**：フェード/ズームなど演出は CSS 側。JS は `classList` とイベント発火のみ。
+`player-core.js` is currently the runtime center. Treat it as high-risk.
 
-### ページ遷移と TTS 終端
-- デフォルトは **TTS 完了＋postDelayMs** 後に自動遷移。  
-- `advancePolicy.mode: "manual"` を指定したシーンは停止待ち。  
-- ユーザーの「次へ」で**待機キャンセル**（navToken を無効化）。
+Main responsibilities:
 
----
+- Core state: `State`, `Ctrl`, UI-facing state.
+- Scene surface creation and DOM rendering.
+- Scene sequencing and navigation: `gotoPage`, `gotoNext`, `gotoPrev`.
+- Live TTS preview: `runContentSpeech`, `speakOrWait`, `speakStrict`.
+- Final MP3 playback: `hasFinalAudio`, `playFinalAudio`, `stopFinalAudio`.
+- Stop / Hard Stop behavior.
+- Exporter-facing canvas rendering through `__playerCore.renderSceneToCanvas`.
 
-## 3) ビューポート適応（iOS-first）
-
-### 三点支持の方針
-1) **`visualViewport`** でキーボード出現時の実可視領域を取得。 [oai_citation:5‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/API/Visual_Viewport_API?utm_source=chatgpt.com)  
-2) **動的ビューポート単位 `dvh`** を平常時の高さ基準に採用（UI の表示非表示へ追従）。 [oai_citation:6‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/CSS/length?utm_source=chatgpt.com)  
-3) **`safe-area` env()** でホームインジケータ分を下端に加算。 [oai_citation:7‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver?utm_source=chatgpt.com)
-
-### 実装規約
-- JS：`--visual-viewport-h` / `--host-bias-bottom` を `documentElement` にセット。  
-- CSS：`#wrapper` / `#content` は `min-height: var(--visual-viewport-h, 100dvh)` を採用。  
-- Debug Panel は **自分の実高**を `--debug-panel-h` としてフィードし、本文側 `padding-bottom` へ伝搬（`ResizeObserver`）。 [oai_citation:8‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/CSS/env?utm_source=chatgpt.com)  
-- 主要イベントは **`passive:true`**、不要になれば **確実に解除**。 [oai_citation:9‡Stack Overflow](https://stackoverflow.com/questions/62780281/2024-ios-safari-video-autoplay-options?utm_source=chatgpt.com)
+Do not refactor `player-core.js` casually. A broad refactor requires a dedicated issue and explicit Human Seal.
 
 ---
 
-## 4) TTS 規範（Web Speech API）
+## 4. Final MP3 layer
 
-### 役割別・絶対レート
-- **範囲**：0.5–2.0 clamp。**既定 1.4**。  
-- `tag / titleKey / title / narr` で個別指定。  
-- 実際の適用は `__ttsUtils.getRateForRole(1.0, role)`。
+Final MP3 is the deterministic harvest path.
 
-### 読了保証（静寂ゲート）
-- 長文は `splitChunksJa()` でチャンク化。  
-- 各チャンク終了→`speechSynthesis.speaking=false` を監視→**静寂 ms** 経過で次へ。  
-- `visibilitychange` でタブ非アクティブ時の挙動も安定化（ポリシーは「即停止」）。 [oai_citation:10‡html.spec.whatwg.org](https://html.spec.whatwg.org/?utm_source=chatgpt.com)
+Key concepts:
 
-> 参考：Web Speech API（`speechSynthesis` / `SpeechSynthesisUtterance`） [oai_citation:11‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_environment_variables/Using_environment_variables?utm_source=chatgpt.com)
+- `hasFinalAudio(scene)` detects scenes with final audio.
+- `playFinalAudio(scene, navTokenAtStart)` owns an `Audio` element.
+- `stopFinalAudio(reason)` interrupts the app-owned audio object.
+- The current final proof case is Page003.
 
----
+Expected behavior:
 
-## 5) Debug Panel（責務と境界）
+- Stop / Hard Stop / Next can kill Final MP3 with one app-owned path.
+- Final MP3 should not fall back to Live TTS after user stop or mid-play interruption.
+- If Final MP3 fails before playback starts, fallback may still be allowed.
 
-- **JS の責務**：状態（data 属性・クラス）とイベント発火のみ。  
-- **CSS の責務**：配色・余白・レイアウト・アニメ。**`#debug-panel` スコープ**に限定。  
-- **高さ連携**：`ResizeObserver`→`--debug-panel-h`→本文 `padding-bottom`。 [oai_citation:12‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/CSS/env?utm_source=chatgpt.com)
+Runtime doctrine:
 
----
-
-## 6) ファイル一覧（最小セット）
-- `index.html`：**HTML は素体のみ**。`<style>` は禁止。  
-- `style.css`：見た目の単一ソース。A/B/T ベール・タグ・帯・TTS 可視化等。  
-- `js/player-core.js`：状態機械・シーン描画・TTS・遷移。  
-- `js/tts-voice-utils.js`：声カタログ・役割別レート。  
-- `js/scene-effects.js`：軽量エフェクトの登録・実行。  
-- `js/debug-panel.js`：UI 状態・Stop ACK・テレメトリ。  
-- `js/viewport-handler.js`：`visualViewport` 監視と CSS 変数供給。
+> Final MP3 is app-owned. The kill path is deterministic.
 
 ---
 
-## 7) テスト手順（iOS Safari 推奨）
-1. 初回ロードで **Activation Gate** が前面。タップでゲート消滅＆TTS 解錠（ミュートでないこと）。 [oai_citation:13‡Stack Overflow](https://stackoverflow.com/questions/74986310/how-to-keep-header-at-top-of-visual-viewport-after-layout-visual-viewport-change?utm_source=chatgpt.com)  
-2. **長文シーン**で飛ばしなし（途中で停止→再開しない）。  
-3. `advancePolicy.postDelayMs` の反映（例：1000ms）を目視。  
-4. `manual` のシーンで自動遷移停止。  
-5. 再生中～余韻待ち中に「次へ」で**待機キャンセル**。  
-6. 入力要素フォーカス→キーボード出現で本文が**下端に潜らない**（`visualViewport` 反映）。 [oai_citation:14‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/API/Visual_Viewport_API?utm_source=chatgpt.com)  
-7. 端末回転／URL バー表示切替で**レイアウトが瞬断しない**（`dvh` 採用）。 [oai_citation:15‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/CSS/length?utm_source=chatgpt.com)
+## 5. Live TTS layer
+
+Live TTS is the preview path.
+
+Key functions:
+
+- `runContentSpeech(scene)` reads scene roles in order.
+- `speakOrWait(text, rate, role)` splits text into chunks and waits for quiet time.
+- `speakStrict(text, rate, role)` calls `speechSynthesis.speak()` and includes watchdog/fallback behavior.
+
+Role order:
+
+1. `tag`
+2. `titleKey`
+3. `title`
+4. `narr`
+
+Important boundary:
+
+- Live TTS uses browser-managed `speechSynthesis`.
+- The app can request cancellation, but it does not own the browser's hidden queue/producer state the same way it owns an `Audio` element.
+- iOS may leave timing, queue, or watchdog states outside the app's synchronous kill path.
+
+Runtime doctrine:
+
+> Live TTS is useful for preview, but it is not the final deterministic audio path.
 
 ---
 
-## 8) よくある落とし穴
-- **`100vh` 固定**：iOS UI の表示非表示でズレる → `100dvh` を基本に。 [oai_citation:16‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/CSS/length?utm_source=chatgpt.com)  
-- **safe-area 未対応**：下端の 1px 隙間や被り → `env(safe-area-inset-*)` を合算。 [oai_citation:17‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver?utm_source=chatgpt.com)  
-- **初回ジェスチャーなしの再生**：無言失敗 → Activation Gate で解錠。 [oai_citation:18‡Stack Overflow](https://stackoverflow.com/questions/74986310/how-to-keep-header-at-top-of-visual-viewport-after-layout-visual-viewport-change?utm_source=chatgpt.com)  
-- **イベント氾濫**：`passive` 付与・不要時 `removeEventListener`。 [oai_citation:19‡Stack Overflow](https://stackoverflow.com/questions/62780281/2024-ios-safari-video-autoplay-options?utm_source=chatgpt.com)
+## 6. Red Stop / Hard Stop evidence
+
+Observed runtime behavior:
+
+| Page | Audio mode | Stop observation | Interpretation |
+|---|---|---|---|
+| Page003 | Final MP3 | one tap | app-owned kill path |
+| Page004 | Live TTS | may require two taps | browser-owned producer depth |
+| Page005 | Live TTS | may require three taps | deeper TTS queue / role / watchdog state |
+
+Current interpretation:
+
+> **Tap Count may reflect hidden browser-owned producer depth.**
+
+This is an observation-based model, not a browser-internal claim.
+
+The Stop mystery is parked. Do not keep patching Live TTS Stop behavior unless a new product-critical issue explicitly reopens it.
 
 ---
 
-## 9) 参考（一次情報）
-- Visual Viewport API（Explainer / MDN / browser support） [oai_citation:20‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/CSS/env?utm_source=chatgpt.com)  
-- Dynamic viewport units: `dvh/svh/lvh`（MDN / Can I use） [oai_citation:21‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/CSS/length?utm_source=chatgpt.com)  
-- Safe Area Insets `env(safe-area-inset-*)`（MDN） [oai_citation:22‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver?utm_source=chatgpt.com)  
-- Safari 自動再生ポリシー（Apple Developer） [oai_citation:23‡Stack Overflow](https://stackoverflow.com/questions/74986310/how-to-keep-header-at-top-of-visual-viewport-after-layout-visual-viewport-change?utm_source=chatgpt.com)  
-- Web Speech API（MDN） [oai_citation:24‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_environment_variables/Using_environment_variables?utm_source=chatgpt.com)  
-- ResizeObserver（MDN / web.dev） [oai_citation:25‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Values_and_units?utm_source=chatgpt.com)  
-- Passive Event Listeners（MDN） [oai_citation:26‡Stack Overflow](https://stackoverflow.com/questions/62780281/2024-ios-safari-video-autoplay-options?utm_source=chatgpt.com)  
-- `inert` 属性（MDN） [oai_citation:27‡MDNウェブドキュメント](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API?utm_source=chatgpt.com)  
-- Page Visibility API（MDN） [oai_citation:28‡html.spec.whatwg.org](https://html.spec.whatwg.org/?utm_source=chatgpt.com)
+## 7. `audio-log.js` boundary
+
+`debug-panel/audio-log.js` is a debug/evidence helper, not the core audio engine.
+
+It currently helps by:
+
+- logging `player:audio-start`, `player:audio-end`, `player:audio-interrupted`, and `player:audio-error`,
+- wrapping `stopHard` for TTS stop evidence,
+- gating late `speechSynthesis.speak()` attempts after hard stop,
+- issuing delayed `speechSynthesis.cancel()` retries.
+
+Do not grow `audio-log.js` into a second player core.
+
+If behavior needs to become product-critical, create a dedicated issue for a real TTS producer-cancellation design instead of piling patches into the debug helper.
+
+---
+
+## 8. Runtime link note
+
+The root README owns the project-level Link Policy. The JS runtime interpretation is simple:
+
+- Runtime App links test the app.
+- Direct MP3 links only verify asset delivery.
+- A Trusted Tap URL may reduce tap friction, but it is platform/session-controlled and not guaranteed.
+
+Do not design JS runtime behavior around ChatGPT/iOS link confirmation quirks.
+
+---
+
+## 9. What not to do
+
+Do not do these from inside a small runtime task:
+
+- Do not rewrite the TTS engine.
+- Do not add a queue manager casually.
+- Do not refactor `player-core.js` broadly.
+- Do not change `scenes.json` from an audio-stop concern.
+- Do not touch schema/exporter/workflow from a JS runtime note task.
+- Do not turn `audio-log.js` into production logic.
+- Do not reopen the TTS Stop mystery without a dedicated Human Seal.
+
+---
+
+## 10. Future issue candidate
+
+Only if Live TTS cancellation becomes product-critical, create a dedicated issue for:
+
+> Live TTS producer cancellation design
+
+That issue should explicitly address:
+
+- ownership model,
+- chunk/role queue,
+- watchdog timers,
+- stale token guards,
+- iOS `speechSynthesis` behavior,
+- whether Live TTS should remain preview-only.
+
+Until then, the working policy remains:
+
+> **Final MP3 is harvest. Live TTS is preview.**
+
+---
+
+## 11. Next gate
+
+After this file is refreshed:
+
+1. Complete final human runtime evidence for Issue #13.
+2. Decide whether Issue #13 can close after human runtime seal.
+3. Avoid broad runtime cleanup until the issue boundary is sealed.
+
+Root remains the root README. This file is the JS runtime map under that guard.
