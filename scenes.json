@@ -83,7 +83,8 @@
       "narr.02": "./assets/audio/demo-narr-02.mp3",
       "narr.03": "./assets/audio/demo-narr-03.mp3",
       "narr.04": "./assets/audio/demo-narr-04.mp3",
-      "narr.05": "./assets/audio/demo-narr-05.mp3"
+      "narr.05": "./assets/audio/demo-narr-05.mp3",
+      "page.003.final": "./assets/audio/final/page-003-scattered-room-v001.mp3"
     }
   },
   "scenes": [
