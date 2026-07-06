@@ -1,8 +1,12 @@
 # JS Runtime Notes
 
+Last verified: 2026-07-07 by YusukeJP.
+
 This document is the runtime-internals map for `js/`.
 
-Read the root [`README.md`](../README.md) first. The root README defines the project-level branch guard, audio policy, link policy, and Human Seal boundaries. This file only explains the JavaScript runtime layer.
+Read the root [`README.md`](../README.md) first. The root README defines the project-level branch guard, audio policy, link policy, default-deny rule, and Human Seal boundaries. This file only explains the JavaScript runtime layer.
+
+This file inherits the root README's default-deny rule. It is editable only when the current task explicitly names `js/README.md`.
 
 Root rule inherited from the root README:
 
@@ -42,7 +46,7 @@ Important runtime files:
 | `debug-panel/state.js` | Debug panel state helpers |
 | `debug-panel/audio-log.js` | Audio/TTS event evidence helper and stop-gate support |
 
-If a file is not named by the current task, do not edit it.
+If a file is not named by the current task, do not edit it. This map covers code files; data/config dependencies such as `scenes.json` remain guarded by the root README.
 
 ---
 
@@ -60,13 +64,13 @@ Main responsibilities:
 - Stop / Hard Stop behavior.
 - Exporter-facing canvas rendering through `__playerCore.renderSceneToCanvas`.
 
-Do not refactor `player-core.js` casually. A broad refactor requires a dedicated issue and explicit Human Seal.
+Do not refactor `player-core.js` without a dedicated issue and explicit Human Seal.
 
 ---
 
 ## 4. Final MP3 layer
 
-Final MP3 is the deterministic harvest path.
+Final MP3 is the deterministic harvest path on the Page003 tested path; human seal remains pending via Issue #13.
 
 Key concepts:
 
@@ -79,11 +83,11 @@ Expected behavior:
 
 - Stop / Hard Stop / Next can kill Final MP3 with one app-owned path.
 - Final MP3 should not fall back to Live TTS after user stop or mid-play interruption.
-- If Final MP3 fails before playback starts, fallback may still be allowed.
+- If Final MP3 fails before playback starts, fallback to Live TTS is permitted only if the substitution is logged and visible. Silent fallback is forbidden.
 
 Runtime doctrine:
 
-> Final MP3 is app-owned. The kill path is deterministic.
+> Final MP3 is app-owned. The kill path is deterministic on the Page003 tested path; human seal remains pending via Issue #13.
 
 ---
 
@@ -132,7 +136,7 @@ Current interpretation:
 
 This is an observation-based model, not a browser-internal claim.
 
-The Stop mystery is parked. Do not keep patching Live TTS Stop behavior unless a new product-critical issue explicitly reopens it.
+The Stop mystery is parked. Recording new contradictory evidence is always permitted. Reopening investigation requires Human Seal.
 
 ---
 
@@ -146,6 +150,8 @@ It currently helps by:
 - wrapping `stopHard` for TTS stop evidence,
 - gating late `speechSynthesis.speak()` attempts after hard stop,
 - issuing delayed `speechSynthesis.cancel()` retries.
+
+The stop-gate and cancel-retry behavior is tolerated frozen debt: do not extend it and do not remove it without a dedicated issue and Human Seal.
 
 Do not grow `audio-log.js` into a second player core.
 
@@ -170,9 +176,9 @@ Do not design JS runtime behavior around ChatGPT/iOS link confirmation quirks.
 Do not do these from inside a small runtime task:
 
 - Do not rewrite the TTS engine.
-- Do not add a queue manager casually.
+- Do not add a queue manager without a dedicated issue and explicit Human Seal.
 - Do not refactor `player-core.js` broadly.
-- Do not change `scenes.json` from an audio-stop concern.
+- Do not write to `scenes.json` from an audio-stop concern; reading guarded files for diagnosis is allowed.
 - Do not touch schema/exporter/workflow from a JS runtime note task.
 - Do not turn `audio-log.js` into production logic.
 - Do not reopen the TTS Stop mystery without a dedicated Human Seal.
@@ -181,7 +187,7 @@ Do not do these from inside a small runtime task:
 
 ## 10. Future issue candidate
 
-Only if Live TTS cancellation becomes product-critical, create a dedicated issue for:
+Only if YusukeJP or the current task explicitly declares Live TTS cancellation product-critical, create a dedicated issue for:
 
 > Live TTS producer cancellation design
 
@@ -202,10 +208,12 @@ Until then, the working policy remains:
 
 ## 11. Next gate
 
+This is a queue, not standing authorization.
+
 After this file is refreshed:
 
 1. Complete final human runtime evidence for Issue #13.
-2. Decide whether Issue #13 can close after human runtime seal.
+2. YusukeJP decides whether Issue #13 can close after human runtime seal.
 3. Avoid broad runtime cleanup until the issue boundary is sealed.
 
 Root remains the root README. This file is the JS runtime map under that guard.
